@@ -1,5 +1,7 @@
 # Harmony OpenUI
 
+![Harmony OpenUI — Generative UI for HarmonyOS](docs/images/harmony-openui-banner.png)
+
 [简体中文](README.md) | English
 
 **OpenUI Lang → native HarmonyOS ArkUI interfaces.**

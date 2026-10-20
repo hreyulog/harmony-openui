@@ -1,5 +1,7 @@
 # Harmony OpenUI
 
+![Harmony OpenUI — 鸿蒙原生生成式 UI](docs/images/harmony-openui-banner.png)
+
 简体中文 | [English](README.en.md)
 
 **OpenUI Lang → HarmonyOS ArkUI 原生界面。**
