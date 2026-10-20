@@ -1,10 +1,12 @@
 # Harmony OpenUI
 
+简体中文 | [English](README.en.md)
+
 **OpenUI Lang → HarmonyOS ArkUI 原生界面。**
 
-一个独立的社区适配库：复用 OpenUI 官方解析器，让模型输出组件声明，由鸿蒙预编译组件渲染，再把用户操作交回宿主应用。适合聊天里的方案选择、信息卡片和结果页面。无需 WebView，也不在设备上编译或执行模型生成的 ArkTS。
+一个独立的社区适配库：复用 OpenUI 官方解析器，以 AGenUI 为原生渲染后端，让模型输出的组件声明显示为鸿蒙界面，再把用户操作交回宿主应用。适合聊天里的方案选择、信息卡片和结果页面。无需 WebView，也不在设备上编译或执行模型生成的 ArkTS。
 
-This is an independent community project, not an official OpenUI or Huawei SDK. v0.1 is a bounded native adapter, not a complete implementation of OpenUI Lang 1.0.
+这是社区项目，非 OpenUI 或华为官方 SDK。v0.1 提供受限的鸿蒙原生适配，尚未完整实现 OpenUI Lang 1.0。
 
 已在 Nova 真机跑通 **MiniMax 实际生成 → 点击方案 → 同一张卡片显示模型结果**，并验证深浅主题、详情展开、同名卡片隔离及动态缩窄。下图均来自独立示例真机，资料为虚构演示，未接入 Sofia。
 
@@ -20,10 +22,24 @@ flowchart LR
   Model -->|OpenUI Lang / 分块文本| Parser[官方 lang-core 解析器]
   Parser --> Adapter[鸿蒙适配器与校验]
   Adapter --> State[Surface 状态]
-  State --> Native[ArkUI 原生组件]
+  State --> Native[AGenUI + ArkUI 原生组件]
   Native -->|用户操作与当前 revision| App
   App -->|下一步数据或结果| Model
 ```
+
+## 复用了什么，实现了什么
+
+可以把本项目理解为 **OpenUI Lang 的鸿蒙原生适配与运行层**：复用官方语言解析，在其后接上鸿蒙组件、状态和事件处理。各层职责如下：
+
+| 层 | 来源 | 职责 |
+| --- | --- | --- |
+| 语言解析 | OpenUI 官方 `@openuidev/lang-core@1.0.1` | 增量解析组件声明、解析 Action；随 HAR 打包。 |
+| 组件目录与适配 | 本项目 | 定义支持的组件、生成 schema／提示词，将解析结果转换为原生中间表示并校验。 |
+| 状态与交互 | 本项目 | Surface、revision、快照、选中／只读状态、旧回调隔离和事件去重。 |
+| 原生显示 | AGenUI 1.6.0 + 本项目的 ArkUI 组件 | 基础布局、原生桥接，以及选项、事实列表、状态、详情等预编译组件的显示和测量。 |
+| 模型与业务 | 宿主应用 | 提供模型接口与数据，决定如何响应用户操作、调用工具或生成下一步界面。 |
+
+当前支持原生卡片所需的静态组件树与单步交互；完整上游的响应式状态、查询和变更执行尚未接入。具体范围见下方限制。
 
 ## v0.1 包含什么
 
@@ -39,6 +55,14 @@ flowchart LR
 ## 最小接入
 
 将编译出的 HAR 作为本地依赖安装到 HarmonyOS 工程，保留它的公共 OHPM 依赖。开发环境为 HarmonyOS API 24，兼容版本 API 20；入口位于 `openui/Index.ets`。
+
+当前通过源码构建和本地 HAR 接入，尚未发布到 OHPM 注册中心。构建完成后，在宿主模块目录执行：
+
+```powershell
+ohpm install D:/openui-build/har-01/artifacts/harmony-openui-0.1.0.har
+```
+
+随后使用包名 `@hreyulog/harmony-openui` 导入。宿主无需另外安装 npm 解析器或模型 SDK。
 
 ```ts
 import { OpenUiController, OpenUiActionReceipt, OpenUiLanguageStream,
@@ -70,9 +94,11 @@ struct GeneratedPanel {
 
 `@Choose("a")` 回调为 `name: 'choose', context: { value: 'a' }`。`@ToAssistant` 与 `@OpenUrl` 只返回操作数据；宿主自行实现其效果。完整语法以 [生成的 schema](schemas/openui-lang-v0.1.json) 与 [目录定义](tools/lang/library.mjs) 为准。
 
+选中和只读由宿主显式调用 `controller.setSelected(surfaceId, componentId)`、`controller.setReadOnly(surfaceId, true)` 设置。需要继续处理时，由宿主调用工具或请求模型，再将新界面交给 stream；`onAction` 本身只回传事件。
+
 ## 构建与测试
 
-需要 Python 3、Node.js 22.18+ 或 24、pnpm 11，以及华为官方 HarmonyOS Command Line Tools / SDK 和 JBR。Windows PowerShell 示例：
+需要 Python 3.10+、Node.js 22.18+ 或 24、pnpm 11.25.0、Git，以及华为官方 HarmonyOS Command Line Tools 6.1.1、API 24 SDK 和 DevEco JBR（Java 17）。Windows PowerShell 示例：
 
 ```powershell
 pnpm install --frozen-lockfile --ignore-scripts
