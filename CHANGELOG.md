@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0 — 2026-10-20
+
+Extend the bounded native catalog from choice/result cards to forms and richer results. Device acceptance of the new flow is recorded separately from the retained v0.1 evidence.
+
+- Add 14 model-facing components: Form, TextInput, TextArea, Search, Checkbox, Toggle, Select, RadioGroup, Slider, DatePicker, TimePicker, Image, List, and Dialog. There are 23 model components / 21 native IR kinds, not full ArkUI support.
+- Extend the official parser catalog, schema, generated prompt, and adapter while retaining existing syntax and the compatibility schema filename/catalog identifier.
+- Add controller-owned live field values, required/type/range validation, localized validation-message hooks, and snapshots compatible with earlier empty field maps.
+- Add `@Submit(form)` with exact static context. Validate the current containing form and attach live enabled fields to the host receipt; reject callback-supplied answer objects.
+- Synchronize field edits and errors without changing document revision or remounting the native surface. Preserve stale-callback and read-only enforcement.
+- Avoid native value echoes inside active picker callbacks, keep selected Date objects stable, and apply atomic controlled-state updates for host corrections. Defer auxiliary redraws and cancel pending work on teardown.
+- Render actual native input/select/radio/slider/time controls, compact CalendarPicker dates, HTTPS images, bounded lists, and user-tapped confirmation sheets.
+- Add an independent trip → preferences → result demo. A real model can generate the first form and final result; the intermediate preferences page is host-supplied, and all travel data remains fictional.
+- Add official-parser family/chunk tests, invalid-program retention, actual ETS form-state/Submit integration, and native rendering contracts. Consult the verification record for build/device results rather than inferring them from host tests.
+- Update Chinese/English documentation with form signatures, state ownership, native mappings, architecture, and remaining limits. Sofia integration remains separate.
+
 ## 0.1.0 — 2026-10-20
 
 Initial independent HarmonyOS adapter for OpenUI Lang.

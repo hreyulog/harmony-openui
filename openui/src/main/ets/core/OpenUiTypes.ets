@@ -4,6 +4,9 @@ export type OpenUiText = string | OpenUiBinding;
 export interface OpenUiFact { label: OpenUiText; value: OpenUiText; }
 export interface OpenUiActionDefinition { event: OpenUiNamedAction; }
 export interface OpenUiNamedAction { name: string; context: Record<string, Object>; }
+export type OpenUiFieldValue = string | number | boolean;
+export interface OpenUiSelectOption { label: string; value: string; }
+export interface OpenUiListItem { title: string; description?: string; meta?: string; }
 export interface OpenUiComponent {
   id: string;
   component: string;
@@ -20,6 +23,27 @@ export interface OpenUiComponent {
   justify?: string;
   styles?: Record<string, string>;
   action?: OpenUiActionDefinition;
+  name?: string;
+  field?: string;
+  label?: string;
+  value?: OpenUiFieldValue;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  inputType?: string;
+  options?: OpenUiSelectOption[];
+  min?: number;
+  max?: number;
+  step?: number;
+  minDate?: string;
+  maxDate?: string;
+  source?: string;
+  alt?: string;
+  aspectRatio?: number;
+  items?: OpenUiListItem[];
+  height?: number;
+  confirmLabel?: string;
+  cancelLabel?: string;
 }
 export type OpenUiRenderStatus = 'pending' | 'rendered' | 'error';
 export interface OpenUiSurface {
@@ -28,6 +52,8 @@ export interface OpenUiSurface {
   revision: number;
   components: OpenUiComponent[];
   dataModelJson: string;
+  fieldValuesJson: string;
+  fieldErrorsJson: string;
   readOnly: boolean;
   selectedComponent: string;
   renderStatus: OpenUiRenderStatus;
@@ -50,9 +76,19 @@ export interface OpenUiRenderEvent {
   status: OpenUiRenderStatus;
   error: string;
 }
+export interface OpenUiFieldChange {
+  surfaceId: string;
+  sourceComponentId: string;
+  field: string;
+  form: string;
+  value: OpenUiFieldValue;
+  revision: number;
+}
 export interface OpenUiControllerOptions {
   onAction?: (event: OpenUiActionReceipt) => void;
   onRenderStatus?: (event: OpenUiRenderEvent) => void;
+  onFieldChange?: (event: OpenUiFieldChange) => void;
+  validationMessage?: (code: string, component: OpenUiComponent) => string;
 }
 export interface OpenUiChange {
   kind: 'create' | 'components' | 'data' | 'delete';

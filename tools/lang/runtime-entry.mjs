@@ -17,6 +17,9 @@ function actionDefinition(value) {
   if (step.type === 'custom_action' && step.name === 'Choose' && typeof step.params?.value === 'string') {
     return { event: { name: 'choose', context: { value: step.params.value } } };
   }
+  if (step.type === 'custom_action' && step.name === 'Submit' && typeof step.params?.form === 'string') {
+    return { event: { name: 'submit', context: { form: step.params.form } } };
+  }
   if (step.type === 'continue_conversation' && typeof step.message === 'string') {
     return { event: { name: 'continue_conversation', context: { message: step.message } } };
   }
@@ -39,6 +42,7 @@ function translate(root) {
     const id = rootNode ? 'root' : 'n_' + (element.statementId || path).replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 68);
     const p = element.props, node = add({ id, component: '' });
     const children = () => (p.children || []).map((child, index) => visit(child, path + '_' + index)).filter(Boolean);
+    const props = names => { for (const name of names) { if (p[name] !== undefined) node[name] = p[name]; } };
     switch (element.typeName) {
       case 'Stack': case 'Row': node.component = element.typeName === 'Stack' ? 'Column' : 'Row'; node.children = children(); break;
       case 'Card': {
@@ -57,6 +61,18 @@ function translate(root) {
         node.component = 'Button'; node.child = 's_' + id + '_label'; node.action = actionDefinition(p.action);
         if (p.variant !== undefined) node.variant = p.variant;
         add({ id: node.child, component: 'Text', text: p.label, variant: 'body' }); break;
+      case 'Form': node.component = 'OpenUiForm'; props(['name']); node.children = children(); break;
+      case 'TextInput': case 'TextArea': case 'Search':
+        node.component = 'OpenUiInput'; node.variant = { TextInput: 'text', TextArea: 'textarea', Search: 'search' }[element.typeName];
+        props(['field', 'label', 'value', 'placeholder', 'required', 'disabled', 'inputType']); break;
+      case 'Checkbox': case 'Toggle': case 'Select': case 'RadioGroup': case 'Slider': case 'DatePicker': case 'TimePicker':
+        node.component = 'OpenUi' + element.typeName;
+        props(['field', 'label', 'options', 'value', 'required', 'disabled', 'min', 'max', 'step', 'minDate', 'maxDate']); break;
+      case 'Image': node.component = 'OpenUiImage'; props(['source', 'alt', 'aspectRatio']); break;
+      case 'List': node.component = 'OpenUiList'; props(['items', 'title', 'height']); break;
+      case 'Dialog':
+        node.component = 'OpenUiDialog'; props(['label', 'title', 'text', 'confirmLabel', 'cancelLabel']);
+        node.action = actionDefinition(p.action); break;
       default: throw Error('OPENUI_LANG_COMPONENT_UNSUPPORTED');
     }
     return id;
@@ -72,7 +88,7 @@ export function createLanguageSession() {
       const result = parser.push(chunk, complete);
       const errors = result.meta.errors.filter(error => error.severity !== 'warning');
       const dynamic = result.rootExpression || Object.keys(result.stateDeclarations || {}).length || result.queryStatements.length || result.mutationStatements.length;
-      if (dynamic) errors.push({ code: 'OPENUI_LANG_DYNAMIC_UNSUPPORTED', message: 'Reactive state, queries and mutations are not supported by the v0.1 native adapter.' });
+      if (dynamic) errors.push({ code: 'OPENUI_LANG_DYNAMIC_UNSUPPORTED', message: 'Reactive state, queries and mutations are not supported by the native adapter.' });
       let components = [];
       try { if (result.root && !errors.length) components = translate(result.root); }
       catch (error) { errors.push({ code: String(error.message), message: String(error.message) }); }

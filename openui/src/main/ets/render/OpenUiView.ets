@@ -6,6 +6,7 @@ import { OpenUiNativeSession } from './OpenUiNative';
 import { OpenUiNativeIds } from './OpenUiNativeIds';
 import { OpenUiProjection } from './OpenUiProjection';
 import { OpenUiTheme, OpenUiThemes } from './OpenUiTheme';
+import { OpenUiFieldValue } from '../core/OpenUiTypes';
 
 interface ActionHeader { action?: ActionIdentity; }
 interface ActionIdentity { surfaceId?: string; sourceComponentId?: string; }
@@ -76,7 +77,9 @@ export struct OpenUiView {
     // layout -> status -> re-mount -> layout notification cycle.
     const signature = JSON.stringify([surface?.revision, surface?.components, surface?.dataModelJson,
       surface?.readOnly, surface?.selectedComponent, this.surfaceId, this.theme, this.contentWidth]);
-    if (signature === this.fingerprint) { return; }
+    // Field edits/errors share a document revision. Updating the current native
+    // elements preserves keyboard focus, selection and internal scroll state.
+    if (signature === this.fingerprint) { if (surface) { this.nativeSession?.syncFields(surface); } return; }
     this.fingerprint = signature; this.release(); this.errorLabel = '';
     if (this.mountedSurface !== this.surfaceId) { this.details.clear(); this.mountedSurface = this.surfaceId; }
     if (!surface || !OpenUiProjection.ready(surface) || this.contentWidth <= 0) { return; }
@@ -86,7 +89,10 @@ export struct OpenUiView {
       const ids = new OpenUiNativeIds(surface.components);
       this.nativeInstance = manager.getInstanceId();
       this.nativeSession = new OpenUiNativeSession(manager, id, this.theme, surface.readOnly, surface.selectedComponent, this.details, this.getUIContext(), ids,
-        (): void => { this.reportMeasured(epoch); }, this.contentWidth);
+        (): void => { this.reportMeasured(epoch); }, this.contentWidth,
+        (logicalId: string, value: OpenUiFieldValue): boolean => {
+          return this.epoch === epoch && this.controller.setFieldValue(id, logicalId, value, revision);
+        }, surface);
       manager.addListener(new OpenUiSurfaceListener((created: Surface): void => {
         if (this.epoch === epoch && created.surfaceId === id) { this.visibleEpoch = epoch; }
       }, (raw: string): void => {

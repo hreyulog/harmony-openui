@@ -29,7 +29,7 @@ export class OpenUiNativeIds {
       visited.add(source);
       const component = lookup.get(source);
       if (!component) { continue; }
-      if (component.component?.startsWith('OpenUi')) { this.semantic.add(this.nativeId(source)); }
+      if (component.component?.startsWith('OpenUi') && component.component !== 'OpenUiForm') { this.semantic.add(this.nativeId(source)); }
       for (const child of component.children ?? (component.child ? [component.child] : [])) { pending.push(child); }
     }
   }

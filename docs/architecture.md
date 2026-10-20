@@ -1,0 +1,77 @@
+# Architecture
+
+Harmony OpenUI is an independent HarmonyOS adaptation of OpenUI Lang. It reuses the official parser and supplies a bounded native catalog, controller, and renderer. The model produces declarations; the device runs precompiled ArkUI components. The library does not compile or execute generated ArkTS, embed the web renderer, or implement a phone-agent loop.
+
+```mermaid
+flowchart TD
+  Host[Host: data, model transport, tools, persistence] -->|System prompt and supplied facts| Model[Model]
+  Model -->|OpenUI Lang text chunks| Parser[Official lang-core parser]
+  Catalog[Shared component catalog] -->|Schema| Parser
+  Catalog -->|Generated system prompt| Host
+  Parser --> Adapter[Language adapter: native IR and static action definitions]
+  Adapter --> Validation[Core property and graph validation]
+  Validation --> Document[Surface document and revision]
+  Document --> Native[AGenUI bridge + precompiled ArkUI]
+  Native -->|Field edits, original ID and revision| Fields[Live field values + validation errors]
+  Fields -->|Sync properties without remount| Native
+  Native -->|Static action context| Action[Controller action checks]
+  Fields -->|Validate and collect current values| Action
+  Action -->|Accepted receipt| Host
+```
+
+## Layer ownership
+
+| Layer | Files / dependency | Responsibility |
+| --- | --- | --- |
+| Official language | `@openuidev/lang-core@1.0.1` | Streaming syntax, component references, action evaluation. |
+| Catalog | [`tools/lang/library.mjs`](../tools/lang/library.mjs) | Model-facing signatures and generated schema/system prompt. |
+| Language adapter | [`tools/lang/runtime-entry.mjs`](../tools/lang/runtime-entry.mjs), `OpenUiLanguage.ets` | Convert supported syntax into native IR; buffer incomplete native props and retain the last valid tree. |
+| Core | `openui/src/main/ets/core/` | Authoritative property/graph checks, document revisions, field state, snapshots and action validation. |
+| Native renderer | `openui/src/main/ets/render/`, `@agenui/agenui@1.6.0` | Mount isolation, actual ArkUI controls, measurement, themes and event projection. |
+| Host | Your app; the standalone demo is one example | Model HTTP/SSE transport, trusted facts, resource URLs, business rules, tools, history and persistence. |
+
+The official parser is not a substitute for core validation. The native catalog validates limits, types, calendar dates, field uniqueness, form ancestry, and static action context before state is committed. Unsupported syntax is not converted into invented success. Model declarations are limited to 23 registered components, mapping to 21 native IR kinds.
+
+## A surface has two kinds of state
+
+The **document** contains component definitions, data bindings, selection/read-only decisions, and a revision. A structural change creates a new revision and native mount; old callbacks cannot act on the new document. Native IDs are namespaced for each mount and reversed back to source IDs before controller validation.
+
+**Live field state** stores typed scalar values and validation errors separately from declarations. A user edit does not change document revision. The existing native session receives updated field properties without destroying the keyboard focus or rebuilding the whole card. Field identity is reconciled when a document changes; removed or incompatible fields do not inherit unrelated answers.
+
+Snapshots can preserve both kinds of state. The host chooses whether and where to persist them; the SDK has no filesystem, account, cloud synchronization, or retention policy of its own. Older v0.1 snapshots without field maps can be loaded with empty maps. Restored documents receive new render revisions.
+
+## Submit is a validated receipt
+
+```text
+root = Stack([trip])
+trip = Form("trip", [name, next])
+name = TextInput("traveler", "Traveler", "", "Enter a name", true)
+next = Button("Continue", @Submit("trip"))
+```
+
+The declaration's action context is only `{form: 'trip'}`. It does not contain a model-authored answer object. On a native tap:
+
+1. The renderer maps the current native source ID back to its logical component ID.
+2. The controller checks the surface, revision, reachable source, exact static action, and event ID.
+3. For Submit, it verifies the containing form and validates current enabled fields.
+4. If valid, it appends `fields` read from controller state to the accepted receipt and calls the host.
+
+Empty required inputs, invalid options/date/time/numbers, read-only or obsolete callbacks, and forged field payloads cannot produce an accepted Submit receipt. Disabled fields are omitted. The host still decides what business operation is permitted and what happens after submission.
+
+An ordinary `@Choose`, `@ToAssistant`, or `@OpenUrl` remains action data. The SDK does not execute business effects. A `Dialog` is an explicit native confirmation-sheet launcher; it does not automatically open, bypass Submit checks, or establish that a purchase happened.
+
+## Multistep demo
+
+The standalone `Forms.ets` page demonstrates `trip → preferences → result` on one surface. “Model form” requests a real model-generated initial trip form. The host then supplies a fixed preferences form containing additional native controls and a confirmation sheet. The final model request receives the two accepted sets of user values and generates a read-only summary, bounded list, and host-supplied project image. “Reset example” exercises the same host flow using local declarations.
+
+This is host orchestration of single-step submissions, not a model-defined workflow engine. The fixture is explicitly fictional and does not query tickets, reserve seats, or make payments. The demo uses complete HTTP responses and feeds parser chunks afterward; it does not yet implement provider SSE framing. The SDK can receive text chunks from another host's real stream.
+
+## Boundaries
+
+- v0.2 is a bounded extension, not all of ArkUI or all of OpenUI Lang. `$state`, Query/Mutation, multistep actions, video, navigation, charts, and arbitrary drawing are outside this catalog.
+- Native field updates are incremental; complete fine-grained structural diffing is not implemented.
+- Images use host-supplied HTTPS URLs and platform loading. The host controls resource policy and network permissions. Actual loading needs its own device check.
+- A2UI v0.9/v0.9.1 NDJSON is an optional subset adapter sharing the controller and renderer; it does not replace the official OpenUI Lang entry point or claim complete protocol conformance.
+- Host tests establish contracts; compilation establishes ArkTS/API compatibility. Actual display, editing, pickers, scrolling, image loading, and confirmation require independent device evidence in [verification.md](verification.md).
+
+See [protocol.md](protocol.md) for signatures and state APIs, and [rendering.md](rendering.md) for native mappings, measurement, and mount isolation.

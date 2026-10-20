@@ -62,6 +62,8 @@ export class OpenUiProjection {
         }));
       }
       if (node.action) { node.action.event.context = OpenUiProjection.resolve(node.action.event.context, data) as Record<string, Object>; }
+      if (node.component === 'OpenUiForm') { node.component = 'Column'; node.name = undefined; }
+      if (node.component === 'OpenUiDialog' && surface.readOnly) { node.action = undefined; node.disabled = true; }
       if (node.component === 'Button' && surface.readOnly) {
         output.push({ id: node.id, component: 'Column', children: [node.child!] }); continue;
       }

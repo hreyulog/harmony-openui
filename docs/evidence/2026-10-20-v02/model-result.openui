@@ -1,0 +1,7 @@
+```
+root = Stack([status, facts, list, banner])
+status = Status("演示已完成 · 未查询 · 未下单", "neutral")
+facts = Facts([{label:"乘车人",value:"Lin"},{label:"目的地",value:"Beijing"},{label:"席别",value:"first"},{label:"出发日期",value:"2026-10-24"},{label:"备注",value:"DemoNote"},{label:"直达",value:"否"},{label:"提醒",value:"否"},{label:"座位偏好",value:"aisle"},{label:"预算",value:"800"},{label:"时间",value:"11:03"}], "用户提交的值")
+list = List([{title:"建议一",description:"仅作演示用途，未发起真实查询。",meta:"示例"},{title:"建议二",description:"可在正式流程中提交后查询实际班次。",meta:"示例"}], "后续建议", 160)
+banner = Image("https://raw.githubusercontent.com/hreyulog/harmony-openui/be5bfd9a4310d80406c4330a4fbb1120607226c1/docs/images/harmony-openui-banner.png", "Harmony OpenUI项目横幅", 2.5)
+```

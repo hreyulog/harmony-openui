@@ -9,10 +9,13 @@ function fixture(){
  const intrinsic=read('render/OpenUiIntrinsicLayout');
  const intrinsicMethods=intrinsic.slice(intrinsic.indexOf('  onMeasureSize('),intrinsic.indexOf('  build()'));
  const intrinsicClass='class IntrinsicFixture {widthHint:number=0;revision:number=0;kind:string="";title:string="";onMeasured:(size:SizeResult)=>void=()=>{};'+intrinsicMethods+'}';
+ const controls=read('render/OpenUiControlsLayout');
+ const pickerMethods=controls.slice(controls.indexOf('  aboutToAppear():'),controls.indexOf('  onMeasureSize('));
+ const controlsClass='class ControlsFixture {kind:string="";stringValue:string="";numberValue:number=0;boolValue:boolean=false;controlState:string="";nativeValue:OpenUiFieldValue="";liveStringValue:string="";liveNumberValue:number=0;liveBoolValue:boolean=false;selectedDate:Date=new Date();selectedTime:Date=new Date(2000,0,1);dialogVisible:boolean=false;onModalReady:(close:()=>void)=>void=()=>{};onString:(value:string)=>void=()=>{};onNumber:(value:number)=>void=()=>{};onBoolean:(value:boolean)=>void=()=>{};'+pickerMethods+'}';
  const view=read('render/OpenUiView');
  const methods=view.slice(view.indexOf('  aboutToAppear():'),view.indexOf('  build() {'));
  const fakeView='class ViewFixture { controller: OpenUiController = new OpenUiController(); surfaceId:string="s"; theme:OpenUiTheme=OpenUiThemes.create(); nativeInstance:number=0;visibleEpoch:number=0;errorLabel:string="";observerId:number=-1;epoch:number=0;contentWidth:number=0;outerWidth:number=0;eventSerial:number=0;lifetime:string="fixture";fingerprint:string="";mountedSurface:string="";manager:SurfaceManager|undefined;nativeSession:OpenUiNativeSession|undefined;details:Map<string,boolean>=new Map();getUIContext():UIContext {return {window:this.lifetime} as UIContext;}'+methods+'}';
- const sources=[read('core/OpenUiTypes'),read('core/OpenUiCatalog'),read('core/OpenUiController'),read('render/OpenUiTheme'),read('render/OpenUiRenderDiagnostics'),read('render/OpenUiNativeIds'),read('render/OpenUiProjection'),native.split('@Builder')[0],native.slice(native.indexOf('export class OpenUiNativeElement')),view.split('@Component')[0],fakeView,intrinsicClass];
+ const sources=[read('core/OpenUiTypes'),read('core/OpenUiCatalog'),read('core/OpenUiController'),read('render/OpenUiControlModel'),read('render/OpenUiTheme'),read('render/OpenUiRenderDiagnostics'),read('render/OpenUiNativeIds'),read('render/OpenUiProjection'),native.split('@Builder')[0],native.slice(native.indexOf('export class OpenUiNativeElement')),view.split('@Component')[0],fakeView,intrinsicClass,controlsClass];
  const text=sources.join('\n').replace(/^import[\s\S]*?;\r?\n/gm,'');
  const js=stripTypeScriptTypes(text).replace(/^export /gm,'');
  const factories=new Map(),events=[],sizes=[],managers=[],hybridViews=new Map(),timers=new Map();let serial=0,timerSerial=0;
@@ -20,7 +23,7 @@ function fixture(){
   constructor(surface,id,type,_ptr,_builder,instance){Object.assign(this,{surface,id,type,instance});this.earlyContext=this.getUIContext();}
   getSurfaceId(){return this.surface}getContextId(){return this.surface}getNodeId(){return this.id}getComponentType(){return this.type}getInstanceId(){return this.instance}
   getUIContext(){return undefined}toCreateArkUIView(){const context=this.getUIContext();return context?{context,type:this.type}:null;}
-  updateProperties(props){this.props=props;this.onUpdateProperties(props)}updateArkUI(){}reportContentHeight(height,width){sizes.push({height,width,instance:this.instance,nodeId:this.id})}
+  updateProperties(props){this.props=props;this.onUpdateProperties(props)}updateArkUI(){this.updates=(this.updates??0)+1}reportContentHeight(height,width){sizes.push({height,width,instance:this.instance,nodeId:this.id})}
   toDestroyArkTsView(){this.onDestroy?.();this.destroyed=true}
  }
  class Manager {
@@ -41,7 +44,7 @@ function fixture(){
   }
   updateNative(id,patch){const element=hybridViews.get(id);if(element)element.updateProperties({...element.props,...patch})}
  }
- const api=vm.runInNewContext(js+'\n({Controller:OpenUiController,Projection:OpenUiProjection,Themes:OpenUiThemes,NativeIds:OpenUiNativeIds,NativeSession:OpenUiNativeSession,View:ViewFixture,Intrinsic:IntrinsicFixture})',{Map,Set,JSON,Date,Math,SurfaceManager:Manager,A2UIComponent:NativeBase,AGenUI:{registerComponent(name,factory){factories.set(name,factory)}},wrapBuilder:()=>({}),openUiElement:()=>{},getContext:()=>({}),setTimeout:callback=>{const id=++timerSerial;timers.set(id,callback);return id},clearTimeout:id=>timers.delete(id)});
+ const api=vm.runInNewContext(js+'\n({Controller:OpenUiController,Projection:OpenUiProjection,Themes:OpenUiThemes,NativeIds:OpenUiNativeIds,NativeSession:OpenUiNativeSession,View:ViewFixture,Intrinsic:IntrinsicFixture,Controls:ControlsFixture})',{Map,Set,JSON,Date,Math,SurfaceManager:Manager,A2UIComponent:NativeBase,AGenUI:{registerComponent(name,factory){factories.set(name,factory)}},wrapBuilder:()=>({}),openUiElement:()=>{},getContext:()=>({}),setTimeout:callback=>{const id=++timerSerial;timers.set(id,callback);return id},clearTimeout:id=>timers.delete(id)});
  const flushTimers=()=>{for(const [id,callback] of Array.from(timers)){timers.delete(id);callback()}};
  return {...api,factories,events,sizes,managers,hybridViews,Manager,timers,flushTimers};
 }
@@ -144,4 +147,122 @@ test('late viewport-width measurements cannot relock a narrower current card',()
 test('semantic measurement applies host width as an upper bound and preserves narrower nested columns',()=>{
  const s=fixture(),layout=new s.Intrinsic(),widths=[];layout.widthHint=309;const child={measure:constraint=>{widths.push(constraint.maxWidth);return {width:constraint.maxWidth,height:Math.ceil(900/constraint.maxWidth)*24}}};
  const corrected=layout.onMeasureSize({},[child],{maxWidth:377,maxHeight:0});assert.equal(corrected.width,309);assert.equal(corrected.height,72,'height is recomputed from content at the capped width');const nested=layout.onMeasureSize({},[child],{maxWidth:150,maxHeight:0});assert.equal(nested.width,150);assert.equal(nested.height,144);assert.deepEqual(widths,[309,150]);
+});
+
+test('native controls hydrate edited values and errors without recreating the native manager or control',()=>{
+ const s=fixture(),m=new s.Manager(),ids=new s.NativeIds([{id:'email',component:'OpenUiInput'}]);
+ const surface={fieldValuesJson:JSON.stringify({email:'first@example.com'}),fieldErrorsJson:'{}'};
+ const edits=[],owner=new s.NativeSession(m,'s',s.Themes.create(),false,'',new Map(),{},ids,undefined,320,(id,value)=>{edits.push({id,value});return true},surface);
+ const native=s.factories.get('OpenUiInput')('s',ids.nativeId('email'),'OpenUiInput',0n,0);
+ native.updateProperties({label:'Email',value:'model-default@example.com',field:'email',inputType:'email',required:true});
+ assert.equal(native.stringValue,'first@example.com','sparse local edits win over model defaults on initial hydration');
+ const initialRevision=native.renderRevision;owner.syncFields(surface);assert.equal(native.updates,undefined,'same-value propagation does not reset the native editor selection');
+ owner.syncFields({...surface,fieldValuesJson:JSON.stringify({email:'not-an-email'}),fieldErrorsJson:JSON.stringify({email:'email'})});
+ assert.equal(native.stringValue,'not-an-email');assert.match(native.fieldError,/邮箱/);assert.equal(native.updates,1);assert.ok(native.renderRevision>initialRevision);
+ native.edit('valid@example.com');assert.deepEqual(JSON.parse(JSON.stringify(edits)),[{id:'email',value:'valid@example.com'}]);assert.equal(s.managers.length,1);assert.equal(native.getInstanceId(),m.getInstanceId());
+ owner.dispose();native.edit('stale@example.com');assert.equal(edits.length,1,'detached native keyboard callbacks are inert');
+});
+
+test('all control factories keep real instance identity and disabled or read-only controls cannot write',()=>{
+ const s=fixture(),m=new s.Manager(),types=['OpenUiInput','OpenUiCheckbox','OpenUiToggle','OpenUiSelect','OpenUiRadioGroup','OpenUiSlider','OpenUiDatePicker','OpenUiTimePicker','OpenUiImage','OpenUiList','OpenUiDialog'];
+ const ids=new s.NativeIds(types.map(id=>({id,component:id}))),edits=[];
+ const owner=new s.NativeSession(m,'s',s.Themes.create(),false,'',new Map(),{window:'controls'},ids,undefined,320,(id,value)=>{edits.push({id,value});return true});
+ for(const type of types){const native=s.factories.get(type)('s',ids.nativeId(type),type,0n,0);native.updateProperties({label:type,disabled:true,value:type==='OpenUiCheckbox'?true:undefined});assert.equal(native.getInstanceId(),m.getInstanceId());assert.equal(native.earlyContext.window,'controls');native.edit('blocked');assert.equal(native.canEdit(),false)}
+ assert.equal(edits.length,0);owner.dispose();
+ const ids2=new s.NativeIds([{id:'slider',component:'OpenUiSlider'}]),readonly=new s.NativeSession(m,'s',s.Themes.create(),true,'',new Map(),{},ids2,undefined,320,()=>{edits.push('wrong');return true});
+ const slider=s.factories.get('OpenUiSlider')('s',ids2.nativeId('slider'),'OpenUiSlider',0n,0);slider.updateProperties({min:5,max:10,step:1});assert.equal(slider.numberValue,5);slider.edit(7);assert.equal(edits.length,0);assert.equal(slider.canEdit(),false);readonly.dispose();
+});
+
+test('dialog confirmations use original native action identity and teardown closes the owned sheet',()=>{
+ const s=fixture(),m=new s.Manager(),ids=new s.NativeIds([{id:'confirm',component:'OpenUiDialog'}]);
+ const owner=new s.NativeSession(m,'s',s.Themes.create(),false,'',new Map(),{},ids),native=s.factories.get('OpenUiDialog')('s',ids.nativeId('confirm'),'OpenUiDialog',0n,0);
+ native.updateProperties({label:'Review',title:'Confirm',text:'Original data',action:{event:{name:'Confirm',context:{ticket:'A'}}}});
+ let closed=0;native.setModalCloser(()=>closed++);assert.equal(s.events.length,0,'model generation cannot automatically confirm or invoke the host');native.activate();
+ assert.equal(s.events.length,1);assert.equal(s.events[0].type,'OpenUiDialog');assert.equal(s.events[0].nodeId,ids.nativeId('confirm'));assert.equal(native.props.action.event.context.ticket,'A');
+ owner.dispose();assert.equal(closed,1);native.activate();assert.equal(s.events.length,1,'a retained sheet callback cannot confirm after replacement');native.setModalCloser(()=>closed++);assert.equal(closed,2,'a late sheet registration is immediately dismissed');native.onDestroy();assert.equal(closed,2);
+});
+
+test('native form containers do not wait for a nonexistent semantic custom view',()=>{
+ const s=fixture(),surface={id:'form-surface',catalogId:'test',revision:1,readOnly:false,selectedComponent:'',dataModelJson:'{}',fieldValuesJson:'{}',fieldErrorsJson:'{}',components:[{id:'root',component:'OpenUiForm',name:'booking',children:['name']},{id:'name',component:'OpenUiInput',field:'name',label:'Name'}]};
+ const ids=new s.NativeIds(surface.components);assert.deepEqual(JSON.parse(JSON.stringify(ids.semanticIds())),[ids.nativeId('name')]);
+ const nodes=s.Projection.components(surface,s.Themes.create());assert.equal(nodes[0].component,'Column');assert.equal(nodes[0].name,undefined);assert.equal(surface.components[0].component,'OpenUiForm');
+});
+
+test('typing and validation update the mounted View at one revision, with stale edits rejected after replacement',()=>{
+ const s=fixture(),edits=[],c=new s.Controller({onFieldChange:event=>edits.push(event),validationMessage:()=> '请填写联系人'});
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'components',surfaceId:'s',components:[
+  {id:'root',component:'OpenUiForm',name:'booking',children:['name']},
+  {id:'name',component:'OpenUiInput',field:'contact',label:'联系人',required:true}
+ ]});
+ const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],id=manager.nodes.find(node=>node.component==='OpenUiInput').id,element=s.hybridViews.get(id),revision=c.getSurface('s').revision;
+ assert.equal(c.validateForm('s','booking'),false);assert.equal(element.fieldError,'请填写联系人','the host localized validation text is displayed verbatim');assert.equal(s.managers.length,1,'validation must not recreate the control or blur the keyboard');
+ for(const value of ['L','Li','Lin'])element.edit(value);
+ assert.equal(element.stringValue,'Lin');assert.equal(element.fieldError,'');assert.equal(c.getSurface('s').revision,revision);assert.equal(c.getFormValues('s','booking').contact,'Lin');assert.equal(s.managers.length,1);assert.equal(edits.length,3);assert.equal(edits[2].sourceComponentId,'name');
+ const updates=element.updates;element.edit('Lin');assert.equal(element.updates,updates,'a native same-value echo does not rewrite the editor');
+ c.apply({kind:'components',surfaceId:'s',components:[{id:'name',component:'OpenUiInput',field:'contact',label:'New label',required:true}]});assert.equal(s.managers.length,2);assert.equal(manager.disposed,true);element.edit('stale');assert.equal(c.getFormValues('s','booking').contact,'Lin');
+ view.aboutToDisappear();
+});
+
+test('sparse native field maps never inherit Object prototype names as values or errors',()=>{
+ const s=fixture(),m=new s.Manager(),ids=new s.NativeIds([{id:'toString',component:'OpenUiInput'}]);
+ const owner=new s.NativeSession(m,'s',s.Themes.create(),false,'',new Map(),{},ids,undefined,320,undefined,{fieldValuesJson:'{}',fieldErrorsJson:'{}'});
+ const native=s.factories.get('OpenUiInput')('s',ids.nativeId('toString'),'OpenUiInput',0n,0);native.updateProperties({label:'Safe value',value:'Default'});
+ assert.equal(native.stringValue,'Default');assert.equal(native.fieldError,'');owner.syncFields({fieldValuesJson:JSON.stringify({toString:'Edited'}),fieldErrorsJson:JSON.stringify({toString:'Host message'})});assert.equal(native.stringValue,'Edited');assert.equal(native.fieldError,'Host message');owner.dispose();
+});
+
+test('native picker edits publish immediately without echoing selected values into the active event stack',()=>{
+ const s=fixture(),c=new s.Controller();c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'components',surfaceId:'s',components:[
+  {id:'root',component:'OpenUiForm',name:'trip',children:['time']},{id:'time',component:'OpenUiTimePicker',field:'time',label:'Departure',value:'08:00'}]});
+ const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],id=manager.nodes.find(node=>node.component==='OpenUiTimePicker').id,native=s.hybridViews.get(id);
+ let inNativeCallback=true,redraws=0;native.updateArkUI=()=>{assert.equal(inNativeCallback,false,'reentering the active native TimePicker callback can invalidate its wheel nodes');redraws++};
+ native.edit('09:00');native.edit('09:01');assert.equal(c.getFormValues('s','trip').time,'09:01','submitting in this turn reads the latest value');assert.equal(native.stringValue,'09:01');assert.equal(redraws,0);assert.equal(s.timers.size,0,'ordinary native value echoes require no redraw at all');
+ inNativeCallback=false;c.setFieldValue('s','time','10:30');assert.equal(redraws,1,'a real host change still updates the controlled picker');assert.equal(s.managers.length,1);view.aboutToDisappear();
+});
+
+test('validation or host correction during a native edit is deferred, coalesced, and canceled on disposal',()=>{
+ const s=fixture();let c; c=new s.Controller({onFieldChange:event=>{if(event.value==='09:01'){c.setFieldValue('s','time','10:30');c.setFieldValue('s','time','11:45')}}});
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'components',surfaceId:'s',components:[
+  {id:'root',component:'OpenUiForm',name:'trip',children:['time']},{id:'time',component:'OpenUiTimePicker',field:'time',label:'Departure',value:'08:00'}]});
+ const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],id=manager.nodes.find(node=>node.component==='OpenUiTimePicker').id,native=s.hybridViews.get(id);
+ let active=true,redraws=0;native.updateArkUI=()=>{assert.equal(active,false);redraws++};native.edit('09:01');assert.equal(c.getFormValues('s','trip').time,'11:45');assert.equal(native.stringValue,'11:45');assert.equal(redraws,0);assert.equal(s.timers.size,1);
+ active=false;s.flushTimers();assert.equal(redraws,1,'only the final correction is rendered after native callback return');
+ active=true;native.edit('09:01');assert.equal(s.timers.size,1);view.aboutToDisappear();assert.equal(s.timers.size,0);active=false;s.flushTimers();assert.equal(redraws,1,'queued correction cannot touch a freed native pointer');
+});
+
+test('picker adapters retain stable Date objects for native echoes and apply genuine external changes',()=>{
+ const s=fixture(),time=new s.Controls();time.kind='OpenUiTimePicker';time.stringValue='08:00';time.aboutToAppear();const initial=time.selectedTime,values=[];
+ let revision=0;time.onString=value=>{values.push(value);time.stringValue=value;time.controlState=JSON.stringify({value,revision:++revision});time.receivedControl()};
+ time.changedTime({hour:9,minute:0});time.changedTime({minute:1});assert.deepEqual(values,['09:00','09:01']);assert.equal(time.selectedTime,initial,'native echo must not reset selected/new Date while a wheel animates');
+ time.stringValue='10:30';time.controlState=JSON.stringify({value:'10:30',revision:++revision});time.receivedControl();assert.notEqual(time.selectedTime,initial);assert.equal(time.selectedTime.getHours(),10);assert.equal(time.selectedTime.getMinutes(),30);
+ const date=new s.Controls();date.kind='OpenUiDatePicker';date.stringValue='2026-10-23';date.aboutToAppear();const original=date.selectedDate;
+ date.onString=value=>{date.stringValue=value;date.controlState=JSON.stringify({value,revision:++revision});date.receivedControl()};date.changedDate(new Date(2026,9,24,12));assert.equal(date.stringValue,'2026-10-24');assert.equal(date.selectedDate,original);
+ date.stringValue='2026-11-01';date.controlState=JSON.stringify({value:'2026-11-01',revision:++revision});date.receivedControl();assert.notEqual(date.selectedDate,original);assert.equal(date.selectedDate.getMonth(),10);assert.equal(date.selectedDate.getDate(),1);
+});
+
+test('native slider labels and blank picker hints refresh after the callback without remounting',()=>{
+ const s=fixture(),c=new s.Controller();c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'components',surfaceId:'s',components:[
+  {id:'root',component:'OpenUiForm',name:'trip',children:['budget','time']},{id:'budget',component:'OpenUiSlider',field:'budget',label:'Budget',value:500,min:100,max:1000,step:50},
+  {id:'time',component:'OpenUiTimePicker',field:'time',label:'Time'}]});
+ const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],find=kind=>s.hybridViews.get(manager.nodes.find(node=>node.component===kind).id),slider=find('OpenUiSlider'),time=find('OpenUiTimePicker');
+ let active=true;slider.updateArkUI=()=>{assert.equal(active,false);slider.drawnNumber=slider.numberValue};time.updateArkUI=()=>{assert.equal(active,false);time.drawnText=time.stringValue};
+ slider.edit(550);slider.edit(600);time.edit('09:00');assert.equal(c.getFormValues('s','trip').budget,600);assert.equal(c.getFormValues('s','trip').time,'09:00');assert.equal(slider.drawnNumber,undefined);assert.equal(time.drawnText,undefined);
+ active=false;s.flushTimers();assert.equal(slider.drawnNumber,600);assert.equal(time.drawnText,'09:00');assert.equal(s.managers.length,1);view.aboutToDisappear();
+});
+
+test('atomic picker state applies a host rollback even when its value matches the previous rendered prop',()=>{
+ const s=fixture(),time=new s.Controls();time.kind='OpenUiTimePicker';time.stringValue='08:00';time.aboutToAppear();const original=time.selectedTime;
+ time.onString=()=>{};time.changedTime({hour:9,minute:1});assert.equal(time.stringValue,'08:00','no native echo redraw has occurred yet');assert.equal(time.nativeValue,'09:01');
+ time.controlState=JSON.stringify({value:'08:00',revision:12});time.receivedControl();assert.notEqual(time.selectedTime,original,'a real host rollback needs a new selected Date even though the old prop text is unchanged');assert.equal(time.selectedTime.getHours(),8);assert.equal(time.selectedTime.getMinutes(),0);assert.equal(time.nativeValue,'08:00');
+ const rolledBack=time.selectedTime;time.controlState=JSON.stringify({value:'08:00',revision:13});time.receivedControl();assert.equal(time.selectedTime,rolledBack,'unrelated revisions with the same current native value do not reset an active picker');
+});
+
+test('atomic controlled state rolls back strings, booleans and slider numbers to their original rendered values',()=>{
+ const s=fixture();for(const [kind,initial,edited,key,change] of [
+  ['OpenUiInput','Initial','Edited','liveStringValue','changedString'],['OpenUiSelect','first','second','liveStringValue','changedString'],
+  ['OpenUiCheckbox',false,true,'liveBoolValue','changedBoolean'],['OpenUiToggle',true,false,'liveBoolValue','changedBoolean'],
+  ['OpenUiSlider',500,800,'liveNumberValue','changedNumber']]){
+  const control=new s.Controls();control.kind=kind;control.stringValue=typeof initial==='string'?initial:'';control.numberValue=typeof initial==='number'?initial:0;control.boolValue=initial===true;control.aboutToAppear();
+  control[change](edited);assert.equal(control[key],edited,'the native selection is tracked locally without a Surface remount');
+  control.controlState=JSON.stringify({value:initial,revision:22});control.receivedControl();assert.equal(control[key],initial,kind+' rollback must be visible even if the old parent prop value never changed');assert.equal(control.nativeValue,initial);
+ }
 });

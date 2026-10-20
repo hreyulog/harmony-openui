@@ -23,15 +23,42 @@ Pass a stable controller for the view's lifetime. Replace the `theme` value to a
 
 ## Components and actions
 
-The initial capability set is deliberately bounded: basic `Column`, `Row`, `Card`, `Text`, `Button`, plus native `OpenUiOption`, `OpenUiFacts`, `OpenUiStatus` and `OpenUiDetails`. This is not a claim of complete A2UI component or input-language conformance.
+The capability set is deliberately bounded: basic `Column`, `Row`, `Card`, `Text`, `Button`, native card composites, and the v0.2 form/media/confirmation kinds described below. There are 23 model-facing components and 21 native IR kinds because TextInput, TextArea, and Search share `OpenUiInput`. This is not a claim of complete ArkUI, A2UI, or input-language conformance.
 
 The four composite types are registered with AGenUI as real `A2UIComponent` factories, using precompiled ArkUI builders. Options make the complete row tappable. Facts align labels with values. Status has neutral, positive and caution colors. Details expands locally without sending a business action.
 
 Actions travel through the native surface API to the controller's `onAction` callback. The renderer performs no action named in that callback. In particular, selecting a row does not approve a purchase, payment, message or any other application effect. The host decides whether to call `setSelected` or `setReadOnly`; the library does not automatically lock the whole surface after an ordinary selection.
 
+## Native forms, images, lists and confirmation
+
+The added IR kinds use precompiled native ArkUI components, not screenshot substitutes, generated JavaScript, HTML, or a WebView:
+
+| Model component | Native rendering |
+| --- | --- |
+| `Form` | A named group of children with controller-owned field state. |
+| `TextInput`, `TextArea`, `Search` | ArkUI `TextInput`, `TextArea`, and `Search`, with a visible label and inline validation error. |
+| `Checkbox`, `Toggle` | Native boolean controls. |
+| `Select`, `RadioGroup` | ArkUI `Select` and a group of native `Radio` controls, preserving the model's distinct value keys. |
+| `Slider` | Native `Slider` with validated min, max and step. |
+| `DatePicker` | Compact native `CalendarPicker`; the model name does not imply the wheel-style ArkUI DatePicker. |
+| `TimePicker` | Native 24-hour `TimePicker`. |
+| `Image` | Native `Image` loading an HTTPS source, with alternative text and a bounded aspect ratio. |
+| `List` | Native `List` / `ListItem` inside a bounded viewport. |
+| `Dialog` | A launcher opening a native `bindSheet` confirmation panel after a user tap. |
+
+Dates are restricted to the native CalendarPicker's `0001-01-01`–`5000-12-31` range. A supplied initial date and range must validate before mounting. The native display and submitted controller value must describe the same chosen date; a visual picker default is not permission to invent a submitted value. Time values use `HH:mm`.
+
+Image URLs must be supplied by the embedding host; the model prompt does not authorize inventing resource URLs. Rendering may make a native network fetch for that image. Network permissions, remote availability, and any application-specific resource allowlist remain host responsibilities. Image availability is separate from model-generation or layout acceptance. Lists have finite item counts and viewports, without remote pagination or infinite-loading behavior.
+
+The confirmation panel is local UI state. It does not open automatically when model output arrives. Cancel, close, or dismiss returns no action. Confirm forwards the declared action through the original source/revision checks, so an outdated or read-only form cannot submit via an old panel. For `@Submit`, the controller validates and attaches live values before notifying the host.
+
 ## Updates and isolation
 
 Surface revisions rebuild that surface's native instance. Listeners capture their original revision and mount generation so delayed callbacks from an old instance cannot act on a replacement document. Read-only state is enforced both in projected controls and by the controller.
+
+Field edits and validation errors are excluded from the structural mount fingerprint. They update the existing native elements through the active session; typing does not rebuild the surface, reset keyboard focus, or require a model round trip. Changes to the document, theme, host width, read-only state, or selected state still use the revision/mount lifecycle. Edited values are controller state, not mutations of the source component declarations.
+
+Native edits record the already displayed value before notifying the controller. The resulting state notification does not synchronously echo the same value into an active native callback. Auxiliary text/error refreshes are deferred and coalesced, and disposed owners cancel queued work. Atomic control-state properties distinguish a genuine host correction from a native echo, even when the host restores the initial value. Date/time controls retain stable selected `Date` objects during native wheel changes; only genuine external changes replace those objects. The Nova tests exercise the TimePicker sequence that crashed an earlier candidate, without claiming a C++ stack diagnosis.
 
 The renderer waits for its own outer Column to measure, subtracts its theme insets, and uses that inner content width when creating the native surface. The synthetic native root is sized explicitly in A2UI units from this host measurement; the display viewport is not used as a card-width default. A host width change remounts only that view. Deferred measurements from an old mount or wider than the current host are rejected, preventing an early full-screen measurement from fixing Yoga at a stale width after the actual container shrinks. Each semantic component measures at the smaller of its native constraint and the host upper bound, so nested Row columns can remain narrower. Content height is measured again at that width rather than carried over from a wider layout.
 
@@ -62,3 +89,5 @@ Content size reports ignore zero, invalid and unchanged dimensions, as well as c
 `tests/render.test.cjs` runs executable contract tests with mocked SDK boundaries. It includes the public SDK's factory-instance-0 behavior and a global hybrid node-ID map to check context/measurement routing, equal-ID surface updates and teardown, semantic roots, action reverse projection and stale-callback rejection. It also checks data projection, themes, read-only actions, state retention, measurement deduplication and status gating. These are host tests: they do not establish that AGenUI draws correctly on HarmonyOS.
 
 A successful HAR build additionally establishes ArkTS/API compatibility. Actual colors, touch targets, text wrapping, scrolling, accessibility and first visible native content require device screenshots/layout receipts and interaction checks. Those checks must be reported separately; no static mock or host test is a substitute for native rendering evidence.
+
+The retained v0.1 screenshots establish its original card flow only. v0.2 form controls, actual keyboard editing, picker choices, list scrolling, image loading, and native confirmation need their own device receipts. See [verification.md](verification.md) for the current accepted scope.

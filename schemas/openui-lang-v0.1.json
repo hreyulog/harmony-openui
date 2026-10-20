@@ -28,6 +28,48 @@
     },
     "Button": {
       "$ref": "#/$defs/Button"
+    },
+    "Form": {
+      "$ref": "#/$defs/Form"
+    },
+    "TextInput": {
+      "$ref": "#/$defs/TextInput"
+    },
+    "TextArea": {
+      "$ref": "#/$defs/TextArea"
+    },
+    "Search": {
+      "$ref": "#/$defs/Search"
+    },
+    "Checkbox": {
+      "$ref": "#/$defs/Checkbox"
+    },
+    "Toggle": {
+      "$ref": "#/$defs/Toggle"
+    },
+    "Select": {
+      "$ref": "#/$defs/Select"
+    },
+    "RadioGroup": {
+      "$ref": "#/$defs/RadioGroup"
+    },
+    "Slider": {
+      "$ref": "#/$defs/Slider"
+    },
+    "DatePicker": {
+      "$ref": "#/$defs/DatePicker"
+    },
+    "TimePicker": {
+      "$ref": "#/$defs/TimePicker"
+    },
+    "Image": {
+      "$ref": "#/$defs/Image"
+    },
+    "List": {
+      "$ref": "#/$defs/List"
+    },
+    "Dialog": {
+      "$ref": "#/$defs/Dialog"
     }
   },
   "required": [
@@ -39,7 +81,21 @@
     "Facts",
     "Status",
     "Details",
-    "Button"
+    "Button",
+    "Form",
+    "TextInput",
+    "TextArea",
+    "Search",
+    "Checkbox",
+    "Toggle",
+    "Select",
+    "RadioGroup",
+    "Slider",
+    "DatePicker",
+    "TimePicker",
+    "Image",
+    "List",
+    "Dialog"
   ],
   "additionalProperties": false,
   "$defs": {
@@ -69,6 +125,45 @@
                   },
                   {
                     "$ref": "#/$defs/Button"
+                  },
+                  {
+                    "$ref": "#/$defs/TextInput"
+                  },
+                  {
+                    "$ref": "#/$defs/TextArea"
+                  },
+                  {
+                    "$ref": "#/$defs/Search"
+                  },
+                  {
+                    "$ref": "#/$defs/Checkbox"
+                  },
+                  {
+                    "$ref": "#/$defs/Toggle"
+                  },
+                  {
+                    "$ref": "#/$defs/Select"
+                  },
+                  {
+                    "$ref": "#/$defs/RadioGroup"
+                  },
+                  {
+                    "$ref": "#/$defs/Slider"
+                  },
+                  {
+                    "$ref": "#/$defs/DatePicker"
+                  },
+                  {
+                    "$ref": "#/$defs/TimePicker"
+                  },
+                  {
+                    "$ref": "#/$defs/Image"
+                  },
+                  {
+                    "$ref": "#/$defs/List"
+                  },
+                  {
+                    "$ref": "#/$defs/Dialog"
                   }
                 ]
               },
@@ -77,6 +172,9 @@
               },
               {
                 "$ref": "#/$defs/Card"
+              },
+              {
+                "$ref": "#/$defs/Form"
               }
             ]
           }
@@ -284,6 +382,472 @@
       "additionalProperties": false,
       "description": "An ordinary host action; the renderer never performs business or network operations."
     },
+    "TextInput": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "inputType": {
+          "type": "string",
+          "enum": [
+            "text",
+            "number",
+            "email",
+            "tel"
+          ]
+        }
+      },
+      "required": [
+        "field",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "A labelled single-line field. Use a unique field key inside a Form. Initial values are supplied facts, not guesses."
+    },
+    "TextArea": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "field",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "A labelled multiline field for a short user note."
+    },
+    "Search": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "field",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "A labelled local form search field. Typing never makes a network request."
+    },
+    "Checkbox": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": "boolean"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "field",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "A labelled boolean checkbox. A required checkbox must be checked before Submit is accepted."
+    },
+    "Toggle": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": "boolean"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "field",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "A labelled on/off value. A required toggle must be on before Submit is accepted."
+    },
+    "Select": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "options": {
+          "minItems": 1,
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "value": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "field",
+        "label",
+        "options"
+      ],
+      "additionalProperties": false,
+      "description": "A labelled native select with distinct supplied option values."
+    },
+    "RadioGroup": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "options": {
+          "minItems": 1,
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "value": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "field",
+        "label",
+        "options"
+      ],
+      "additionalProperties": false,
+      "description": "A small visible group of mutually exclusive supplied options."
+    },
+    "Slider": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "step": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "field",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "A labelled numeric value with a bounded range. Choose sensible min, max and step values."
+    },
+    "DatePicker": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "minDate": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "maxDate": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "field",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "A labelled calendar date. Values use YYYY-MM-DD; minDate and maxDate are inclusive."
+    },
+    "TimePicker": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "field",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "A labelled 24-hour time. Values use HH:mm."
+    },
+    "Image": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "maxLength": 2048,
+          "pattern": "^https:\\/\\/"
+        },
+        "alt": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "aspectRatio": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 4
+        }
+      },
+      "required": [
+        "source",
+        "alt"
+      ],
+      "additionalProperties": false,
+      "description": "An image from an HTTPS URL supplied by the host. Never invent, search for or construct image URLs."
+    },
+    "List": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "minItems": 1,
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "meta": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "title": {
+          "type": "string"
+        },
+        "height": {
+          "type": "number",
+          "minimum": 120,
+          "maximum": 480
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "additionalProperties": false,
+      "description": "A bounded native scrolling list of supplied items. Use a viewport height between 120 and 480 vp."
+    },
+    "Dialog": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "action": {
+          "$ref": "#/$defs/ActionExpression"
+        },
+        "confirmLabel": {
+          "type": "string"
+        },
+        "cancelLabel": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "title",
+        "text",
+        "action"
+      ],
+      "additionalProperties": false,
+      "description": "An explicit button that opens a native confirmation dialog. Only confirming returns the declared action to the host; cancellation has no action."
+    },
     "Row": {
       "type": "object",
       "properties": {
@@ -308,6 +872,45 @@
               },
               {
                 "$ref": "#/$defs/Button"
+              },
+              {
+                "$ref": "#/$defs/TextInput"
+              },
+              {
+                "$ref": "#/$defs/TextArea"
+              },
+              {
+                "$ref": "#/$defs/Search"
+              },
+              {
+                "$ref": "#/$defs/Checkbox"
+              },
+              {
+                "$ref": "#/$defs/Toggle"
+              },
+              {
+                "$ref": "#/$defs/Select"
+              },
+              {
+                "$ref": "#/$defs/RadioGroup"
+              },
+              {
+                "$ref": "#/$defs/Slider"
+              },
+              {
+                "$ref": "#/$defs/DatePicker"
+              },
+              {
+                "$ref": "#/$defs/TimePicker"
+              },
+              {
+                "$ref": "#/$defs/Image"
+              },
+              {
+                "$ref": "#/$defs/List"
+              },
+              {
+                "$ref": "#/$defs/Dialog"
               }
             ]
           }
@@ -345,6 +948,135 @@
                   },
                   {
                     "$ref": "#/$defs/Button"
+                  },
+                  {
+                    "$ref": "#/$defs/TextInput"
+                  },
+                  {
+                    "$ref": "#/$defs/TextArea"
+                  },
+                  {
+                    "$ref": "#/$defs/Search"
+                  },
+                  {
+                    "$ref": "#/$defs/Checkbox"
+                  },
+                  {
+                    "$ref": "#/$defs/Toggle"
+                  },
+                  {
+                    "$ref": "#/$defs/Select"
+                  },
+                  {
+                    "$ref": "#/$defs/RadioGroup"
+                  },
+                  {
+                    "$ref": "#/$defs/Slider"
+                  },
+                  {
+                    "$ref": "#/$defs/DatePicker"
+                  },
+                  {
+                    "$ref": "#/$defs/TimePicker"
+                  },
+                  {
+                    "$ref": "#/$defs/Image"
+                  },
+                  {
+                    "$ref": "#/$defs/List"
+                  },
+                  {
+                    "$ref": "#/$defs/Dialog"
+                  }
+                ]
+              },
+              {
+                "$ref": "#/$defs/Row"
+              },
+              {
+                "$ref": "#/$defs/Form"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "A bounded group of related information. Do not nest cards."
+    },
+    "Form": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Text"
+                  },
+                  {
+                    "$ref": "#/$defs/Option"
+                  },
+                  {
+                    "$ref": "#/$defs/Facts"
+                  },
+                  {
+                    "$ref": "#/$defs/Status"
+                  },
+                  {
+                    "$ref": "#/$defs/Details"
+                  },
+                  {
+                    "$ref": "#/$defs/Button"
+                  },
+                  {
+                    "$ref": "#/$defs/TextInput"
+                  },
+                  {
+                    "$ref": "#/$defs/TextArea"
+                  },
+                  {
+                    "$ref": "#/$defs/Search"
+                  },
+                  {
+                    "$ref": "#/$defs/Checkbox"
+                  },
+                  {
+                    "$ref": "#/$defs/Toggle"
+                  },
+                  {
+                    "$ref": "#/$defs/Select"
+                  },
+                  {
+                    "$ref": "#/$defs/RadioGroup"
+                  },
+                  {
+                    "$ref": "#/$defs/Slider"
+                  },
+                  {
+                    "$ref": "#/$defs/DatePicker"
+                  },
+                  {
+                    "$ref": "#/$defs/TimePicker"
+                  },
+                  {
+                    "$ref": "#/$defs/Image"
+                  },
+                  {
+                    "$ref": "#/$defs/List"
+                  },
+                  {
+                    "$ref": "#/$defs/Dialog"
                   }
                 ]
               },
@@ -356,10 +1088,11 @@
         }
       },
       "required": [
+        "name",
         "children"
       ],
       "additionalProperties": false,
-      "description": "A bounded group of related information. Do not nest cards."
+      "description": "A named group of labelled fields and a Button with @Submit of this form name. Keep field keys unique. Forms can appear in Stack or Card and cannot nest."
     }
   },
   "actions": {
@@ -374,6 +1107,24 @@
         },
         "required": [
           "value"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "Submit": {
+      "description": "Submit the containing Form name. The host reads and validates the live field values; never put a model-generated fields object in the action.",
+      "params": {
+        "type": "object",
+        "properties": {
+          "form": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+          }
+        },
+        "required": [
+          "form"
         ],
         "additionalProperties": false
       }

@@ -1,0 +1,55 @@
+{
+  "trip": {
+    "traveler": "Lin",
+    "destination": "Beijing",
+    "seat": "first",
+    "date": "2026-10-24"
+  },
+  "preferences": {
+    "note": "DemoNote",
+    "direct": false,
+    "remind": false,
+    "position": "aisle",
+    "budget": 800,
+    "time": "11:03"
+  },
+  "actions": [
+    {
+      "eventId": "mvglxagi-xttol8h9:10:2",
+      "revision": 12,
+      "receivedAt": 1792496250399,
+      "surfaceId": "forms",
+      "sourceComponentId": "n_submit",
+      "name": "submit",
+      "context": {
+        "form": "trip",
+        "fields": {
+          "traveler": "Lin",
+          "destination": "Beijing",
+          "seat": "first",
+          "date": "2026-10-24"
+        }
+      }
+    },
+    {
+      "eventId": "mvglxagi-xttol8h9:11:3",
+      "revision": 13,
+      "receivedAt": 1792496305031,
+      "surfaceId": "forms",
+      "sourceComponentId": "n_confirm",
+      "name": "submit",
+      "context": {
+        "form": "preferences",
+        "fields": {
+          "note": "DemoNote",
+          "direct": false,
+          "remind": false,
+          "position": "aisle",
+          "budget": 800,
+          "time": "11:03"
+        }
+      }
+    }
+  ],
+  "fictionalDemonstrationData": true
+}

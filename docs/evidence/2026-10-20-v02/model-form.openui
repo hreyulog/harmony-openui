@@ -1,0 +1,7 @@
+root = Stack([trip])
+trip = Form("trip", [traveler, destination, seat, date, submit])
+traveler = TextInput("traveler", "乘车人", "", "请输入乘车人", true)
+destination = Search("destination", "目的地", "上海", "请输入目的地", true)
+seat = Select("seat", "席别", [{label:"二等座",value:"second"},{label:"一等座",value:"first"}], "second", true)
+date = DatePicker("date", "出发日期", "2026-10-23", "2026-10-20", "2027-12-31", true)
+submit = Button("继续设置偏好", @Submit("trip"))
