@@ -100,7 +100,7 @@ Host 测试检验解析、状态与回调契约；HAR / HAP 构建检验 ArkTS �
 - 兼容 A2UI 的受限子集，不宣称完整协议兼容。
 - SDK 与示例独立开发，尚未集成到 Sofia。
 
-文档：[协议与状态](docs/protocol.md) · [渲染与主题](docs/rendering.md) · [构建](docs/building.md)
+文档：[协议与状态](docs/protocol.md) · [渲染与主题](docs/rendering.md) · [构建](docs/building.md) · [验证记录](docs/verification.md)
 
 依据：[OpenUI 官方架构](https://www.openui.com/docs/openui-lang/architecture) · [组件目录](https://www.openui.com/docs/openui-lang/defining-components) · [ArkUI](https://developer.huawei.com/consumer/cn/arkui/) · [AGenUI](https://github.com/AGenUI/AGenUI)
 
