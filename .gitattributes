@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.png binary
+# Preserve the upstream LGPL text verbatim, including its final blank line.
+third_party/agenui/COPYING.LGPL-2.1 -whitespace

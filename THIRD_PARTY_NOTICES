@@ -1,0 +1,89 @@
+Third-party notices for Harmony OpenUI 0.1.0
+
+1. @openuidev/lang-core 1.0.1 (bundled runtime)
+Source: https://github.com/thesysdev/openui
+Package: https://www.npmjs.com/package/@openuidev/lang-core
+License: MIT
+The official parser and evaluator are bundled without modifying their source.
+The catalog and native adapter are implemented in this repository.
+The MIT License (MIT)
+
+Copyright (c) 2011-2024 Thesys Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+2. Zod 4.6.7 (bundled runtime dependency)
+Source: https://github.com/colinhacks/zod
+License: MIT
+MIT License
+
+Copyright (c) 2025 Colin McDonnell
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+3. @agenui/agenui 1.6.0 (separately resolved OHPM dependency)
+Source: https://github.com/AGenUI/AGenUI
+Registry: https://ohpm.openharmony.cn/#/cn/detail/@agenui%2Fagenui
+License: Apache-2.0 for AGenUI's own code; bundled native components retain
+their own licenses as described below.
+The package retains its original LICENSE and copyright notices. The full
+Apache-2.0 license is also reproduced in this distribution's LICENSE.
+
+Native component notices (not a relicense of these components):
+- iksemel: LGPL-2.1, Copyright (c) 2000-2007 Gurer Ozen.
+  Built as the separate libiksemel.so on HarmonyOS.
+- sax, derived from iksemel: LGPL-2.1, Copyright (c) 2000-2007 Gurer Ozen;
+  modifications Copyright (c) AGenUI Contributors. The modified sax.c is
+  compiled into liba2ui-capi.so; replacing only libiksemel.so does not replace it.
+- Yoga: MIT, Copyright (c) Meta Platforms, Inc. and affiliates; libyoga.so.
+- nlohmann/json: MIT, Copyright (c) 2013-2022 Niels Lohmann.
+  The MIT permission and warranty terms reproduced above apply to these MIT
+  components as well; their original notices must be retained.
+- The public package also contains libc++_shared.so. Its exact toolchain
+  provenance and applicable runtime notices must be verified for the shipped
+  binary; the package-level Apache-2.0 field is not sufficient evidence.
+
+The complete upstream NOTICE and LGPL-2.1 text are reproduced verbatim in
+third_party/agenui/NOTICE and third_party/agenui/COPYING.LGPL-2.1. The pinned
+upstream source is tag AGenUI-1.6.0, commit
+0a448291965198b3943707249b6630f49a7cc849. See docs/third-party-native.md for
+official source URLs, copied-file hashes, source/build/relink pointers and
+unverified distribution requirements. This project does not claim to have
+reproduced the public AGenUI binary or validated a recipient relink route.
+
+Build-only dependencies, not linked into the HAR runtime:
+esbuild 0.28.2 (MIT), Node.js, pnpm and the HarmonyOS SDK. Their own packages
+contain their respective notices. Generated parser source includes retained
+upstream legal comments in addition to this file.

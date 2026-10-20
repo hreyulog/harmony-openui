@@ -1,0 +1,9 @@
+{
+  "modelVersion": "6.0.0",
+  "name": "harmony-openui-workspace",
+  "version": "0.1.0",
+  "description": "Native HarmonyOS generative UI component library and independent demo.",
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "devDependencies": {}
+}

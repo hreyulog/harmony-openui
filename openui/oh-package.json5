@@ -1,0 +1,12 @@
+{
+  "name": "@hreyulog/harmony-openui",
+  "version": "0.1.0",
+  "description": "Native component catalog and renderer integration for model-generated HarmonyOS UI.",
+  "main": "Index.ets",
+  "author": "hreyulog",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/hreyulog/harmony-openui",
+  "dependencies": {
+    "@agenui/agenui": "1.6.0"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "apiType": "stageMode",
+  "buildOption": {
+    "packingOptions": {
+      "asset": {
+        "include": [
+          "LICENSE",
+          "NOTICE",
+          "THIRD_PARTY_NOTICES",
+          "third_party/**"
+        ]
+      }
+    }
+  },
+  "buildOptionSet": [
+    {
+      "name": "release",
+      "arkOptions": {
+        "obfuscation": {
+          "ruleOptions": {
+            "enable": false,
+            "files": []
+          }
+        }
+      }
+    }
+  ],
+  "targets": [
+    {
+      "name": "default"
+    }
+  ]
+}

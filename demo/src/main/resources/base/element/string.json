@@ -1,0 +1,7 @@
+{
+  "string": [
+    { "name": "module_desc", "value": "Harmony OpenUI independent demo" },
+    { "name": "ability_desc", "value": "Native model-generated component demonstrations" },
+    { "name": "ability_label", "value": "Harmony OpenUI" }
+  ]
+}

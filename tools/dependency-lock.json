@@ -1,0 +1,16 @@
+{
+  "dependencies": [
+    {
+      "name": "@agenui/agenui",
+      "version": "1.6.0",
+      "license": "Apache-2.0",
+      "registry": "https://ohpm.openharmony.cn/ohpm",
+      "tarball": "https://ohpm.openharmony.cn/ohpm/@agenui/agenui/-/agenui-1.6.0.har",
+      "integrity": "sha512-ldqChUS0fZHkz4w4K6yFqMp5hkXwJrp2o6f/cHGvnpYKbnZO0xVWK2VDan0qcCXAvA+aSGUrckZzdJKWEbZMOw==",
+      "sha256": "e2269e998a69871be5251a610d890aea141bb14c00f78a8649a3335c3943c75a",
+      "sourceRepository": "https://github.com/AGenUI/AGenUI",
+      "sourceTag": "AGenUI-1.6.0",
+      "sourceCommit": "0a448291965198b3943707249b6630f49a7cc849"
+    }
+  ]
+}

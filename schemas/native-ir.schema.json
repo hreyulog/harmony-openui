@@ -1,0 +1,561 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:harmony-openui:native-ir:0.1",
+  "title": "Harmony OpenUI native IR components v0.1",
+  "description": "Renderer capability schema; OpenUI Lang is parsed by its upstream parser before adaptation to this IR. This is not an OpenUI Lang syntax schema or a full A2UI implementation.",
+  "type": "array",
+  "maxItems": 200,
+  "items": {
+    "oneOf": [
+      {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+          },
+          "component": {
+            "type": "string",
+            "const": "Column"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 200
+          },
+          "align": {
+            "type": "string"
+          },
+          "justify": {
+            "type": "string"
+          },
+          "styles": {
+            "type": "object",
+            "properties": {
+              "width": {
+                "type": "string"
+              },
+              "height": {
+                "type": "string"
+              },
+              "padding": {
+                "type": "string"
+              },
+              "margin": {
+                "type": "string"
+              },
+              "gap": {
+                "type": "string"
+              },
+              "color": {
+                "type": "string"
+              },
+              "background-color": {
+                "type": "string"
+              },
+              "border-radius": {
+                "type": "string"
+              },
+              "font-size": {
+                "type": "string"
+              },
+              "font-weight": {
+                "type": "string"
+              },
+              "line-height": {
+                "type": "string"
+              },
+              "text-align": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "component",
+          "children"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+          },
+          "component": {
+            "type": "string",
+            "const": "Row"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 200
+          },
+          "align": {
+            "type": "string"
+          },
+          "justify": {
+            "type": "string"
+          },
+          "styles": {
+            "type": "object",
+            "properties": {
+              "width": {
+                "type": "string"
+              },
+              "height": {
+                "type": "string"
+              },
+              "padding": {
+                "type": "string"
+              },
+              "margin": {
+                "type": "string"
+              },
+              "gap": {
+                "type": "string"
+              },
+              "color": {
+                "type": "string"
+              },
+              "background-color": {
+                "type": "string"
+              },
+              "border-radius": {
+                "type": "string"
+              },
+              "font-size": {
+                "type": "string"
+              },
+              "font-weight": {
+                "type": "string"
+              },
+              "line-height": {
+                "type": "string"
+              },
+              "text-align": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "component",
+          "children"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+          },
+          "component": {
+            "type": "string",
+            "const": "Card"
+          },
+          "child": {
+            "type": "string"
+          },
+          "styles": {
+            "type": "object",
+            "properties": {
+              "width": {
+                "type": "string"
+              },
+              "height": {
+                "type": "string"
+              },
+              "padding": {
+                "type": "string"
+              },
+              "margin": {
+                "type": "string"
+              },
+              "gap": {
+                "type": "string"
+              },
+              "color": {
+                "type": "string"
+              },
+              "background-color": {
+                "type": "string"
+              },
+              "border-radius": {
+                "type": "string"
+              },
+              "font-size": {
+                "type": "string"
+              },
+              "font-weight": {
+                "type": "string"
+              },
+              "line-height": {
+                "type": "string"
+              },
+              "text-align": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "component",
+          "child"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+          },
+          "component": {
+            "type": "string",
+            "const": "Text"
+          },
+          "text": {
+            "$ref": "#/$defs/text"
+          },
+          "variant": {
+            "type": "string"
+          },
+          "styles": {
+            "type": "object",
+            "properties": {
+              "width": {
+                "type": "string"
+              },
+              "height": {
+                "type": "string"
+              },
+              "padding": {
+                "type": "string"
+              },
+              "margin": {
+                "type": "string"
+              },
+              "gap": {
+                "type": "string"
+              },
+              "color": {
+                "type": "string"
+              },
+              "background-color": {
+                "type": "string"
+              },
+              "border-radius": {
+                "type": "string"
+              },
+              "font-size": {
+                "type": "string"
+              },
+              "font-weight": {
+                "type": "string"
+              },
+              "line-height": {
+                "type": "string"
+              },
+              "text-align": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "component",
+          "text"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+          },
+          "component": {
+            "type": "string",
+            "const": "Button"
+          },
+          "child": {
+            "type": "string"
+          },
+          "variant": {
+            "type": "string"
+          },
+          "styles": {
+            "type": "object",
+            "properties": {
+              "width": {
+                "type": "string"
+              },
+              "height": {
+                "type": "string"
+              },
+              "padding": {
+                "type": "string"
+              },
+              "margin": {
+                "type": "string"
+              },
+              "gap": {
+                "type": "string"
+              },
+              "color": {
+                "type": "string"
+              },
+              "background-color": {
+                "type": "string"
+              },
+              "border-radius": {
+                "type": "string"
+              },
+              "font-size": {
+                "type": "string"
+              },
+              "font-weight": {
+                "type": "string"
+              },
+              "line-height": {
+                "type": "string"
+              },
+              "text-align": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "action": {
+            "type": "object",
+            "properties": {
+              "event": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z][\\w.-]{0,79}$"
+                  },
+                  "context": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "name",
+                  "context"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "event"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "component",
+          "child",
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+          },
+          "component": {
+            "type": "string",
+            "const": "OpenUiOption"
+          },
+          "title": {
+            "$ref": "#/$defs/text"
+          },
+          "description": {
+            "$ref": "#/$defs/text"
+          },
+          "meta": {
+            "$ref": "#/$defs/text"
+          },
+          "action": {
+            "type": "object",
+            "properties": {
+              "event": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z][\\w.-]{0,79}$"
+                  },
+                  "context": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "name",
+                  "context"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "event"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "component",
+          "title",
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+          },
+          "component": {
+            "type": "string",
+            "const": "OpenUiFacts"
+          },
+          "title": {
+            "$ref": "#/$defs/text"
+          },
+          "facts": {
+            "type": "array",
+            "maxItems": 80,
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "$ref": "#/$defs/text"
+                },
+                "value": {
+                  "$ref": "#/$defs/text"
+                }
+              },
+              "required": [
+                "label",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "component",
+          "facts"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+          },
+          "component": {
+            "type": "string",
+            "const": "OpenUiStatus"
+          },
+          "text": {
+            "$ref": "#/$defs/text"
+          },
+          "tone": {
+            "type": "string",
+            "enum": [
+              "neutral",
+              "success",
+              "warning"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "component",
+          "text"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+          },
+          "component": {
+            "type": "string",
+            "const": "OpenUiDetails"
+          },
+          "title": {
+            "$ref": "#/$defs/text"
+          },
+          "text": {
+            "$ref": "#/$defs/text"
+          }
+        },
+        "required": [
+          "id",
+          "component",
+          "title",
+          "text"
+        ],
+        "additionalProperties": false
+      }
+    ]
+  },
+  "$defs": {
+    "text": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 8192
+        },
+        {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "pattern": "^(?:$|/)"
+            }
+          },
+          "required": [
+            "path"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

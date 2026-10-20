@@ -1,0 +1,9 @@
+{
+  "name": "harmony-openui-demo",
+  "version": "0.1.0",
+  "description": "Independent Harmony OpenUI demonstration application.",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@hreyulog/harmony-openui": "file:../openui"
+  }
+}

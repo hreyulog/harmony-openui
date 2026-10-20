@@ -1,0 +1,382 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "Stack": {
+      "$ref": "#/$defs/Stack"
+    },
+    "Row": {
+      "$ref": "#/$defs/Row"
+    },
+    "Card": {
+      "$ref": "#/$defs/Card"
+    },
+    "Text": {
+      "$ref": "#/$defs/Text"
+    },
+    "Option": {
+      "$ref": "#/$defs/Option"
+    },
+    "Facts": {
+      "$ref": "#/$defs/Facts"
+    },
+    "Status": {
+      "$ref": "#/$defs/Status"
+    },
+    "Details": {
+      "$ref": "#/$defs/Details"
+    },
+    "Button": {
+      "$ref": "#/$defs/Button"
+    }
+  },
+  "required": [
+    "Stack",
+    "Row",
+    "Card",
+    "Text",
+    "Option",
+    "Facts",
+    "Status",
+    "Details",
+    "Button"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "Stack": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Text"
+                  },
+                  {
+                    "$ref": "#/$defs/Option"
+                  },
+                  {
+                    "$ref": "#/$defs/Facts"
+                  },
+                  {
+                    "$ref": "#/$defs/Status"
+                  },
+                  {
+                    "$ref": "#/$defs/Details"
+                  },
+                  {
+                    "$ref": "#/$defs/Button"
+                  }
+                ]
+              },
+              {
+                "$ref": "#/$defs/Row"
+              },
+              {
+                "$ref": "#/$defs/Card"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "A vertical layout using the application spacing scale."
+    },
+    "Text": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "heading",
+            "body",
+            "caption"
+          ]
+        }
+      },
+      "required": [
+        "content"
+      ],
+      "additionalProperties": false,
+      "description": "Readable text with host-controlled typography."
+    },
+    "Option": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "meta": {
+          "type": "string"
+        },
+        "action": {
+          "$ref": "#/$defs/ActionExpression"
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "meta",
+        "action"
+      ],
+      "additionalProperties": false,
+      "description": "A complete selectable row. Keep description short and put one compact observed metric in meta. A click only returns an action to the host."
+    },
+    "ActionExpression": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "open_url"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "url"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "continue_conversation"
+            },
+            "context": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "params": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Facts": {
+      "type": "object",
+      "properties": {
+        "facts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "facts"
+      ],
+      "additionalProperties": false,
+      "description": "An aligned group of verified label/value facts."
+    },
+    "Status": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "tone": {
+          "type": "string",
+          "enum": [
+            "neutral",
+            "success",
+            "warning"
+          ]
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "additionalProperties": false,
+      "description": "A concise status supported by supplied facts. Visual tone does not establish business success."
+    },
+    "Details": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "text"
+      ],
+      "additionalProperties": false,
+      "description": "Supplementary text, locally expandable. Keep essential facts visible outside it."
+    },
+    "Button": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "action": {
+          "$ref": "#/$defs/ActionExpression"
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "primary",
+            "borderless"
+          ]
+        }
+      },
+      "required": [
+        "label",
+        "action"
+      ],
+      "additionalProperties": false,
+      "description": "An ordinary host action; the renderer never performs business or network operations."
+    },
+    "Row": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Option"
+              },
+              {
+                "$ref": "#/$defs/Facts"
+              },
+              {
+                "$ref": "#/$defs/Status"
+              },
+              {
+                "$ref": "#/$defs/Details"
+              },
+              {
+                "$ref": "#/$defs/Button"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "A horizontal group of small content blocks. Use Stack when narrow content should wrap vertically."
+    },
+    "Card": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Text"
+                  },
+                  {
+                    "$ref": "#/$defs/Option"
+                  },
+                  {
+                    "$ref": "#/$defs/Facts"
+                  },
+                  {
+                    "$ref": "#/$defs/Status"
+                  },
+                  {
+                    "$ref": "#/$defs/Details"
+                  },
+                  {
+                    "$ref": "#/$defs/Button"
+                  }
+                ]
+              },
+              {
+                "$ref": "#/$defs/Row"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "A bounded group of related information. Do not nest cards."
+    }
+  },
+  "actions": {
+    "Choose": {
+      "description": "Return the selected value to the host, without executing a business operation.",
+      "params": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}

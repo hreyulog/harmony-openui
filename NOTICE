@@ -1,0 +1,17 @@
+Harmony OpenUI
+Copyright 2026 harmony-openui contributors
+
+This independent community project adapts OpenUI Lang to HarmonyOS ArkUI.
+It is not an official OpenUI, Huawei, or AGenUI product.
+
+Original adapter, controller, renderer integration, demo, and tooling:
+Apache License, Version 2.0 (see LICENSE).
+
+Bundled third-party OpenUI Lang parser and Zod runtime remain under the MIT
+license. Their copyright notices and license texts follow in
+THIRD_PARTY_NOTICES, which must accompany binary distributions.
+
+The separately resolved @agenui/agenui core retains its Apache-2.0 license;
+its native dependencies retain LGPL-2.1, MIT and other original notices.
+See third_party/agenui and docs/third-party-native.md.
+No Sofia application code is included.
