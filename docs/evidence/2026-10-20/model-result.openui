@@ -1,0 +1,4 @@
+root = Stack([status, facts, details])
+status = Status("已选择方案B · 演示结果 · 未下单", "success")
+facts = Facts([{label:"出发时间",value:"08:00"},{label:"到达时间",value:"08:49"},{label:"行程时长",value:"49分钟"},{label:"席别",value:"二等座"},{label:"票价",value:"¥51.5"}], "所选方案B")
+details = Details("演示说明", "方案A：07:48到08:43，55分钟，二等座，¥53；方案B：08:00到08:49，49分钟，二等座，¥51.5。以上数据仅为演示，不能称为实时查询或实际订票。当前界面仅展示用户选择的方案，未执行下单。")

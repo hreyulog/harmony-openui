@@ -1,0 +1,862 @@
+{
+  "format": "harmony-openui/native-acceptance@1",
+  "date": "2026-10-20",
+  "build": "final-r9",
+  "device": {
+    "model": "HUAWEI nova 15 Pro",
+    "api": 26,
+    "orientation": "portrait",
+    "screenshotPixels": [
+      1320,
+      2856
+    ]
+  },
+  "sourceFiles": [
+    {
+      "path": "AppScope/app.json5",
+      "sha256": "ea3c263b81d296c794673f61149aeae6e5aa9b08b814928fca47dd908b6b3b64",
+      "bytes": 217
+    },
+    {
+      "path": "AppScope/resources/base/element/string.json",
+      "sha256": "b59ee71be27fe21b715fa30ad3b6b97f85edd313abc2378040c3c05e9e0816f0",
+      "bytes": 76
+    },
+    {
+      "path": "AppScope/resources/base/media/app_icon.svg",
+      "sha256": "6c6800fd280331de4a76a6fe986347d4be69fc450d9da30db10cc8e2e1b95b58",
+      "bytes": 518
+    },
+    {
+      "path": "build-profile.json5",
+      "sha256": "fb7869eaa03219e04cbb4c63c76ccb7dcc322a25f3cedf4ac4702aab8e7c19f4",
+      "bytes": 762
+    },
+    {
+      "path": "demo/build-profile.json5",
+      "sha256": "ab6a89261d46045602e8387d49dd8a9bbca8390247c95116eb5ba84cdac7601b",
+      "bytes": 88
+    },
+    {
+      "path": "demo/hvigorfile.ts",
+      "sha256": "2175281ab7e8b7bd70a7666c761f9828300340ec0b1280ae1f39683a0e173416",
+      "bytes": 147
+    },
+    {
+      "path": "demo/oh-package.json5",
+      "sha256": "99193004568a6a7b5adc85b6c00c1467ee4636e76451935922dcc4e49b8ed135",
+      "bytes": 233
+    },
+    {
+      "path": "demo/src/main/ets/entryability/EntryAbility.ets",
+      "sha256": "1b2c81356ea39e623e7a42a199460f63d04b0d051d1d99df610a4577019a2c5c",
+      "bytes": 271
+    },
+    {
+      "path": "demo/src/main/ets/model/DemoModel.ets",
+      "sha256": "c970a0da849b163d4b280c6515b156b1ed9ecc4af63dbad60cbf81c5a48029c4",
+      "bytes": 3072
+    },
+    {
+      "path": "demo/src/main/ets/pages/Index.ets",
+      "sha256": "ff57ad812ce81e0c5e1f518c0b9bc9d470d43dcee36a7e7f73dd439df7f0de3a",
+      "bytes": 12155
+    },
+    {
+      "path": "demo/src/main/ets/pages/Isolation.ets",
+      "sha256": "f464ae0e0f27ff06dd650652b3299eefe3267d07d897453a497116c4e8a1f330",
+      "bytes": 5383
+    },
+    {
+      "path": "demo/src/main/module.json5",
+      "sha256": "52c0d8ef05b0bf6c734c8359f647e7df027db9e02c80ffb5d358bad907affe0b",
+      "bytes": 1019
+    },
+    {
+      "path": "demo/src/main/resources/base/element/color.json",
+      "sha256": "21e9459b6e0ea4d443cb585571b3d43087a1f9938d1c726449fe2954c9156af2",
+      "bytes": 83
+    },
+    {
+      "path": "demo/src/main/resources/base/element/string.json",
+      "sha256": "350854b9711153de19c0074eddca10194d9adfdc38702414d6eca762fabcf764",
+      "bytes": 248
+    },
+    {
+      "path": "demo/src/main/resources/base/profile/main_pages.json",
+      "sha256": "b26b2ee6c15a770aa67755090e241ffdf5e8417285cd49574fc57776713cc18f",
+      "bytes": 48
+    },
+    {
+      "path": "hvigor/hvigor-config.json5",
+      "sha256": "151b4cf50d0aaa8ef9d7e71f1dc92988d6da0e5c7188f51f4d7891561eccf413",
+      "bytes": 94
+    },
+    {
+      "path": "hvigorfile.ts",
+      "sha256": "84ab53d0270f13e44c9f0916d5073c9d0c09c46ca25bdc9ad6ba00c053721918",
+      "bytes": 147
+    },
+    {
+      "path": "oh-package.json5",
+      "sha256": "2beccd8d9791c8b78c6dfdc60fe54289e4eb8d188c2123aed6dcecd717eccbd5",
+      "bytes": 255
+    },
+    {
+      "path": "openui/Index.ets",
+      "sha256": "9aba9f1560745769cc11e86e4f7cf4eda4bed63ff3aeb58b350f907706ce1483",
+      "bytes": 714
+    },
+    {
+      "path": "openui/build-profile.json5",
+      "sha256": "9b6412aef506e58f1c3b8d43e1dde378c7b3a255e9a3ab8b3b302c119627f8d9",
+      "bytes": 550
+    },
+    {
+      "path": "openui/hvigorfile.ts",
+      "sha256": "bcb105f0bb161d1cbf571aceb909ce7d5907c573b08f0d05fa4ca1d53934ca2e",
+      "bytes": 147
+    },
+    {
+      "path": "openui/oh-package.json5",
+      "sha256": "1cb97d789d0b447593bf0824047851784425c7537b48275c2f8c8fd3d7e61bae",
+      "bytes": 358
+    },
+    {
+      "path": "openui/src/main/ets/core/OpenUiCatalog.ets",
+      "sha256": "621b2d95442160855105369a4b6c7644604bb66227e536e916219a59a4d4366b",
+      "bytes": 5858
+    },
+    {
+      "path": "openui/src/main/ets/core/OpenUiController.ets",
+      "sha256": "18ab96eeaadb0c0dcfa0ab0d903bbfe2cd956d23c45cc8efb2b841f8a770f616",
+      "bytes": 14328
+    },
+    {
+      "path": "openui/src/main/ets/core/OpenUiTypes.ets",
+      "sha256": "bab9d53004cb882179cd5dcfd58e6f22b0b3cd703607fd6358b70c940e80a892",
+      "bytes": 1823
+    },
+    {
+      "path": "openui/src/main/ets/lang/OpenUiLanguage.ets",
+      "sha256": "a34590ce9b789369a4944355e0cb57c6737c6fa11558646079c9a859fc451e75",
+      "bytes": 2617
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiIntrinsicLayout.ets",
+      "sha256": "c2201facfc35b063c94412fe2183f82614a2586273836e0c9e995f541de3f432",
+      "bytes": 7694
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiNative.ets",
+      "sha256": "44f556b900149c6293acc21802661276e6fff9bdf0aca9b1a4100e4909c62ad6",
+      "bytes": 9538
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiNativeIds.ets",
+      "sha256": "3209205447773b1d81cb8d17422429c0a5e1b3fb7239309cf3a59bae1dc790b6",
+      "bytes": 2224
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiProjection.ets",
+      "sha256": "236f9cbd863778448a0addd1781001b3a2f5dc5430bab47b301bda4765c42417",
+      "bytes": 7164
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiRenderDiagnostics.ets",
+      "sha256": "0647d1dbbef58f211d2daae5b917440961dbc9f3021934c158846931aef75b45",
+      "bytes": 327
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiTheme.ets",
+      "sha256": "b7372fb7e90029630b8220f9294cb0115aae3023802c5dff2e342425a2dae84c",
+      "bytes": 1726
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiView.ets",
+      "sha256": "490fbee6d3e74e04a30361dfceb4aba654029b4c81fe502ff7b04255d78e7600",
+      "bytes": 7922
+    },
+    {
+      "path": "openui/src/main/module.json5",
+      "sha256": "3bc499b55d6254369e9e0c4f10abb942851b05329d13ded0e5d061403bb448e8",
+      "bytes": 110
+    },
+    {
+      "path": "package.json",
+      "sha256": "5147911faa6670ba2836731b76cff1ceca784975af800b5f484724d1ee2c66c4",
+      "bytes": 403
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "a2acb2f4885ba2c04daccc1e61edb80f6c52b5b60ecf3540691f93623a0dbc38",
+      "bytes": 9475
+    },
+    {
+      "path": "schemas/native-ir.schema.json",
+      "sha256": "53c8d4096a8a4d42dfebf1090282f428b72ac8fba2ff03064a2bfbf8e2969758",
+      "bytes": 13618
+    },
+    {
+      "path": "schemas/openui-lang-v0.1.json",
+      "sha256": "dafb98510b10faabfa642777efc99c13b9305c588e717a2fcab27cbf53e38cc9",
+      "bytes": 8619
+    },
+    {
+      "path": "tools/build-lang.mjs",
+      "sha256": "497213b30172add8d35c15f5d69313fd13e239979fcce211f033d602c5f43392",
+      "bytes": 2233
+    },
+    {
+      "path": "tools/build.py",
+      "sha256": "4814bb0801f33b70c79367c15e5322bec9cc0f6dec47899f6717a62334d53832",
+      "bytes": 14805
+    },
+    {
+      "path": "tools/build_common.py",
+      "sha256": "c5dd6194bc1eb29c339e502f89e308391e1460e74d316838b9515445a36f751d",
+      "bytes": 3824
+    },
+    {
+      "path": "tools/dependency-lock.json",
+      "sha256": "d815d96bf565e3e7b1a7b33ab8efeeb9cdb842b6cf34f5531a4e6c6f62530b29",
+      "bytes": 634
+    },
+    {
+      "path": "tools/lang/library.mjs",
+      "sha256": "422cf58194e850a87e816d913e21bcc4076a6fb4d976e15f6e79cae81a3c9cf0",
+      "bytes": 3993
+    },
+    {
+      "path": "tools/lang/runtime-entry.mjs",
+      "sha256": "9f03604e56fc25e14c109d34068a77db38eb4f55596eb70eec8aacd6d9f3f301",
+      "bytes": 4842
+    },
+    {
+      "path": "tools/prepare-deps.py",
+      "sha256": "59d96f8de49ce7b1b6cb991d7b13952d5d064b838c241438ae2472dc0fe34ff0",
+      "bytes": 848
+    },
+    {
+      "path": "tools/signing-config.example.json",
+      "sha256": "7d95a231426295f9b281a75a79aec308f629d5ea22ba1bc2085393987e94fe37",
+      "bytes": 503
+    }
+  ],
+  "hostTests": {
+    "node": 52,
+    "python": 2
+  },
+  "signing": {
+    "officialVerifierExitCode": 0,
+    "embeddedProfileExactMatch": true,
+    "diagnosticsEnabled": false
+  },
+  "model": {
+    "provider": "MiniMax",
+    "model": "MiniMax-M3",
+    "protocol": "Anthropic-compatible HTTPS",
+    "deviceRequests": 2,
+    "providerStreaming": false,
+    "parserChunkReplay": true,
+    "data": "fictional demonstration"
+  },
+  "choiceToResult": {
+    "surfaceId": "main",
+    "choiceRevision": 7,
+    "resultRevision": 15,
+    "action": {
+      "surfaceId": "main",
+      "sourceComponentId": "n_planB",
+      "name": "choose",
+      "context": {
+        "value": "b"
+      },
+      "revision": 7
+    },
+    "readOnlyResult": true,
+    "facts": [
+      {
+        "label": "出发时间",
+        "value": "08:00"
+      },
+      {
+        "label": "到达时间",
+        "value": "08:49"
+      },
+      {
+        "label": "行程时长",
+        "value": "49分钟"
+      },
+      {
+        "label": "席别",
+        "value": "二等座"
+      },
+      {
+        "label": "票价",
+        "value": "¥51.5"
+      }
+    ],
+    "visibleFacts": true
+  },
+  "responsiveLayout": {
+    "optionWidthPixels": [
+      1082,
+      728,
+      1082
+    ],
+    "optionHeightPixels": [
+      290,
+      364,
+      290
+    ],
+    "rightCardWidthUnchanged": true
+  },
+  "isolation": {
+    "equalSurfaceIds": true,
+    "equalSourceIds": true,
+    "updatedA": true,
+    "removedA": true,
+    "finalLeftCount": 1,
+    "finalRightCount": 2,
+    "rightStillRendered": true
+  },
+  "nativeBounds": {
+    "r9-native-cold": {
+      "nativeLeaves": 3,
+      "allWithinHost": true,
+      "checks": [
+        {
+          "bounds": [
+            119,
+            1023,
+            1201,
+            1313
+          ],
+          "host": [
+            119,
+            897,
+            1201,
+            1840
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1355,
+            1201,
+            1645
+          ],
+          "host": [
+            119,
+            897,
+            1201,
+            1840
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1686,
+            1201,
+            1840
+          ],
+          "host": [
+            119,
+            897,
+            1201,
+            1840
+          ],
+          "withinHost": true
+        }
+      ]
+    },
+    "r9-model-choice": {
+      "nativeLeaves": 2,
+      "allWithinHost": true,
+      "checks": [
+        {
+          "bounds": [
+            119,
+            1023,
+            1201,
+            1387
+          ],
+          "host": [
+            119,
+            897,
+            1201,
+            1793
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1429,
+            1201,
+            1793
+          ],
+          "host": [
+            119,
+            897,
+            1201,
+            1793
+          ],
+          "withinHost": true
+        }
+      ]
+    },
+    "r9-model-result": {
+      "nativeLeaves": 3,
+      "allWithinHost": true,
+      "checks": [
+        {
+          "bounds": [
+            119,
+            897,
+            1201,
+            1055
+          ],
+          "host": [
+            119,
+            897,
+            1201,
+            2105
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1097,
+            1201,
+            1909
+          ],
+          "host": [
+            119,
+            897,
+            1201,
+            2105
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1951,
+            1201,
+            2105
+          ],
+          "host": [
+            119,
+            897,
+            1201,
+            2105
+          ],
+          "withinHost": true
+        }
+      ]
+    },
+    "r9-details-expanded": {
+      "nativeLeaves": 3,
+      "allWithinHost": true,
+      "checks": [
+        {
+          "bounds": [
+            119,
+            897,
+            1201,
+            1055
+          ],
+          "host": [
+            119,
+            897,
+            1201,
+            2504
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1097,
+            1201,
+            1909
+          ],
+          "host": [
+            119,
+            897,
+            1201,
+            2504
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1952,
+            1201,
+            2504
+          ],
+          "host": [
+            119,
+            897,
+            1201,
+            2504
+          ],
+          "withinHost": true
+        }
+      ]
+    },
+    "r9-isolation-initial": {
+      "nativeLeaves": 4,
+      "allWithinHost": true,
+      "checks": [
+        {
+          "bounds": [
+            119,
+            1379,
+            1201,
+            1669
+          ],
+          "host": [
+            119,
+            1253,
+            1201,
+            1866
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1712,
+            1201,
+            1866
+          ],
+          "host": [
+            119,
+            1253,
+            1201,
+            1866
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            2139,
+            1201,
+            2429
+          ],
+          "host": [
+            119,
+            2013,
+            1201,
+            2626
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            2472,
+            1201,
+            2626
+          ],
+          "host": [
+            119,
+            2013,
+            1201,
+            2626
+          ],
+          "withinHost": true
+        }
+      ]
+    },
+    "r9-isolation-narrow": {
+      "nativeLeaves": 4,
+      "allWithinHost": true,
+      "checks": [
+        {
+          "bounds": [
+            119,
+            1379,
+            847,
+            1743
+          ],
+          "host": [
+            119,
+            1253,
+            847,
+            1939
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1785,
+            847,
+            1939
+          ],
+          "host": [
+            119,
+            1253,
+            847,
+            1939
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            2212,
+            1201,
+            2502
+          ],
+          "host": [
+            119,
+            2086,
+            1201,
+            2699
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            2545,
+            1201,
+            2699
+          ],
+          "host": [
+            119,
+            2086,
+            1201,
+            2699
+          ],
+          "withinHost": true
+        }
+      ]
+    },
+    "r9-isolation-narrow-selected": {
+      "nativeLeaves": 4,
+      "allWithinHost": true,
+      "checks": [
+        {
+          "bounds": [
+            119,
+            1379,
+            847,
+            1743
+          ],
+          "host": [
+            119,
+            1253,
+            847,
+            1939
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1785,
+            847,
+            1939
+          ],
+          "host": [
+            119,
+            1253,
+            847,
+            1939
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            2212,
+            1201,
+            2502
+          ],
+          "host": [
+            119,
+            2086,
+            1201,
+            2699
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            2545,
+            1201,
+            2699
+          ],
+          "host": [
+            119,
+            2086,
+            1201,
+            2699
+          ],
+          "withinHost": true
+        }
+      ]
+    },
+    "r9-isolation-restored": {
+      "nativeLeaves": 4,
+      "allWithinHost": true,
+      "checks": [
+        {
+          "bounds": [
+            119,
+            1379,
+            1201,
+            1669
+          ],
+          "host": [
+            119,
+            1253,
+            1201,
+            1866
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1712,
+            1201,
+            1866
+          ],
+          "host": [
+            119,
+            1253,
+            1201,
+            1866
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            2139,
+            1201,
+            2429
+          ],
+          "host": [
+            119,
+            2013,
+            1201,
+            2626
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            2472,
+            1201,
+            2626
+          ],
+          "host": [
+            119,
+            2013,
+            1201,
+            2626
+          ],
+          "withinHost": true
+        }
+      ]
+    },
+    "r9-isolation-removed": {
+      "nativeLeaves": 2,
+      "allWithinHost": true,
+      "checks": [
+        {
+          "bounds": [
+            119,
+            1379,
+            1201,
+            1669
+          ],
+          "host": [
+            119,
+            1253,
+            1201,
+            1866
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1712,
+            1201,
+            1866
+          ],
+          "host": [
+            119,
+            1253,
+            1201,
+            1866
+          ],
+          "withinHost": true
+        }
+      ]
+    }
+  },
+  "screenshots": {
+    "model-choice": {
+      "file": "../../images/nova-20261020/model-choice.jpeg",
+      "sha256": "8df6e83471b66839efa2fc3c0402e74fa6f8a1f8a5ef459184486d6a9b98f05a",
+      "bytes": 177320
+    },
+    "model-result": {
+      "file": "../../images/nova-20261020/model-result.jpeg",
+      "sha256": "34d77fd3ba240ddb66cda9280bdfad1b665a4fdac4254ed4f87012506d890e03",
+      "bytes": 167124
+    },
+    "model-result-dark": {
+      "file": "../../images/nova-20261020/model-result-dark.jpeg",
+      "sha256": "00aadf964249cf4beb1520530ca7cd00c9cef0fe297e8324dfde4a38a9075ac0",
+      "bytes": 168203
+    },
+    "isolation-narrow": {
+      "file": "../../images/nova-20261020/isolation-narrow.jpeg",
+      "sha256": "ad590dece02eae08510b92416f95eed6bd36874c57829922b378f2435699313d",
+      "bytes": 195075
+    }
+  },
+  "artifacts": [
+    {
+      "target": "har",
+      "artifact": "artifacts\\harmony-openui-0.1.0.har",
+      "sha256": "7615c2ee1744a006f8d9876d0a73628ac4ad453d8eb233b0f2da0f7521f7b78a",
+      "bytes": 601589,
+      "distributionNoticesComplete": true
+    },
+    {
+      "target": "demo",
+      "artifact": "artifacts\\harmony-openui-demo-0.1.0-signed.hap",
+      "sha256": "e69dac845c246f48262aa8e5e051a80b5d645dfad4a95ca6f006971f3b10f329",
+      "bytes": 5985401,
+      "distributionNoticesComplete": true,
+      "publicNativeLibrariesVerified": 4,
+      "signed": true
+    }
+  ],
+  "notEstablished": [
+    "other device/API visual acceptance",
+    "full upstream language conformance",
+    "all nested layout patterns",
+    "Sofia integration",
+    "real ticket availability or purchase"
+  ]
+}

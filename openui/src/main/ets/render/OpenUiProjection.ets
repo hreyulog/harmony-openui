@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { OpenUiComponent, OpenUiFact, OpenUiSurface, OpenUiText } from '../core/OpenUiTypes';
 import { OpenUiTheme } from './OpenUiTheme';
+import { OpenUiNativeIds } from './OpenUiNativeIds';
 
 interface RenderNode extends OpenUiComponent { selectable?: boolean; selected?: boolean; }
 interface NativeCreate { version: string; createSurface: NativeSurface; }
@@ -89,20 +90,27 @@ export class OpenUiProjection {
       }
       output.push(node);
     }
-    if (!output.some((node: RenderNode): boolean => node.id === 'root')) {
-      const referenced: Set<string> = new Set<string>();
-      for (const node of output) { for (const id of node.children ?? (node.child ? [node.child] : [])) { referenced.add(id); } }
-      const top = output.filter((node: RenderNode): boolean => !referenced.has(node.id)).map((node: RenderNode): string => node.id);
-      const rootStyles: Record<string, string> = {};
-      rootStyles['gap'] = (theme.dimensions.spacing * 2).toString() + 'px';
-      const rootNode: RenderNode = { id: 'root', component: 'Column', children: top, styles: rootStyles };
-      output.push(rootNode);
-    }
     return output;
   }
-  static messages(surface: OpenUiSurface, theme: OpenUiTheme): string {
+  static messages(surface: OpenUiSurface, theme: OpenUiTheme, ids: OpenUiNativeIds, contentWidth: number): string {
+    const nodes = OpenUiProjection.components(surface, theme);
+    const referenced: Set<string> = new Set<string>();
+    for (const node of nodes) { for (const child of node.children ?? (node.child ? [node.child] : [])) { referenced.add(child); } }
+    const top = nodes.some((node: RenderNode): boolean => node.id === 'root') ? ['root'] :
+      nodes.filter((node: RenderNode): boolean => !referenced.has(node.id)).map((node: RenderNode): string => node.id);
+    for (const node of nodes) {
+      node.id = ids.nativeId(node.id);
+      if (node.child) { node.child = ids.nativeId(node.child); }
+      if (node.children) { node.children = node.children.map((child: string): string => ids.nativeId(child)); }
+    }
+    // The native adapter requires root. Keep it basic and namespace the entire
+    // source tree, including a custom source component whose own ID is root.
+    const rootStyles: Record<string, string> = {};
+    rootStyles['width'] = (contentWidth * 2).toString() + 'px'; rootStyles['gap'] = (theme.dimensions.spacing * 2).toString() + 'px';
+    const root: RenderNode = { id: 'root', component: 'Column', children: top.map((id: string): string => ids.nativeId(id)), styles: rootStyles };
+    nodes.unshift(root);
     const create: NativeCreate = { version: 'v0.9', createSurface: { surfaceId: surface.id, catalogId: surface.catalogId } };
-    const update: NativeUpdate = { version: 'v0.9', updateComponents: { surfaceId: surface.id, components: OpenUiProjection.components(surface, theme) } };
+    const update: NativeUpdate = { version: 'v0.9', updateComponents: { surfaceId: surface.id, components: nodes } };
     return JSON.stringify(create) + '\n' + JSON.stringify(update);
   }
 }

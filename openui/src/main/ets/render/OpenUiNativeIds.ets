@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: Apache-2.0
+import { OpenUiComponent } from '../core/OpenUiTypes';
+
+/** AGenUI 1.6's hybrid view registry is global and keyed only by node ID. */
+export class OpenUiNativeIds {
+  private static sequence: number = 0;
+  private forward: Map<string, string> = new Map<string, string>();
+  private reverse: Map<string, string> = new Map<string, string>();
+  private semantic: Set<string> = new Set<string>();
+  constructor(components: OpenUiComponent[]) {
+    const prefix = 'openui_m' + (++OpenUiNativeIds.sequence).toString(36) + '_';
+    for (let index = 0; index < components.length; index++) {
+      const source = components[index].id;
+      const native = prefix + index.toString(36);
+      this.forward.set(source, native); this.reverse.set(native, source);
+    }
+    const lookup: Map<string, OpenUiComponent> = new Map<string, OpenUiComponent>();
+    const referenced: Set<string> = new Set<string>();
+    for (const component of components) {
+      lookup.set(component.id, component);
+      for (const id of component.children ?? (component.child ? [component.child] : [])) { referenced.add(id); }
+    }
+    const pending = lookup.has('root') ? ['root'] : components.filter((component: OpenUiComponent): boolean => !referenced.has(component.id))
+      .map((component: OpenUiComponent): string => component.id);
+    const visited: Set<string> = new Set<string>();
+    while (pending.length) {
+      const source = pending.pop()!;
+      if (visited.has(source)) { continue; }
+      visited.add(source);
+      const component = lookup.get(source);
+      if (!component) { continue; }
+      if (component.component?.startsWith('OpenUi')) { this.semantic.add(this.nativeId(source)); }
+      for (const child of component.children ?? (component.child ? [component.child] : [])) { pending.push(child); }
+    }
+  }
+  nativeId(source: string): string {
+    const native = this.forward.get(source);
+    if (!native) { throw new Error('OPENUI_NATIVE_ID'); }
+    return native;
+  }
+  sourceId(native: string): string | undefined { return this.reverse.get(native); }
+  nativeIds(): string[] { return Array.from(this.reverse.keys()); }
+  semanticIds(): string[] { return Array.from(this.semantic); }
+}

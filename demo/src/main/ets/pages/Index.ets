@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { common } from '@kit.AbilityKit';
 import fs from '@ohos.file.fs';
+import router from '@ohos.router';
 import { OpenUiController, OpenUiActionReceipt, OpenUiRenderEvent, OpenUiLanguageStream,
   OpenUiView, OpenUiThemes, OpenUiTheme } from '@hreyulog/harmony-openui';
 import { DemoModel, DemoModelConfig } from '../model/DemoModel';
@@ -87,6 +88,7 @@ struct Index {
     const epoch = ++this.generation;
     this.busy = true; this.useModel = true; this.lastAction = ''; this.status = '模型正在生成 OpenUI Lang…';
     this.controller.setReadOnly('main', true);
+    this.persistEvidence();
     try {
       const text = await DemoModel.generate(this.config(), OpenUiLanguageStream.systemPrompt(),
         FACTS + '请生成简洁的两方案原生选择界面，使用两个Option和@Choose("a")/@Choose("b")，明确标注演示资料。');
@@ -107,6 +109,7 @@ struct Index {
     const epoch = ++this.generation;
     this.busy = true; this.controller.setSelected('main', event.sourceComponentId); this.controller.setReadOnly('main', true);
     this.status = this.useModel ? '已收到选择，模型正在生成结果…' : '已收到选择，宿主正在更新同一界面…';
+    this.persistEvidence();
     try {
       const result = this.useModel ? await DemoModel.generate(this.config(), OpenUiLanguageStream.systemPrompt(),
         FACTS + '用户选择了方案' + (value === 'a' ? 'A' : 'B') + '。请生成只读结果界面，用Status/Facts/Details呈现所选方案，明确这是演示结果、未下单；不要再加入Option或Button。') :
@@ -143,6 +146,9 @@ struct Index {
           OpenUiView({ controller: this.controller, surfaceId: 'main', theme: this.theme })
           Text('示例中的行程与价格仅用于验证界面，不代表实时服务。').fontSize(12).lineHeight(18)
             .fontColor(this.theme.palette.secondary).width('100%')
+          Button('多卡片隔离').id('demo-isolation').enabled(!this.busy).fontSize(13)
+            .backgroundColor(this.theme.palette.accentContainer).fontColor(this.theme.palette.accent)
+            .onClick((): void => { void router.pushUrl({ url: 'pages/Isolation' }); })
           Button(this.showConfig ? '收起模型配置' : '模型配置与源码').id('demo-config').fontSize(13)
             .backgroundColor(this.theme.palette.accentContainer).fontColor(this.theme.palette.accent)
             .onClick((): void => { this.showConfig = !this.showConfig; })
@@ -163,7 +169,7 @@ struct Index {
             })
           }
         }.width('100%').padding(20).alignItems(HorizontalAlign.Start)
-      }.layoutWeight(1).width('100%').scrollBar(BarState.Auto)
+      }.layoutWeight(1).width('100%').align(Alignment.TopStart).scrollBar(BarState.Auto)
     }.width('100%').height('100%').backgroundColor(this.theme.palette.canvas)
   }
 }

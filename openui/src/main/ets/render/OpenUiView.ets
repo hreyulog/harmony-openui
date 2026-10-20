@@ -3,11 +3,12 @@ import { common } from '@kit.AbilityKit';
 import { AGenUIContainer, ISurfaceManagerListener, Surface, SurfaceManager } from '@agenui/agenui';
 import { OpenUiController } from '../core/OpenUiController';
 import { OpenUiNativeSession } from './OpenUiNative';
+import { OpenUiNativeIds } from './OpenUiNativeIds';
 import { OpenUiProjection } from './OpenUiProjection';
 import { OpenUiTheme, OpenUiThemes } from './OpenUiTheme';
 
 interface ActionHeader { action?: ActionIdentity; }
-interface ActionIdentity { surfaceId?: string; }
+interface ActionIdentity { surfaceId?: string; sourceComponentId?: string; }
 
 class OpenUiSurfaceListener implements ISurfaceManagerListener {
   private created: (surface: Surface) => void;
@@ -32,6 +33,9 @@ export struct OpenUiView {
   @State private errorLabel: string = '';
   private observerId: number = -1;
   private epoch: number = 0;
+  private contentWidth: number = 0;
+  private outerWidth: number = 0;
+  private laidOutEpoch: number = 0;
   private eventSerial: number = 0;
   private lifetime: string = Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 10);
   private fingerprint: string = '';
@@ -46,11 +50,23 @@ export struct OpenUiView {
   }
   aboutToDisappear(): void {
     this.controller.unsubscribe(this.observerId); this.observerId = -1;
+    this.contentWidth = 0; this.outerWidth = 0;
     this.fingerprint = ''; this.release();
   }
-  private configurationChanged(): void { if (this.observerId >= 0) { this.refresh(); } }
+  private configurationChanged(): void {
+    if (this.observerId >= 0) { this.viewportChanged({ width: this.outerWidth, height: 0 }); this.refresh(); }
+  }
+  private viewportChanged(size: SizeOptions): void {
+    const outer = size.width as number;
+    if (!Number.isFinite(outer) || outer <= 0) { return; }
+    this.outerWidth = outer;
+    const width = Math.max(0, outer - 2 * this.theme.dimensions.inset);
+    if (width <= 0 || Math.abs(width - this.contentWidth) <= 0.5) { return; }
+    this.contentWidth = width;
+    if (this.observerId >= 0) { this.refresh(); }
+  }
   private release(): void {
-    this.epoch++; this.visibleEpoch = 0;
+    this.epoch++; this.visibleEpoch = 0; this.laidOutEpoch = 0;
     this.nativeSession?.dispose(); this.nativeSession = undefined;
     this.manager?.destroy(); this.manager = undefined;
   }
@@ -59,32 +75,40 @@ export struct OpenUiView {
     // Render-status notifications are deliberately excluded, preventing a
     // layout -> status -> re-mount -> layout notification cycle.
     const signature = JSON.stringify([surface?.revision, surface?.components, surface?.dataModelJson,
-      surface?.readOnly, surface?.selectedComponent, this.surfaceId, this.theme]);
+      surface?.readOnly, surface?.selectedComponent, this.surfaceId, this.theme, this.contentWidth]);
     if (signature === this.fingerprint) { return; }
     this.fingerprint = signature; this.release(); this.errorLabel = '';
     if (this.mountedSurface !== this.surfaceId) { this.details.clear(); this.mountedSurface = this.surfaceId; }
-    if (!surface || !OpenUiProjection.ready(surface)) { return; }
+    if (!surface || !OpenUiProjection.ready(surface) || this.contentWidth <= 0) { return; }
     const epoch = this.epoch; const revision = surface.revision; const id = surface.id;
     try {
       const manager = new SurfaceManager(getContext(this) as common.UIAbilityContext); this.manager = manager;
+      const ids = new OpenUiNativeIds(surface.components);
       this.nativeInstance = manager.getInstanceId();
-      this.nativeSession = new OpenUiNativeSession(manager, id, this.theme, surface.readOnly, surface.selectedComponent, this.details);
+      this.nativeSession = new OpenUiNativeSession(manager, id, this.theme, surface.readOnly, surface.selectedComponent, this.details, this.getUIContext(), ids,
+        (): void => { this.reportMeasured(epoch); }, this.contentWidth);
       manager.addListener(new OpenUiSurfaceListener((created: Surface): void => {
         if (this.epoch === epoch && created.surfaceId === id) { this.visibleEpoch = epoch; }
       }, (raw: string): void => {
         if (this.epoch !== epoch) { return; }
+        let projected: string;
         try {
-          if ((JSON.parse(raw) as ActionHeader).action?.surfaceId !== id) { return; }
+          const event = JSON.parse(raw) as ActionHeader;
+          if (event.action?.surfaceId !== id) { return; }
+          const source = ids.sourceId(event.action.sourceComponentId ?? '');
+          if (source === undefined) { return; }
+          event.action.sourceComponentId = source;
+          projected = JSON.stringify(event);
         } catch (_) { return; }
         const eventId = this.lifetime + ':' + epoch.toString() + ':' + (++this.eventSerial).toString();
-        this.controller.acceptAction(raw, revision, eventId);
+        this.controller.acceptAction(projected, revision, eventId);
       }, (code: number): void => {
         if (this.epoch !== epoch) { return; }
         this.errorLabel = 'This view is unavailable.';
         this.controller.reportRenderStatus(id, revision, 'error', 'Native renderer error ' + code.toString());
       }));
       this.controller.reportRenderStatus(id, revision, 'pending');
-      manager.beginTextStream(); manager.receiveTextChunk(OpenUiProjection.messages(surface, this.theme)); manager.endTextStream();
+      manager.beginTextStream(); manager.receiveTextChunk(OpenUiProjection.messages(surface, this.theme, ids, this.contentWidth)); manager.endTextStream();
     } catch (_) {
       this.errorLabel = 'This view is unavailable.';
       this.controller.reportRenderStatus(id, revision, 'error', 'Native renderer initialization failed');
@@ -94,9 +118,13 @@ export struct OpenUiView {
     if (epoch !== this.epoch || this.errorLabel) { return; }
     const width = size.width as number; const height = size.height as number;
     if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
-      const surface = this.controller.getSurface(this.surfaceId);
-      if (surface) { this.controller.reportRenderStatus(surface.id, surface.revision, 'rendered'); }
+      this.laidOutEpoch = epoch; this.reportMeasured(epoch);
     }
+  }
+  private reportMeasured(epoch: number): void {
+    if (epoch !== this.epoch || this.laidOutEpoch !== epoch || this.errorLabel || !this.nativeSession?.allMeasured()) { return; }
+    const surface = this.controller.getSurface(this.surfaceId);
+    if (surface) { this.controller.reportRenderStatus(surface.id, surface.revision, 'rendered'); }
   }
   build() {
     Column() {
@@ -113,5 +141,6 @@ export struct OpenUiView {
       }
     }.width('100%').padding(this.theme.dimensions.inset).backgroundColor(this.theme.palette.surface)
       .borderRadius(this.theme.dimensions.radius)
+      .onSizeChange((_before: SizeOptions, after: SizeOptions): void => { this.viewportChanged(after); })
   }
 }

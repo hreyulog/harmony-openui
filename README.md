@@ -6,6 +6,14 @@
 
 This is an independent community project, not an official OpenUI or Huawei SDK. v0.1 is a bounded native adapter, not a complete implementation of OpenUI Lang 1.0.
 
+已在 Nova 真机跑通 **MiniMax 实际生成 → 点击方案 → 同一张卡片显示模型结果**，并验证深浅主题、详情展开、同名卡片隔离及动态缩窄。下图均来自独立示例真机，资料为虚构演示，未接入 Sofia。
+
+| 模型生成选择 | 选择后的结果 | 深色结果 | 窄卡片与独立主题 |
+| --- | --- | --- | --- |
+| <img src="docs/images/nova-20261020/model-choice.jpeg" width="210" alt="Nova 模型生成的两个选项"> | <img src="docs/images/nova-20261020/model-result.jpeg" width="210" alt="点击方案 B 后的模型结果"> | <img src="docs/images/nova-20261020/model-result-dark.jpeg" width="210" alt="同一结果切换深色主题"> | <img src="docs/images/nova-20261020/isolation-narrow.jpeg" width="210" alt="缩窄 A 后重新换行，B 保持独立"> |
+
+[真机验证与产物哈希](docs/verification.md) · [实际模型输出与验证回执](docs/evidence/2026-10-20/acceptance.json)
+
 ```mermaid
 flowchart LR
   App[宿主应用 / Agent] -->|组件目录与真实数据| Model[任意模型]
@@ -92,6 +100,8 @@ python tools/build.py --target all --unsigned --work-dir D:/openui-build/demo-01
 示例的模型 HTTP 请求当前为完整响应，再按块送入解析器；SDK 本身支持真实网络流提供的任意文本分块。点击选择后，同一个 Surface 显示宿主处理后的结果。
 
 Host 测试检验解析、状态与回调契约；HAR / HAP 构建检验 ArkTS 和 API 兼容性。真机的实际显示、触摸、滚动和主题须另行验证，不能由 host 测试代替。
+
+2026-10-20 的最终候选包通过 52 项 Node、2 项 Python 检查，以及 Nova API 26 的上述真机交互；详细范围见验证记录。原生内容测量使用 API 20 的 `LayoutPolicy.fixAtIdealSize`，最低版本为 API 20。
 
 ## 当前限制
 

@@ -1,0 +1,4 @@
+root = Stack([notice, planA, planB])
+notice = Text("演示资料 · 非实时查询 · 不会实际订票", "caption")
+planA = Option("方案A", "07:48 → 08:43 · 55分钟 · 二等座", "¥53", @Choose("a"))
+planB = Option("方案B", "08:00 → 08:49 · 49分钟 · 二等座", "¥51.5", @Choose("b"))
