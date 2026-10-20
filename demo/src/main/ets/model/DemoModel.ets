@@ -2,6 +2,11 @@
 import { http } from '@kit.NetworkKit';
 
 export interface DemoModelConfig { endpoint: string; model: string; apiKey: string; protocol: string; }
+export interface DemoGenerationHooks {
+  onAttempt?: () => void;
+  onCandidate?: (source: string) => void;
+  isCurrent?: () => boolean;
+}
 interface DemoText { type: string; text?: string; }
 interface DemoChoice { message: DemoMessage; finish_reason?: string; }
 interface DemoMessage { content: string; }
@@ -11,6 +16,29 @@ interface DemoRequestBody { model: string; max_tokens: number; stream: boolean; 
 
 /** Example transport, deliberately outside the SDK. No credential persistence. */
 export class DemoModel {
+  /** A bounded demo-host repair round. The reusable SDK still has no transport. */
+  static async generateValidated(config: DemoModelConfig, system: string, prompt: string,
+    validate: (source: string) => void, hooks: DemoGenerationHooks = {}): Promise<string> {
+    let requestPrompt = prompt;
+    for (let attempt = 0; attempt < 2; ++attempt) {
+      if (hooks.isCurrent && !hooks.isCurrent()) { throw new Error('DEMO_MODEL_CANCELLED'); }
+      hooks.onAttempt?.();
+      // Transport/quota/truncation failures propagate; only invalid UI is repaired.
+      const source = await DemoModel.generate(config, system, requestPrompt);
+      if (hooks.isCurrent && !hooks.isCurrent()) { throw new Error('DEMO_MODEL_CANCELLED'); }
+      hooks.onCandidate?.(source);
+      try { validate(source); return source; }
+      catch (error) {
+        if (attempt === 1) { throw error as Error; }
+        requestPrompt = prompt + '\n\n上一份界面未通过组件协议校验，请修复后重新输出完整 OpenUI Lang，保留原任务和数据。' +
+          '\n校验错误：' + (error as Error).message.slice(0, 500) +
+          '\nCard 的顺序是 Card(children,variant,direction,gap,align,justify,wrap)，最多七个参数；' +
+          '默认推荐 Card(children) 或 Card(children,"card","column","s")。Stack 第二参数才是 direction。' +
+          '\n上一份源码：\n' + source.slice(0, 16000);
+      }
+    }
+    throw new Error('DEMO_MODEL_UI_INVALID');
+  }
   static async generate(config: DemoModelConfig, system: string, prompt: string): Promise<string> {
     if (!config.apiKey || !config.model || !config.endpoint.startsWith('https://')) {
       throw new Error('请配置 HTTPS 模型接口、模型名称和 API Key');

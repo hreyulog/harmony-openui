@@ -1,0 +1,14 @@
+root = Stack([header, filterCard, resetButton, results, emptyState], "column", "m")
+$kind = "all"
+$duration = "all"
+header = Card([CardHeader("周末去哪里", "以下均为虚构演示资料，图片为活动类型配图，非场馆实景。")], "clear")
+filterCard = Card([kindControl, durationControl], "card", "column", "s")
+kindControl = FormControl("活动类型", Select("kind", [SelectItem("all", "全部类型"), SelectItem("park", "公园步道"), SelectItem("museum", "展馆"), SelectItem("bookstore", "书店")], "请选择", null, $kind))
+durationControl = FormControl("活动时长", Select("duration", [SelectItem("all", "不限时长"), SelectItem("short", "约1小时"), SelectItem("long", "约2小时")], "请选择", null, $duration))
+resetButton = Button("重置筛选", @Reset($kind, $duration), "tertiary")
+results = Stack([($kind == "all" || $kind == "park") && ($duration == "all" || $duration == "short") ? lakeWalkCard : null, ($kind == "all" || $kind == "museum") && ($duration == "all" || $duration == "long") ? cityMuseumCard : null, ($kind == "all" || $kind == "bookstore") && ($duration == "all" || $duration == "short") ? cornerBooksCard : null, ($kind == "all" || $kind == "park") && ($duration == "all" || $duration == "long") ? forestTrailCard : null], "column", "m")
+emptyState = TextContent("没有匹配结果，请调整筛选", "default")
+lakeWalkCard = Card([Image("湖畔慢走活动类型配图", "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop"), CardHeader("湖畔慢走", "户外 · 约 1 小时 · 适合轻松散步"), Button("选择湖畔慢走", @ToAssistant("选择湖畔慢走", {itemId:"lake-walk"}))], "card", "column", "s")
+cityMuseumCard = Card([Image("城市展馆活动类型配图", "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=75&fit=crop"), CardHeader("城市展馆", "室内 · 约 2 小时 · 看一场主题展览"), Button("选择城市展馆", @ToAssistant("选择城市展馆", {itemId:"city-museum"}))], "card", "column", "s")
+cornerBooksCard = Card([Image("街角书店活动类型配图", "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop"), CardHeader("街角书店", "室内 · 约 1 小时 · 阅读与休息"), Button("选择街角书店", @ToAssistant("选择街角书店", {itemId:"corner-books"}))], "card", "column", "s")
+forestTrailCard = Card([Image("林间步道活动类型配图", "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"), CardHeader("林间步道", "户外 · 约 2 小时 · 适合步行探索"), Button("选择林间步道", @ToAssistant("选择林间步道", {itemId:"forest-trail"}))], "card", "column", "s")

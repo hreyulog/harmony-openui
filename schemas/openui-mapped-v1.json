@@ -28,6 +28,24 @@
     },
     "FormControl": {
       "$ref": "#/$defs/FormControl"
+    },
+    "Input": {
+      "$ref": "#/$defs/Input"
+    },
+    "TextArea": {
+      "$ref": "#/$defs/TextArea"
+    },
+    "CheckBoxGroup": {
+      "$ref": "#/$defs/CheckBoxGroup"
+    },
+    "CheckBoxItem": {
+      "$ref": "#/$defs/CheckBoxItem"
+    },
+    "Buttons": {
+      "$ref": "#/$defs/Buttons"
+    },
+    "Form": {
+      "$ref": "#/$defs/Form"
     }
   },
   "required": [
@@ -39,7 +57,13 @@
     "Button",
     "Select",
     "SelectItem",
-    "FormControl"
+    "FormControl",
+    "Input",
+    "TextArea",
+    "CheckBoxGroup",
+    "CheckBoxItem",
+    "Buttons",
+    "Form"
   ],
   "additionalProperties": false,
   "$defs": {
@@ -254,7 +278,7 @@
         "label"
       ],
       "additionalProperties": false,
-      "description": "An action button. Set and Reset update local state; ToAssistant and OpenUrl return intent to the host."
+      "description": "An action button. Set and Reset update local state; ToAssistant and OpenUrl return intent to the host. A primary ToAssistant inside a Form validates the live values before returning formState."
     },
     "ActionExpression": {
       "anyOf": [
@@ -379,7 +403,20 @@
           "type": "string"
         },
         "input": {
-          "$ref": "#/$defs/Select"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Input"
+            },
+            {
+              "$ref": "#/$defs/TextArea"
+            },
+            {
+              "$ref": "#/$defs/Select"
+            },
+            {
+              "$ref": "#/$defs/CheckBoxGroup"
+            }
+          ]
         },
         "hint": {
           "type": "string"
@@ -391,6 +428,180 @@
       ],
       "additionalProperties": false,
       "description": "A visible label, supported input and optional hint."
+    },
+    "Input": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "const": "text"
+        },
+        "rules": {
+          "type": "object",
+          "properties": {
+            "required": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "A native single-line text field. This bounded profile accepts type=text only. Bind value to a declared $state or leave it local to its named Form."
+    },
+    "TextArea": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "rows": {
+          "type": "number",
+          "const": 3
+        },
+        "rules": {
+          "type": "object",
+          "properties": {
+            "required": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "A native multiline text field. This bounded profile uses three native rows. Bind value to a declared $state or leave it local to its named Form."
+    },
+    "CheckBoxGroup": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CheckBoxItem"
+          }
+        },
+        "rules": {
+          "type": "object",
+          "properties": {
+            "required": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "value": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "items"
+      ],
+      "additionalProperties": false,
+      "description": "A set of independent choices stored as a record of item name to boolean. A required group needs at least one checked item. The official spelling has a capital B."
+    },
+    "CheckBoxItem": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "defaultChecked": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "label",
+        "description",
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "One named boolean choice. description is required by the upstream signature; use an empty string when unnecessary."
+    },
+    "Buttons": {
+      "type": "object",
+      "properties": {
+        "buttons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Button"
+          }
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "row",
+            "column"
+          ]
+        }
+      },
+      "required": [
+        "buttons"
+      ],
+      "additionalProperties": false,
+      "description": "A reusable group of action buttons. Official default direction is row; use column for long mobile captions."
+    },
+    "Form": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "buttons": {
+          "$ref": "#/$defs/Buttons"
+        },
+        "fields": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FormControl"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "buttons",
+        "fields"
+      ],
+      "additionalProperties": false,
+      "description": "A named form with explicit buttons and labelled fields. Form(name, Buttons([...]), fields). Do not nest forms or invent a Submit action; use @ToAssistant and the host receives the validated live formState."
     }
   }
 }

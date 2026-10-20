@@ -1,0 +1,440 @@
+{
+  "format": "harmony-openui/mapped-model-replay@1",
+  "createdAt": "2026-10-20T13:56:18.448Z",
+  "scope": "Model-free official-runtime replay of Nova model-generated source; this file is not additional device evidence.",
+  "inputActualModel": true,
+  "inputModelRequests": 2,
+  "sourceSha256": "a0e52da4f6c3a02175ca86a88d4fc660bfeadd6a9cad057ae8294a929e636c22",
+  "demoSourceSha256": "734c267138f97b8c73bbf24d1f6f2ad38bb8da7d5b5309315b3aeb8131dac726",
+  "fixtureSourceSha256": "edc40ba8f513582c2f161d20896b2e8eaf834143efe99e0e5800fd87de53bd15",
+  "fixtureIds": [
+    "lake-walk",
+    "city-museum",
+    "corner-books",
+    "forest-trail"
+  ],
+  "combinations": 12,
+  "passed": 12,
+  "emptyStateCorrect": 12,
+  "cardActionsChecked": 16,
+  "results": [
+    {
+      "kind": "all",
+      "duration": "all",
+      "pass": true,
+      "expectedItemIds": [
+        "lake-walk",
+        "city-museum",
+        "corner-books",
+        "forest-trail"
+      ],
+      "visibleItemIds": [
+        "lake-walk",
+        "city-museum",
+        "corner-books",
+        "forest-trail"
+      ],
+      "actions": [
+        {
+          "componentId": "n_root_4_3",
+          "name": "continue_conversation",
+          "itemId": "lake-walk"
+        },
+        {
+          "componentId": "n_root_5_3",
+          "name": "continue_conversation",
+          "itemId": "city-museum"
+        },
+        {
+          "componentId": "n_root_6_3",
+          "name": "continue_conversation",
+          "itemId": "corner-books"
+        },
+        {
+          "componentId": "n_root_7_3",
+          "name": "continue_conversation",
+          "itemId": "forest-trail"
+        }
+      ],
+      "emptyMessageVisible": false,
+      "emptyStateCorrect": true,
+      "reset": {
+        "state": {
+          "$kind": "all",
+          "$duration": "all"
+        },
+        "visibleItemIds": [
+          "lake-walk",
+          "city-museum",
+          "corner-books",
+          "forest-trail"
+        ],
+        "externalActions": 0
+      }
+    },
+    {
+      "kind": "all",
+      "duration": "short",
+      "pass": true,
+      "expectedItemIds": [
+        "lake-walk",
+        "corner-books"
+      ],
+      "visibleItemIds": [
+        "lake-walk",
+        "corner-books"
+      ],
+      "actions": [
+        {
+          "componentId": "n_root_4_3",
+          "name": "continue_conversation",
+          "itemId": "lake-walk"
+        },
+        {
+          "componentId": "n_root_6_3",
+          "name": "continue_conversation",
+          "itemId": "corner-books"
+        }
+      ],
+      "emptyMessageVisible": false,
+      "emptyStateCorrect": true,
+      "reset": {
+        "state": {
+          "$kind": "all",
+          "$duration": "all"
+        },
+        "visibleItemIds": [
+          "lake-walk",
+          "city-museum",
+          "corner-books",
+          "forest-trail"
+        ],
+        "externalActions": 0
+      }
+    },
+    {
+      "kind": "all",
+      "duration": "long",
+      "pass": true,
+      "expectedItemIds": [
+        "city-museum",
+        "forest-trail"
+      ],
+      "visibleItemIds": [
+        "city-museum",
+        "forest-trail"
+      ],
+      "actions": [
+        {
+          "componentId": "n_root_5_3",
+          "name": "continue_conversation",
+          "itemId": "city-museum"
+        },
+        {
+          "componentId": "n_root_7_3",
+          "name": "continue_conversation",
+          "itemId": "forest-trail"
+        }
+      ],
+      "emptyMessageVisible": false,
+      "emptyStateCorrect": true,
+      "reset": {
+        "state": {
+          "$kind": "all",
+          "$duration": "all"
+        },
+        "visibleItemIds": [
+          "lake-walk",
+          "city-museum",
+          "corner-books",
+          "forest-trail"
+        ],
+        "externalActions": 0
+      }
+    },
+    {
+      "kind": "park",
+      "duration": "all",
+      "pass": true,
+      "expectedItemIds": [
+        "lake-walk",
+        "forest-trail"
+      ],
+      "visibleItemIds": [
+        "lake-walk",
+        "forest-trail"
+      ],
+      "actions": [
+        {
+          "componentId": "n_root_4_3",
+          "name": "continue_conversation",
+          "itemId": "lake-walk"
+        },
+        {
+          "componentId": "n_root_7_3",
+          "name": "continue_conversation",
+          "itemId": "forest-trail"
+        }
+      ],
+      "emptyMessageVisible": false,
+      "emptyStateCorrect": true,
+      "reset": {
+        "state": {
+          "$kind": "all",
+          "$duration": "all"
+        },
+        "visibleItemIds": [
+          "lake-walk",
+          "city-museum",
+          "corner-books",
+          "forest-trail"
+        ],
+        "externalActions": 0
+      }
+    },
+    {
+      "kind": "park",
+      "duration": "short",
+      "pass": true,
+      "expectedItemIds": [
+        "lake-walk"
+      ],
+      "visibleItemIds": [
+        "lake-walk"
+      ],
+      "actions": [
+        {
+          "componentId": "n_root_4_3",
+          "name": "continue_conversation",
+          "itemId": "lake-walk"
+        }
+      ],
+      "emptyMessageVisible": false,
+      "emptyStateCorrect": true,
+      "reset": {
+        "state": {
+          "$kind": "all",
+          "$duration": "all"
+        },
+        "visibleItemIds": [
+          "lake-walk",
+          "city-museum",
+          "corner-books",
+          "forest-trail"
+        ],
+        "externalActions": 0
+      }
+    },
+    {
+      "kind": "park",
+      "duration": "long",
+      "pass": true,
+      "expectedItemIds": [
+        "forest-trail"
+      ],
+      "visibleItemIds": [
+        "forest-trail"
+      ],
+      "actions": [
+        {
+          "componentId": "n_root_7_3",
+          "name": "continue_conversation",
+          "itemId": "forest-trail"
+        }
+      ],
+      "emptyMessageVisible": false,
+      "emptyStateCorrect": true,
+      "reset": {
+        "state": {
+          "$kind": "all",
+          "$duration": "all"
+        },
+        "visibleItemIds": [
+          "lake-walk",
+          "city-museum",
+          "corner-books",
+          "forest-trail"
+        ],
+        "externalActions": 0
+      }
+    },
+    {
+      "kind": "museum",
+      "duration": "all",
+      "pass": true,
+      "expectedItemIds": [
+        "city-museum"
+      ],
+      "visibleItemIds": [
+        "city-museum"
+      ],
+      "actions": [
+        {
+          "componentId": "n_root_5_3",
+          "name": "continue_conversation",
+          "itemId": "city-museum"
+        }
+      ],
+      "emptyMessageVisible": false,
+      "emptyStateCorrect": true,
+      "reset": {
+        "state": {
+          "$kind": "all",
+          "$duration": "all"
+        },
+        "visibleItemIds": [
+          "lake-walk",
+          "city-museum",
+          "corner-books",
+          "forest-trail"
+        ],
+        "externalActions": 0
+      }
+    },
+    {
+      "kind": "museum",
+      "duration": "short",
+      "pass": true,
+      "expectedItemIds": [],
+      "visibleItemIds": [],
+      "actions": [],
+      "emptyMessageVisible": true,
+      "emptyStateCorrect": true,
+      "reset": {
+        "state": {
+          "$kind": "all",
+          "$duration": "all"
+        },
+        "visibleItemIds": [
+          "lake-walk",
+          "city-museum",
+          "corner-books",
+          "forest-trail"
+        ],
+        "externalActions": 0
+      }
+    },
+    {
+      "kind": "museum",
+      "duration": "long",
+      "pass": true,
+      "expectedItemIds": [
+        "city-museum"
+      ],
+      "visibleItemIds": [
+        "city-museum"
+      ],
+      "actions": [
+        {
+          "componentId": "n_root_5_3",
+          "name": "continue_conversation",
+          "itemId": "city-museum"
+        }
+      ],
+      "emptyMessageVisible": false,
+      "emptyStateCorrect": true,
+      "reset": {
+        "state": {
+          "$kind": "all",
+          "$duration": "all"
+        },
+        "visibleItemIds": [
+          "lake-walk",
+          "city-museum",
+          "corner-books",
+          "forest-trail"
+        ],
+        "externalActions": 0
+      }
+    },
+    {
+      "kind": "bookstore",
+      "duration": "all",
+      "pass": true,
+      "expectedItemIds": [
+        "corner-books"
+      ],
+      "visibleItemIds": [
+        "corner-books"
+      ],
+      "actions": [
+        {
+          "componentId": "n_root_6_3",
+          "name": "continue_conversation",
+          "itemId": "corner-books"
+        }
+      ],
+      "emptyMessageVisible": false,
+      "emptyStateCorrect": true,
+      "reset": {
+        "state": {
+          "$kind": "all",
+          "$duration": "all"
+        },
+        "visibleItemIds": [
+          "lake-walk",
+          "city-museum",
+          "corner-books",
+          "forest-trail"
+        ],
+        "externalActions": 0
+      }
+    },
+    {
+      "kind": "bookstore",
+      "duration": "short",
+      "pass": true,
+      "expectedItemIds": [
+        "corner-books"
+      ],
+      "visibleItemIds": [
+        "corner-books"
+      ],
+      "actions": [
+        {
+          "componentId": "n_root_6_3",
+          "name": "continue_conversation",
+          "itemId": "corner-books"
+        }
+      ],
+      "emptyMessageVisible": false,
+      "emptyStateCorrect": true,
+      "reset": {
+        "state": {
+          "$kind": "all",
+          "$duration": "all"
+        },
+        "visibleItemIds": [
+          "lake-walk",
+          "city-museum",
+          "corner-books",
+          "forest-trail"
+        ],
+        "externalActions": 0
+      }
+    },
+    {
+      "kind": "bookstore",
+      "duration": "long",
+      "pass": true,
+      "expectedItemIds": [],
+      "visibleItemIds": [],
+      "actions": [],
+      "emptyMessageVisible": true,
+      "emptyStateCorrect": true,
+      "reset": {
+        "state": {
+          "$kind": "all",
+          "$duration": "all"
+        },
+        "visibleItemIds": [
+          "lake-walk",
+          "city-museum",
+          "corner-books",
+          "forest-trail"
+        ],
+        "externalActions": 0
+      }
+    }
+  ]
+}

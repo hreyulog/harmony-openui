@@ -39,7 +39,7 @@ test('one mapping registry generates official parameter order, prompt and suppor
   const schema = JSON.parse(getMappedLibrarySchema()); const support = JSON.parse(getMappedSupportManifest());
   assert.deepEqual(Object.keys(schema.$defs.SelectItem.properties), ['value', 'label']);
   assert.deepEqual(Object.keys(schema.$defs.Image.properties), ['alt', 'src']);
-  assert.equal(support.components.length, 9);
+  assert.equal(support.components.length, 15);
   assert.ok(getMappedSystemPrompt().includes('$binding<string>'));
   assert.ok(getMappedSystemPrompt().includes('Do not use Each, Filter, Query or Mutation'));
   assert.ok(support.capabilities.includes('select-binding'));

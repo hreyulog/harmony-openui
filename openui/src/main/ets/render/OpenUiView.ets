@@ -38,6 +38,7 @@ export struct OpenUiView {
   private outerWidth: number = 0;
   private laidOutEpoch: number = 0;
   private eventSerial: number = 0;
+  private refreshTimer: number = -1;
   private lifetime: string = Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 10);
   private fingerprint: string = '';
   private mountedSurface: string = '';
@@ -67,9 +68,18 @@ export struct OpenUiView {
     if (this.observerId >= 0) { this.refresh(); }
   }
   private release(): void {
+    if (this.refreshTimer >= 0) { clearTimeout(this.refreshTimer); this.refreshTimer = -1; }
     this.epoch++; this.visibleEpoch = 0; this.laidOutEpoch = 0;
     this.nativeSession?.dispose(); this.nativeSession = undefined;
     this.manager?.destroy(); this.manager = undefined;
+  }
+  private refreshAfterNativeEdit(): void {
+    if (this.refreshTimer >= 0) { return; }
+    const epoch = this.epoch;
+    this.refreshTimer = setTimeout((): void => {
+      this.refreshTimer = -1;
+      if (this.observerId >= 0 && this.epoch === epoch) { this.refresh(); }
+    }, 0);
   }
   private refresh(): void {
     const surface = this.controller.getSurface(this.surfaceId);
@@ -80,6 +90,11 @@ export struct OpenUiView {
     // Field edits/errors share a document revision. Updating the current native
     // elements preserves keyboard focus, selection and internal scroll state.
     if (signature === this.fingerprint) { if (surface) { this.nativeSession?.syncFields(surface); } return; }
+    // A dynamic label/disabled prop, conditional child or host replacement may
+    // otherwise update or destroy the active native TextInput/Checkbox inside
+    // its own onChange callback. Coalesce to the latest controller snapshot;
+    // ordinary same-value field echoes above still require no native redraw.
+    if (this.nativeSession?.isEditingNativeControl()) { this.refreshAfterNativeEdit(); return; }
     if (surface && OpenUiProjection.ready(surface) && this.manager && this.nativeSession?.canPatch(surface, this.theme, this.contentWidth)) {
       // The mapped runtime has validated a complete atomic replacement. Keep
       // stable native identities and the container's scroll/focus lifetime.

@@ -63,6 +63,10 @@ test('state-owning adapter can authoritatively reset native fields without nativ
  const reset=c.getSurface('s');assert.equal(reset.components.find(n=>n.id==='filter').value,'all');
  assert.deepEqual(JSON.parse(reset.fieldValuesJson),{});assert.deepEqual(JSON.parse(reset.fieldErrorsJson),{});
  assert.equal(changes.length,1,'state-to-native synchronization never calls onFieldChange');
+ c.setFieldValue('s','filter','direct');
+ c.apply({kind:'components',surfaceId:'s',components:nodes('all'),replace:true,syncFieldValues:true});
+ assert.deepEqual(JSON.parse(c.getSurface('s').fieldValuesJson),{});
+ assert.equal(c.getSurface('s').components.find(n=>n.id==='filter').value,'all');
 });
 
 test('reusing an ID for a different native kind or field identity requests safe replacement',()=>{
@@ -124,4 +128,59 @@ test('direct Image native IR reuses the existing HTTPS and geometry limits witho
  }
  const basic=schema.items.oneOf.find(x=>x.properties.component.const==='Image');assert.equal(basic.additionalProperties,false);
  assert.deepEqual(plain(basic.required),['id','component','source','alt']);
+});
+
+test('every apply branch returns its own committed revision despite synchronous observer updates',()=>{
+ for(const kind of ['create','components','patch','data','delete']){
+  const {c}=setup();
+  if(kind!=='create')install(c);
+  c.apply({kind:'create',surfaceId:'other'});
+  const expected=JSON.parse(c.exportSnapshot()).sequence+1;
+  let armed=true;
+  c.subscribe(()=>{
+   if(!armed)return;armed=false;
+   if(kind==='delete')c.apply({kind:'create',surfaceId:'s'});
+   else c.apply({kind:'data',surfaceId:'s',valueJson:'{"observer":"newer"}'});
+  });
+  const change={kind,surfaceId:'s'};
+  if(kind==='components'){change.components=nodes();change.replace=true;}
+  if(kind==='patch')change.components=nodes();
+  if(kind==='data')change.valueJson='{"owner":"original"}';
+  const committed=c.apply(change);
+  assert.equal(committed,expected,kind+' returns its own revision rather than the latest observer revision');
+  assert.ok(c.getSurface('s').revision>committed,kind+' observer committed a newer revision');
+ }
+});
+
+test('authoritative mapped fields retain unresolved touched errors while edited and removed fields reconcile independently',()=>{
+ const {c}=setup();const tree=[{id:'root',component:'OpenUiForm',name:'plan',children:['name','note']},
+  {id:'name',component:'OpenUiInput',field:'name',label:'Name',value:'',required:true},
+  {id:'note',component:'OpenUiInput',field:'note',label:'Note',value:'',required:true}];
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'components',surfaceId:'s',components:tree});
+ assert.equal(c.validateForm('s','plan'),false);assert.deepEqual(Object.keys(JSON.parse(c.getSurface('s').fieldErrorsJson)),['name','note']);
+ const next=plain(tree);next.find(n=>n.id==='name').value='Walk';
+ c.apply({kind:'patch',surfaceId:'s',components:next,syncFieldValues:true});
+ assert.deepEqual(Object.keys(JSON.parse(c.getSurface('s').fieldErrorsJson)),['note']);
+ assert.deepEqual(JSON.parse(c.getSurface('s').fieldValuesJson),{});
+ next.find(n=>n.id==='note').disabled=true;c.apply({kind:'patch',surfaceId:'s',components:next,syncFieldValues:true});
+ assert.deepEqual(JSON.parse(c.getSurface('s').fieldErrorsJson),{});
+});
+
+test('adapter error replacement is atomic, revision-fenced and limited to current enabled reachable fields',()=>{
+ const changes=[];const {c}=setup({onFieldChange:e=>changes.push(e)});install(c);const surface=c.getSurface('s');let publishes=0;c.subscribe(()=>publishes++);
+ assert.equal(c.replaceFieldErrors('s',{filter:'Choose at least one'},surface.revision),true);
+ assert.equal(c.getSurface('s').revision,surface.revision);assert.equal(c.getSurface('s').fieldValuesJson,surface.fieldValuesJson);
+ assert.deepEqual(JSON.parse(c.getSurface('s').fieldErrorsJson),{filter:'Choose at least one'});assert.equal(publishes,1);
+ assert.equal(c.replaceFieldErrors('s',{filter:'Choose at least one'},surface.revision),true);assert.equal(publishes,1);
+ const saved=c.exportSnapshot();
+ for(const [errors,revision] of [[{title:'Wrong kind'},surface.revision],[{missing:'Wrong node'},surface.revision],
+  [{filter:''},surface.revision],[{filter:'x'.repeat(501)},surface.revision],[{filter:42},surface.revision],
+  [{filter:'Stale'},surface.revision-1],[null,surface.revision],[[],surface.revision]]){
+  assert.equal(c.replaceFieldErrors('s',errors,revision),false);assert.equal(c.exportSnapshot(),saved);
+ }
+ assert.equal(c.replaceFieldErrors('s',{},surface.revision),true);assert.equal(c.getSurface('s').fieldErrorsJson,'{}');assert.equal(changes.length,0);
+ const orphan=nodes();orphan[0].children=orphan[0].children.filter(id=>id!=='filter');c.apply({kind:'patch',surfaceId:'s',components:orphan});
+ assert.equal(c.replaceFieldErrors('s',{filter:'Unreachable'},c.getSurface('s').revision),false);
+ const disabled=nodes();disabled.find(n=>n.id==='filter').disabled=true;c.apply({kind:'patch',surfaceId:'s',components:disabled});
+ assert.equal(c.replaceFieldErrors('s',{filter:'Disabled'},c.getSurface('s').revision),false);
 });

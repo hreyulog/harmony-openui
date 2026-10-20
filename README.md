@@ -8,7 +8,18 @@
 
 一个独立的社区适配库：复用 OpenUI 官方解析器，以 AGenUI 为原生渲染后端，让模型输出的组件声明显示为鸿蒙界面，再把用户操作交回宿主应用。适合聊天里的方案选择、资料填写、多步骤表单和结果页面。无需 WebView，也不在设备上编译或执行模型生成的 ArkTS。
 
-这是社区项目，非 OpenUI 或华为官方 SDK。v0.3 新增通用映射运行层，复用 OpenUI 官方状态与表达式引擎，仍是受限的鸿蒙原生适配，尚未完整实现 OpenUI Lang 1.0 或整个 ArkUI 组件体系。
+这是社区项目，非 OpenUI 或华为官方 SDK。v0.4 在通用映射层中加入输入、多选组和实时表单提交，复用 OpenUI 官方状态、表达式引擎及既有原生控件，仍未完整实现 OpenUI Lang 或整个 ArkUI 组件体系。
+
+**v0.4：模型生成图文列表 → 本地筛选与选择 → 原生表单 → 模型生成结果。** 通用映射目录现有 15 类组件，新增输入、多选记录与具名表单；复用既有 ArkUI 控件、官方状态和表达式引擎。[映射架构](docs/mapping.md)
+
+已在 Nova 上用真实 MiniMax 请求走完整流程，验证连续输入焦点、多选聚合、中文必填提示、重置和实时提交值。列表另通过全部 12 种筛选组合回放，表单与结果通过 9 项实际源码回放。此次实际请求共 5 次，含 2 次有界修正；筛选、输入和重置无需请求模型。[v0.4 验证记录](docs/verification-v04.md) · [模型程序与回执](docs/evidence/2026-10-20-v04/acceptance.json)
+
+| 筛选后的图文结果 | 中文必填校验 | 原生输入与多选 | 模型整理结果 |
+| --- | --- | --- | --- |
+| <img src="docs/images/nova-v04-20261020/filtered-forest.jpeg" width="210" alt="本地筛选后的林间步道"> | <img src="docs/images/nova-v04-20261020/form-required.jpeg" width="210" alt="空提交显示中文必填提示"> | <img src="docs/images/nova-v04-20261020/form-filled.jpeg" width="210" alt="填写名称备注并选中两件物品"> | <img src="docs/images/nova-v04-20261020/model-result.jpeg" width="210" alt="模型生成准确保留提交值的只读结果"> |
+
+<details>
+<summary>v0.3 历史真机证据：图文筛选、重置与选择</summary>
 
 **v0.3：模型生成图文结果列表，用户在原生控件里交叉筛选、重置和选择。** 新入口 `OpenUiMappedRuntime` 将常用上游组件映射到现成的 AGenUI／ArkUI 组件，筛选使用官方 `$state`、绑定和条件表达式，在手机本地更新，不再请求模型。旧的 v0.2 表单入口继续保留。[映射架构与示例](docs/mapping.md)
 
@@ -17,6 +28,8 @@ v0.3 已在 Nova 真机完成 **MiniMax 实际生成 → 类型与时长交叉�
 | 交叉筛选与配图 | 展馆结果 | 空结果 | 宿主收到选择 |
 | --- | --- | --- | --- |
 | <img src="docs/images/nova-v03-20261020/filtered-forest.jpeg" width="210" alt="原生筛选后的林间步道"> | <img src="docs/images/nova-v03-20261020/filtered-museum.jpeg" width="210" alt="展馆类型和时长筛选"> | <img src="docs/images/nova-v03-20261020/empty-result.jpeg" width="210" alt="不匹配的筛选显示空结果"> | <img src="docs/images/nova-v03-20261020/selection-receipt.jpeg" width="210" alt="选择街角书店后的宿主回传"> |
+
+</details>
 
 <details>
 <summary>v0.2 历史真机证据：表单、选择与确认弹层</summary>
@@ -65,9 +78,20 @@ flowchart LR
 | 原生显示 | AGenUI 1.6.0 + 本项目的 ArkUI 组件 | 基础布局、原生桥接，以及卡片、表单控件、图片、列表和确认弹层的显示和测量。 |
 | 模型与业务 | 宿主应用 | 提供模型接口与数据，决定如何响应用户操作、调用工具或生成下一步界面。 |
 
-映射入口支持本地状态、Select 绑定、条件组件与 Set／Reset；Query／Mutation 仍未接入。现有表单入口与新映射入口使用不同组件签名，必须分别使用对应的系统提示词。具体范围见[映射说明](docs/mapping.md)。
+映射入口支持本地状态、输入与选择绑定、具名表单、条件组件和 Set／Reset；Query／Mutation 仍未接入。现有表单入口与新映射入口使用不同组件签名，必须分别使用对应的系统提示词。具体范围见[映射说明](docs/mapping.md)。
 
-## v0.3 新增什么
+## v0.4 新增什么
+
+- 新增 `Input`、`TextArea`、`CheckBoxItem`、`CheckBoxGroup`、`Buttons`、`Form` 六类映射，共 15 类。
+- 文本与多行输入复用已有 ArkUI 控件；多选记录由官方 store 保存，适配成已有原生 Checkbox。
+- 普通必填和“多选至少选一项”校验；提交返回当前 `formName` / `formState`，不靠模型猜用户答案。
+- 编辑后保留其余未解决错误；Reset 清空验证状态。新程序使用新默认值，不继承旧 native override。
+- 输入回调栈内的结构更新会合并延后，避免中途进入原生解析器或销毁控件。
+- 独立“图文筛选 → 完善计划 → 整理结果”流程，模型与业务数据仍由示例宿主提供。
+
+以下 v0.3 能力继续保留：
+
+## 保留的映射能力
 
 - 一份集中式映射目录生成 schema、模型提示词、支持清单，并执行原生投影。
 - 对齐上游签名的 `Stack`、`Card`、`CardHeader`、`TextContent`、`Image`、`Button`、`Select`、`SelectItem`、`FormControl` 子集。
@@ -97,7 +121,7 @@ flowchart LR
 当前通过源码构建和本地 HAR 接入，尚未发布到 OHPM 注册中心。构建完成后，在宿主模块目录执行：
 
 ```powershell
-ohpm install D:/openui-build/har-01/artifacts/harmony-openui-0.3.0.har
+ohpm install D:/openui-build/har-01/artifacts/harmony-openui-0.4.0.har
 ```
 
 随后使用包名 `@hreyulog/harmony-openui` 导入。宿主无需另外安装 npm 解析器或模型 SDK。
@@ -129,6 +153,8 @@ struct GeneratedPanel {
 ```
 
 把 `OpenUiLanguageStream.systemPrompt()` 作为模型的系统指令，并提供宿主已取得的数据。流式传输时，对同一个 stream 依次调用 `append(chunk)`，结束时调用 `append('', true)`。新的一次完整响应使用新的 stream，或 `replace(source)`。
+
+新映射入口的 `Form(name, Buttons([...]), fields)` 与下面的旧表单签名不同，使用对应的 `systemPrompt()`；详见[映射文档](docs/mapping.md)。
 
 `@Choose("a")` 回调为 `name: 'choose', context: { value: 'a' }`。`@ToAssistant` 与 `@OpenUrl` 只返回操作数据；宿主自行实现其效果。完整语法以 [生成的 schema](schemas/openui-lang-v0.1.json) 与 [目录定义](tools/lang/library.mjs) 为准。
 
@@ -178,6 +204,8 @@ python tools/build.py --target all --unsigned --work-dir D:/openui-build/demo-01
 
 ## 示例与验证边界
 
+v0.4 的映射示例由“图文筛选”进入“完善计划”：列表、编辑卡片和最终结果分别由模型生成。筛选和输入在本地更新，提交携带当前具名表单的原始值。示例宿主在显示列表前检查全部 12 种筛选组合；模型程序不满足约定时，最多请求模型修正一次，不手动改写生成程序。SDK 不包含这些示例数据或模型请求。
+
 示例使用明确标注的虚构资料检查交互；不是实际订票查询。模型接口支持 OpenAI-compatible 与 Anthropic-compatible HTTPS 请求，API Key 在配置界面输入后仅存在内存。可选的开发者私有配置也必须留在应用私有目录，不能打进包。
 
 示例的模型 HTTP 请求当前为完整响应，再按块送入解析器；SDK 本身支持真实网络流提供的任意文本分块。点击选择后，同一个 Surface 显示宿主处理后的结果。
@@ -196,7 +224,7 @@ Host 测试检验解析、状态与回调契约；HAR / HAP 构建检验 ArkTS �
 - 兼容 A2UI 的受限子集，不宣称完整协议兼容。
 - SDK 与示例独立开发，尚未集成到 Sofia。
 
-文档：[v0.3 真机验证](docs/verification-v03.md) · [映射层](docs/mapping.md) · [架构](docs/architecture.md) · [协议与状态](docs/protocol.md) · [渲染与主题](docs/rendering.md) · [构建](docs/building.md) · [验证记录](docs/verification.md)
+文档：[v0.4 真机验证](docs/verification-v04.md) · [映射层](docs/mapping.md) · [架构](docs/architecture.md) · [协议与状态](docs/protocol.md) · [渲染与主题](docs/rendering.md) · [构建](docs/building.md) · [验证记录](docs/verification.md)
 
 依据：[OpenUI 官方架构](https://www.openui.com/docs/openui-lang/architecture) · [组件目录](https://www.openui.com/docs/openui-lang/defining-components) · [ArkUI](https://developer.huawei.com/consumer/cn/arkui/) · [AGenUI](https://github.com/AGenUI/AGenUI)
 

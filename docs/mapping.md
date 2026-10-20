@@ -4,6 +4,10 @@ v0.3 增加可选的 `harmony-openui/mapped@1` profile。它复用官方 OpenUI 
 
 v0.3 adds the opt-in `harmony-openui/mapped@1` profile. It reuses the official OpenUI Lang runtime and maps a bounded component vocabulary to native HarmonyOS UI. The embedding app supplies data, model transport and business execution. The SDK contains no example-specific filtering rules.
 
+v0.4 在同一 profile 上增补文本输入、多选记录和具名表单。原有九类组件及表单外动作的回调格式保持兼容；这是组件目录的增量扩展。
+
+v0.4 extends the same profile with text inputs, checkbox records and named forms. The original nine mappings and action payloads outside a Form remain compatible.
+
 ## 数据如何到达界面 / Data flow
 
 ```text
@@ -16,18 +20,18 @@ validated native component IR
 AGenUI 1.6 built-ins + existing ArkUI form controls
 ```
 
-- **官方运行时 / Official runtime.** `createStreamingParser` 解析程序；`createStore` 保存 `$state`；`evaluateRoot`、`evaluate` 求值条件与动作表达式；`resolveStateField` 将 Select 值连接到官方 store。映射层没有另写表达式解析器或筛选引擎。此版本的公开 mapped API 一次接收完整程序，不暴露逐 token 渲染。
+- **官方运行时 / Official runtime.** `createStreamingParser` 解析程序；`createStore` 保存 `$state`；`evaluateRoot`、`evaluate` 求值条件与动作表达式；`resolveStateField` 将输入、单选及多选聚合值连接到官方 store。映射层没有另写表达式解析器或筛选引擎。此版本的公开 mapped API 一次接收完整程序，不暴露逐 token 渲染。
 - **一个映射入口 / One mapping entry point.** [mapped-registry.mjs](../tools/lang/mapped-registry.mjs) 集中定义组件签名、原生投影和能力说明。[构建脚本](../tools/build-lang.mjs) 从该模块生成 [schema](../schemas/openui-mapped-v1.json)、模型提示词、[支持清单](../schemas/openui-mapped-support-v1.json) 和可打包运行时。扩展映射时应同时维护这里的签名与投影。
-- **复用原生能力 / Native reuse.** Column、Row、Card、Text、Button 和 Image 使用固定版本 AGenUI 的现有实现。Select 继续复用 v0.2 已有的 ArkUI 控件桥接及受控值同步。无 React 或 WebView 运行时依赖。
+- **复用原生能力 / Native reuse.** Column、Row、Card、Text、Button 和 Image 使用固定版本 AGenUI 的现有实现。输入、单选、复选和表单继续复用 v0.2 已有的 ArkUI 控件桥接及受控值同步。无 React 或 WebView 运行时依赖。
 - **宿主边界 / Host boundary.** `@Set`、`@Reset` 更新本地 store；`@ToAssistant`、`@OpenUrl` 返回意图给宿主。库本身不会请求模型、访问业务接口、打开链接或完成订单。生成界面中的文字不是业务执行凭据。
 
-The parser, state store, expression evaluation and field bindings above are upstream implementations. The registry supplies native projection and generated model-facing artifacts. AGenUI supplies existing native primitives; the established ArkUI Select adapter supplies controlled input. Local actions need no model request. External actions remain host-owned.
+The parser, state store, expression evaluation and field bindings above are upstream implementations. The registry supplies native projection and generated model-facing artifacts. AGenUI supplies existing native primitives; established ArkUI adapters supply controlled fields. Local actions need no model request. External actions remain host-owned.
 
 参考的官方 UI 签名固定在 [OpenUI commit `9823ec0`](https://github.com/thesysdev/openui/tree/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib)。这不代表已实现官方全部组件或视觉像素一致。
 
 The reference UI signatures are pinned to that commit. This profile does not claim complete upstream component support or pixel parity.
 
-## 当前九类映射 / Nine supported mappings
+## 当前十五类映射 / Fifteen supported mappings
 
 | OpenUI 组件 / Component | 原生投影 / Native projection | 范围 / Scope |
 | --- | --- | --- |
@@ -39,11 +43,17 @@ The reference UI signatures are pinned to that commit. This profile does not cla
 | `Button` | AGenUI `Button` + `Text` | 本地状态动作或宿主意图回调 / Local state actions or host intent callbacks |
 | `Select` | 既有 `OpenUiSelect` → ArkUI `Select` | 单选、`$state` 绑定、required 规则 / Single selection, state binding and required rule |
 | `SelectItem` | 选项数据 / Option data | `value`、`label`，不创建独立原生视图 / No separate native view |
-| `FormControl` | `Column` + Select + 可选说明文字 | 标签、单选输入、提示 / Label, select and optional hint |
+| `FormControl` | `Column` + 字段 + 可选说明文字 | 标签、受支持输入、提示 / Label, a supported field and optional hint |
+| `Input` | 既有 `OpenUiInput` → ArkUI `TextInput` | 单行文本、受控值；仅 `type="text"` / Controlled single-line text only |
+| `TextArea` | 既有 `OpenUiInput` → ArkUI `TextArea` | 多行文本、受控值；当前固定三行布局 / Controlled text; bounded three-row layout |
+| `CheckBoxItem` | 选项数据 / Choice data | 标签、说明、具名布尔默认值 / Label, description and named boolean default |
+| `CheckBoxGroup` | `Column` + 既有 `OpenUiCheckbox` + `Text` | 多选记录、组级 required / Boolean record and group-level required validation |
+| `Buttons` | AGenUI `Row` / `Column` | 显式动作按钮组合 / Explicit action-button composition |
+| `Form` | 既有 `OpenUiForm` | 具名字段范围、提交时实时取值 / Named field scope and live action-time values |
 
-这是模型组件目录的九类映射，不是九种全新控件。图片、文字、按钮组成的结果卡片不需要专门的业务卡组件。字体、颜色、尺寸、按钮视觉变体和破坏性操作色彩最终由原生主题决定。
+这是模型组件目录的十五类映射，不是十五种全新控件。图片、文字、按钮组成的结果卡片不需要专门的业务卡组件。字体、颜色、尺寸、按钮视觉变体和破坏性操作色彩最终由原生主题决定。
 
-These are nine model-facing mappings, not nine newly implemented native widgets. Result cards compose ordinary primitives. The native theme owns final typography, colors, geometry, button styling and destructive tones.
+These are fifteen model-facing mappings, not fifteen newly implemented native widgets. Result cards compose ordinary primitives. The native theme owns final typography, colors, geometry, button styling and destructive tones.
 
 ## 两个 profile 的签名不同 / Separate language profiles
 
@@ -55,10 +65,77 @@ These are nine model-facing mappings, not nine newly implemented native widgets.
 | 单选 / Select | `Select(field, label, options, value?, required?, disabled?)` | `Select(name, items, placeholder?, rules?, value?, size?)` |
 | 选项 / Options | `[{label, value}]` | `[SelectItem(value, label)]` |
 | 状态 / State | 宿主控制 / Host-controlled | 官方 `$state`、条件表达式、Set、Reset |
+| 表单 / Form | `Form(name, children)`，自定义 `@Submit(name)` | `Form(name, Buttons(...), fields)`，官方 `@ToAssistant(...)` |
 
 旧目录继续保留，不自动改写旧程序。应使用对应 API 生成的 `systemPrompt()` 与 schema；不能把同名组件当成相同签名混用。mapped profile 的 `src` 在上游签名中可省略，但本原生映射要求提供有效 HTTPS URL。
 
 The existing catalog remains available. Generate prompts and schemas through the chosen API and keep its programs separate. Identically named components may have incompatible positional arguments. Although upstream marks `Image.src` optional, this native mapping requires a valid HTTPS source.
+
+## 文本、多选与表单 / Text, checkbox records and forms
+
+下列参数顺序来自固定版本的官方目录；括号内的 `?` 表示可省略。能力范围由本原生 profile 进一步限制。
+
+These positional signatures follow the pinned upstream catalog; `?` means optional. The native profile intentionally supports a bounded subset of property values.
+
+```text
+Input(name, placeholder?, type?, rules?, value?)
+TextArea(name, placeholder?, rows?, rules?, value?)
+CheckBoxItem(label, description, name, defaultChecked?)
+CheckBoxGroup(name, items, rules?, value?)
+Buttons(buttons, direction?)
+Form(name, buttons, fields = [])
+FormControl(label, input, hint?)
+```
+
+- `Input.type` 仅支持 `"text"`；不将密码输入退化为明文。`TextArea.rows` 可省略或为 `3`，对应已有原生布局，并不承诺 Web 文本框的像素行高。Only text input is supported; password is not silently rendered as plain text. TextArea accepts omitted rows or `3`, using the established native geometry.
+- `rules` 仅支持 `{required:true|false}`。`FormControl.input` 可为 `Input`、`TextArea`、`Select` 或 `CheckBoxGroup`。Only required validation is supported. The four listed field types compose inside FormControl.
+- `CheckBoxGroup` 的拼写包含大写 `B`。`CheckBoxItem` 的 `description` 是官方必填参数，不需要说明时传 `""`。`Buttons.direction` 默认 `"row"`，手机上的长标题可显式选 `"column"`。Use the exact component names and positional arguments; descriptions may be empty. Buttons default to a row.
+
+签名依据：[Input](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/Input/schema.ts)、[TextArea](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/TextArea/schema.ts)、[CheckBoxGroup](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/CheckBoxGroup/schema.ts)、[Form](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/Form/schema.ts)、[Buttons](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/Buttons/schema.ts)。
+
+```openui
+$name = ""
+$preferences = {quiet:false,accessible:false}
+root = Stack([details])
+details = Form("preferences", Buttons([Button("继续", @ToAssistant("提交偏好", {intent:"preferences"}))], "column"), [nameField, noteField, choices])
+nameField = FormControl("称呼", Input("name", "请输入称呼", "text", {required:true}, $name))
+noteField = FormControl("备注", TextArea("notes", "可选备注", 3))
+choices = FormControl("偏好", CheckBoxGroup("choices", [CheckBoxItem("安静", "减少噪声", "quiet"), CheckBoxItem("无障碍", "便于通行", "accessible")], {required:true}, $preferences))
+```
+
+`$preferences` 是扁平的布尔记录，不能写成 `string[]` 或独立一个布尔值。用户勾选一个选项时，适配层读取当前聚合值，只替换对应的 item name，再通过官方 `resolveStateField` 写回整个记录。原生控件仍接收独立布尔值，内部生成的字段名不进入宿主的业务字段。没有 `value` 绑定的字段保存在其 Form 的本地范围内；有 `$state` 绑定的字段由官方 store 保存。
+
+`$preferences` is a flat boolean record, not a string array or a single boolean. A checkbox edit replaces one named entry in the aggregate and writes the record through the official state-field implementation. Native controls still receive scalar booleans. Generated native field names do not leak into the logical form payload. Unbound fields use local form scope; reactive fields use the official store.
+
+具名 Form 中，主按钮的 `@ToAssistant` 先检查当前可见字段的 required 规则；空文本或空单选不通过，多选组至少勾选一项即可。不会要求每个复选项都为 true。未通过时只显示字段错误，不向宿主发送外部动作。次要或三级按钮可用于无需 required 校验的取消、导航动作；`@Set`、`@Reset` 继续是本地状态动作。Form 不能嵌套，字段名在同一范围内必须唯一。原生 profile 没有新增 `@Submit`。
+
+Inside a named Form, a primary ToAssistant button checks required fields before delivering the external action. Required text and select values must be nonempty; a required checkbox group needs at least one selection. Validation failure displays field errors without sending the external action. Secondary or tertiary actions can support cancellation and navigation without required validation. Set and Reset remain local. Forms cannot nest, and field names must be unique within their scope. This profile does not introduce Submit.
+
+提交值在动作发生时从当前状态读取，字段值不能由模型预先写进 `@ToAssistant` 的 context 来代替。适配层返回一致的原生宿主格式：
+
+The adapter reads live values at action time. Model-supplied context is not a substitute for submitted field values. The native host receives a normalized payload:
+
+```json
+{
+  "name": "continue_conversation",
+  "context": {
+    "message": "提交偏好",
+    "context": {"intent": "preferences"},
+    "formName": "preferences",
+    "formState": {
+      "preferences": {
+        "name": "Lin",
+        "notes": "可选备注",
+        "choices": {"quiet": true, "accessible": false}
+      }
+    }
+  }
+}
+```
+
+这个一致格式是本原生适配器的公开契约。官方 React hook 的本地字段可能存为 `{value, componentType}`，具名 Form 存在时取其对象；直接绑定 `$state` 的字段走独立路径，也可能使返回值成为整个 store 的快照。本库不把这些 React 内部包装照搬给宿主，而是为同一 Form 的绑定及非绑定字段返回统一的原始值，并保持模型提供的第二 context 参数独立。表单外的 v0.3 动作格式不变。参考官方 [state-field](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/lang-core/src/runtime/state-field.ts)、[action/form payload hook](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-lang/src/hooks/useOpenUIState.ts)、[Button 校验](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/Button/index.tsx)。
+
+This normalized shape is the native adapter contract. Upstream React may wrap local fields as `{value, componentType}` and returns either named form data or a store snapshot; reactive bindings follow another storage path. The adapter presents consistent raw logical values for bound and unbound fields in the same Form, while preserving the model's optional second context argument separately. The v0.3 action shape outside a Form is unchanged. It does not claim byte-for-byte compatibility with React's internal event representation.
 
 ## 可运行示例 / Runnable example
 
@@ -123,10 +200,10 @@ This avoids unnecessary focus and scroll resets. It does not preserve focus on a
 
 ## 明确边界 / Explicit limitations
 
-- 状态初始值仅支持字符串、数字或布尔字面量，每个 `$name` 只能声明一次。派生条件直接写入组件表达式；重复声明、表达式或对象初始化会明确拒绝。Initial state accepts string, number or boolean literals, declared once. Put derived conditions directly in component expressions.
+- 状态初始值支持字符串、数字、布尔字面量，以及多选使用的扁平布尔记录，每个 `$name` 只能声明一次。派生条件直接写入组件表达式；不接受派生初始化、嵌套对象、数组或任意对象状态。Initial state accepts scalar literals and flat boolean records, declared once. Put derived conditions directly in component expressions; nested objects, arrays and derived initializers are unsupported.
 - 不支持 Query/Mutation、Each/Filter、任意远程请求、宿主代码执行；当前筛选通过条件子节点表达。No Query/Mutation, Each/Filter, remote execution or arbitrary code; use conditional children.
 - 不支持 HTML、Markdown、富文本、表格、图表、Tabs、导航或完整 ArkUI 控件目录。No HTML, Markdown, rich text, tables, charts, tabs, navigation or full ArkUI catalog.
 - 不支持自动换行布局、`Card` 的 `sunk` 变体、高级或异步表单规则、多选数组。No wrapping, sunk cards, advanced/async form rules or array-valued selections.
-- 新 profile 暂只映射 Select 输入；v0.2 的其他表单能力继续由旧 profile 提供，不会自动全部进入 mapped 目录。Other established form controls remain available through the existing profile.
+- mapped profile 支持文本、多行文本、单选及多选记录；v0.2 的其他表单能力继续由旧 profile 提供，不会自动全部进入 mapped 目录。Mapped inputs are text, multiline text, single selection and checkbox records. Other established form controls remain in the existing profile.
 - 新程序接收、状态更新和回调都有节点、深度、字符串及选项数量边界；具体能力以生成的支持清单和校验实现为准。Programs and updates have bounded nodes, depth, strings and options; consult the generated manifest and validation.
 - 本文说明代码契约，不作为真机通过证明；验收证据单独记录。This document describes the implementation contract, not physical-device acceptance; device evidence is recorded separately.

@@ -1,0 +1,101 @@
+{
+  "format": "harmony-openui/planner-model-replay@1",
+  "createdAt": "2026-10-20T13:58:17.515Z",
+  "scope": "Model-free replay using actual Controller, ETS mapped wrapper and already generated Nova sources. Not additional device or model evidence.",
+  "editorSourceSha256": "bc71953c1729323d8f85660dcba738dd822bb0af208bdbec582d8386fae8649a",
+  "resultSourceSha256": "7fe7ad135303666fe37fce88fc83a9390b31a0515bdc04a151a1869ce4d1ca7d",
+  "fixtureSourceSha256": "edc40ba8f513582c2f161d20896b2e8eaf834143efe99e0e5800fd87de53bd15",
+  "inputEditorActualModel": true,
+  "inputResultActualModel": true,
+  "inputEditorModelRequests": 1,
+  "inputResultModelRequests": 3,
+  "checks": [
+    {
+      "name": "actual captured editor and result use the same supplied place",
+      "pass": true,
+      "placeId": "forest-trail"
+    },
+    {
+      "name": "blank required form emits no host action and exposes exactly two errors",
+      "pass": true,
+      "externalActions": 0,
+      "errorCount": 2
+    },
+    {
+      "name": "editing only the plan name preserves the group required error",
+      "pass": true,
+      "errorCount": 1
+    },
+    {
+      "name": "checking camera alone satisfies required group",
+      "pass": true,
+      "gear": {
+        "camera": true,
+        "water": false
+      },
+      "errorCount": 0
+    },
+    {
+      "name": "checking water then clearing camera preserves the other selected item",
+      "pass": true,
+      "gear": {
+        "camera": false,
+        "water": true
+      }
+    },
+    {
+      "name": "reset restores declared defaults and clears errors without a host action",
+      "pass": true,
+      "state": {
+        "$planName": "",
+        "$notes": "",
+        "$gear": {
+          "camera": false,
+          "water": false
+        }
+      },
+      "errorCount": 0,
+      "externalActions": 0
+    },
+    {
+      "name": "saved normalized formState contains current native text and the full boolean aggregate",
+      "pass": true,
+      "formName": "plan",
+      "fields": {
+        "planName": "Walk",
+        "notes": "BringWater",
+        "gear": {
+          "camera": true,
+          "water": true
+        }
+      },
+      "externalActions": 1
+    },
+    {
+      "name": "captured final native result is read-only and its source contains no action or form controls",
+      "pass": true,
+      "readOnly": true,
+      "actions": 0,
+      "imageSource": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop",
+      "visibleSubmittedValues": true
+    },
+    {
+      "name": "replay reports no hidden runtime errors",
+      "pass": true,
+      "runtimeErrors": 0
+    }
+  ],
+  "placeId": "forest-trail",
+  "replayedSubmitted": {
+    "planName": "Walk",
+    "notes": "BringWater",
+    "gear": {
+      "camera": true,
+      "water": true
+    }
+  },
+  "passed": 9,
+  "total": 9,
+  "externalActions": 1,
+  "runtimeErrors": []
+}

@@ -11,7 +11,7 @@ All files in `core/` are new SDK code. The controller does not depend on a phone
 | kind | fields | behavior |
 | --- | --- | --- |
 | `create` | `surfaceId`, optional `catalogId` | Creates an empty surface. The supported catalog is `urn:harmony-openui:catalog:0.1`. |
-| `components` | `surfaceId`, `components`, optional `replace` | Upserts definitions by component ID. `replace: true` atomically replaces the complete component set; language adapters should use it for complete parsed programs. |
+| `components` | `surfaceId`, `components`, optional `replace`, optional `syncFieldValues` | Upserts definitions by component ID. `replace: true` atomically replaces the complete component set; language adapters should use it for complete parsed programs. `syncFieldValues` is allowed only with `replace: true`. |
 | `patch` | `surfaceId`, complete `components`, optional `syncFieldValues` | Atomically replaces the complete IR after local state evaluation. Requires a `root` and all child references to exist. Publishes an incremental-render hint when retained identities are compatible. |
 | `data` | `surfaceId`, `valueJson`, optional `path` | Replaces the root data model or upserts a JSON Pointer path. `valueJson` is serialized JSON, including quotes for a string. |
 | `delete` | `surfaceId` | Removes a surface. Old action and render callbacks no longer match a live revision. |
@@ -33,7 +33,7 @@ Updates are validated before replacing state. Forward references are permitted f
 
 The additional basic `Image` kind has `source`, `alt`, and optional `aspectRatio` properties and maps directly to AGenUI's native Image. It is separate from the retained `OpenUiImage` custom ArkUI control. Both use the same validated HTTPS URL and aspect-ratio limits.
 
-The catalog identifier and legacy generated language-schema filename retain `0.1` for compatibility with existing surfaces and build consumers; the SDK package is v0.3.0. This does not make an older renderer capable of drawing newly added components. The opt-in mapped language profile has its own schema and support manifest.
+The catalog identifier and legacy generated language-schema filename retain `0.1` for compatibility with existing surfaces and build consumers; the SDK package is v0.4.0. This does not make an older renderer capable of drawing newly added components. The opt-in mapped language profile has its own schema and support manifest.
 
 Text properties accept a literal string or `{ "path": "/some/data" }`. Fact groups carry label/value records. Semantic component layout belongs to the native renderer and its injected theme. The input cannot inject host-only selection/read-only state or arbitrary component factories.
 
@@ -77,7 +77,7 @@ Images use host-supplied HTTPS URLs (maximum 2048 characters), alternative text 
 
 `OpenUiMappedRuntime` is a separate opt-in adapter. One registry, `tools/lang/mapped-registry.mjs`, owns the bounded component signatures and their native projection. It generates `schemas/openui-mapped-v1.json`, the model prompt, and `schemas/openui-mapped-support-v1.json`. The manifest pins the upstream reference and lists supported capabilities and limitations.
 
-This profile contains `Stack`, `Card`, `CardHeader`, `TextContent`, `Image`, `Button`, `Select`, `SelectItem`, and `FormControl`. They map to existing native containers, text, buttons, basic Image, and the existing `OpenUiSelect` control. A result card is composed from these generic components; no travel, shopping or other domain-specific card executor is included.
+This profile contains 15 declarations: `Stack`, `Card`, `CardHeader`, `TextContent`, `Image`, `Button`, `Select`, `SelectItem`, `FormControl`, `Input`, `TextArea`, `CheckBoxItem`, `CheckBoxGroup`, `Buttons`, and `Form`. They map to existing native containers, text, buttons, basic Image and the established form controls. A result card or form composes generic components; no travel, shopping or other domain-specific executor is included.
 
 Some names overlap with the legacy profile but have different upstream positional signatures:
 
@@ -86,13 +86,23 @@ Some names overlap with the legacy profile but have different upstream positiona
 | `Image` | `Image(alt, src?)`; this native profile requires a supplied HTTPS `src`. |
 | `SelectItem` | `SelectItem(value, label)`. |
 | `Select` | `Select(name, items, placeholder?, rules?, value?, size?)`; reactive `value` can bind a declared `$state`. |
-| `FormControl` | `FormControl(label, input, hint?)`; the supported input is a mapped `Select`. |
+| `Input` | `Input(name, placeholder?, type?, rules?, value?)`; `type` is omitted or `"text"`. |
+| `TextArea` | `TextArea(name, placeholder?, rows?, rules?, value?)`; `rows` is omitted or `3`. |
+| `CheckBoxItem` | `CheckBoxItem(label, description, name, defaultChecked?)`; data only, with an empty description allowed. |
+| `CheckBoxGroup` | `CheckBoxGroup(name, items, rules?, value?)`; its value is a record of named booleans. |
+| `Buttons` | `Buttons(buttons, direction?)`; row by default, or an explicit column. |
+| `Form` | `Form(name, buttons, fields = [])`; buttons is a `Buttons` declaration, fields are `FormControl` declarations. |
+| `FormControl` | `FormControl(label, input, hint?)`; accepts mapped Input, TextArea, Select or CheckBoxGroup. |
 
-The official `createStore`, `evaluateRoot`, expression evaluator and `resolveStateField` own local state and field bindings. Select edits update that store; conditional expressions produce the next complete native tree. `@Set` and `@Reset` execute locally through the official action plan and do not request a model response. `@ToAssistant(message, context?)` and `@OpenUrl(url)` return intents to the host; the runtime does not open a URL or execute a business operation. The optional second `ToAssistant` argument is retained as `receipt.context.context`.
+The official `createStore`, `evaluateRoot`, expression evaluator and `resolveStateField` own local state and field bindings. Inputs and selections update that store; conditional expressions produce the next complete native tree. State defaults may be scalar literals or a flat record of boolean choices. CheckBoxGroup edits merge one item into the aggregate record before setting its official field; the native IR still uses scalar checkbox leaves. Nested object/array state and derived initializers are unsupported. `@Set` and `@Reset` execute locally through the official action plan and do not request a model response. `@ToAssistant(message, context?)` and `@OpenUrl(url)` return intents to the host; the runtime does not open a URL or execute a business operation. The optional second `ToAssistant` argument is retained as `receipt.context.context`.
+
+Mapped fields support only `{required: boolean}` rules. Before a primary ToAssistant action inside a named Form, current required text/select fields must be nonempty and a required checkbox group must have at least one checked item. Failure projects field errors and sends no external action. Secondary/tertiary actions do not perform that required check. A Form cannot nest, and field names must be unique within its scope. This profile uses official ToAssistant actions rather than the legacy profile's custom Submit action.
+
+An action inside a Form includes live logical values, read at the action step, as `receipt.context.formName` and `receipt.context.formState = { [formName]: { [fieldName]: rawValue } }`. A checkbox group contributes one boolean record, never generated native field names. This normalized native payload includes bound and unbound fields consistently; it intentionally does not copy the React hook's internal `{value, componentType}` wrappers or alternate store-snapshot shape. Model-supplied action context remains separate. Actions outside a Form retain their v0.3 shape. See [mapping.md](mapping.md) for complete examples and upstream references.
 
 Native buttons carry only a checked `mapped_action` event with a stable `actionId`. After the controller checks its current source and static context, the runtime resolves that component's current action plan. Local state steps are consumed inside the adapter; only external intents reach the host's `onAction`. Source replacement validates a candidate session before discarding the old program. Invalid derived state rolls back instead of leaving a new store paired with the old tree.
 
-Mapped runtime `replace(source)` accepts a complete program and uses ordinary controller replacement. Subsequent local state evaluation uses `patch` with `syncFieldValues: true`. This makes evaluated field defaults authoritative and clears old native field overrides/errors without emitting another `onFieldChange` loop. It is an adapter-owned state mode, not an implicit change to legacy form behavior. Query/Mutation, Markdown, wrapping and arbitrary code execution remain unsupported in this bounded profile.
+Mapped runtime `replace(source)` accepts a complete program and uses controller `components` replacement with `replace: true, syncFieldValues: true`. Subsequent local state evaluation uses `patch` with `syncFieldValues: true`. This makes evaluated field defaults authoritative instead of inheriting old native overrides, without emitting another `onFieldChange` loop. Controller reconciliation recalculates existing native validation errors against the authoritative values; an unresolved invalid field is not silently made valid by synchronization. After each mapped result, the ETS adapter atomically replaces its inline messages from that result's `validationErrors`, including an empty map when they have cleared. It is an explicit adapter-owned state mode, not a change to legacy defaults. Query/Mutation, Markdown, wrapping and arbitrary code execution remain unsupported in this bounded profile.
 
 ## Live field state
 
@@ -101,9 +111,10 @@ Model declarations and edited values are separate. Each surface carries `fieldVa
 - `setFieldValue(surfaceId, componentId, value, expectedRevision?)` rejects obsolete, read-only, disabled, unreachable, and wrong-type edits. A syntactically editable but invalid value can be retained with an inline error.
 - `onFieldChange` reports the accepted edit, containing form, source ID, value, and document revision. It does not make a model request.
 - `validateForm(surfaceId, name)` validates current enabled values and publishes errors. `getFormValues` reads values without treating them as validated permission.
+- `replaceFieldErrors(surfaceId, errors, expectedRevision)` atomically replaces the inline message map for an adapter-owned evaluation. It requires the current revision and accepts at most 200 entries, each naming a reachable, enabled field with a nonblank message of at most 500 characters. Any invalid entry rejects the whole replacement. An empty map clears messages. It changes neither values nor document revision and publishes only when the message map changes.
 - `validationMessage(code, component)` customizes errors. Stable codes include `required`, `type`, `email`, `number`, `date`, `time`, `option`, `range`, and `step`; default messages are English.
 
-Structural replacement reconciles compatible field identities and drops removed fields. Changing the field kind/key/form or input variant prevents an unrelated control from inheriting the old value. A patch preserves compatible edits by default; `syncFieldValues: true` is an explicit adapter request to use its evaluated defaults instead. Reset a legacy run by deleting/recreating its surface when values must be discarded deliberately. Document changes still increase revision; compatible patches can retain the native surface, while edits alone do not remount it.
+Structural replacement reconciles compatible field identities and drops removed fields. Changing the field kind/key/form or input variant prevents an unrelated control from inheriting the old value. A patch preserves compatible edits by default; `syncFieldValues: true` on a patch or complete components replacement explicitly requests evaluated defaults instead. The flag is rejected on partial component upserts and other operation kinds. Reset a legacy run by deleting/recreating its surface when values must be discarded deliberately. Document changes still increase revision; compatible patches can retain the native surface, while edits alone do not remount it.
 
 ## Actions and host decisions
 

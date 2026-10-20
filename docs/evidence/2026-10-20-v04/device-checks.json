@@ -1,0 +1,435 @@
+{
+  "format": "harmony-openui/native-mapped-forms-checks@1",
+  "device": "HUAWEI nova 15 Pro",
+  "api": 26,
+  "list": [
+    {
+      "tag": "mapped-r5-model",
+      "state": {
+        "$kind": "all",
+        "$duration": "all"
+      },
+      "visibleImageCount": 4,
+      "emptyStateVisible": false,
+      "modelRequests": 2,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "849:386",
+          "text": "全部类型",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_7",
+          "hashcode": "849:412",
+          "text": "不限时长",
+          "focused": "false",
+          "checked": "false"
+        }
+      ],
+      "revision": 5,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "mapped-r5-empty",
+      "state": {
+        "$kind": "museum",
+        "$duration": "short"
+      },
+      "visibleImageCount": 0,
+      "emptyStateVisible": true,
+      "modelRequests": 2,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "849:386",
+          "text": "展馆",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_7",
+          "hashcode": "849:412",
+          "text": "约1小时",
+          "focused": "false",
+          "checked": "false"
+        }
+      ],
+      "revision": 7,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "mapped-r5-reset",
+      "state": {
+        "$kind": "all",
+        "$duration": "all"
+      },
+      "visibleImageCount": 4,
+      "emptyStateVisible": false,
+      "modelRequests": 2,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "849:386",
+          "text": "全部类型",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_7",
+          "hashcode": "849:412",
+          "text": "不限时长",
+          "focused": "false",
+          "checked": "false"
+        }
+      ],
+      "revision": 8,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "mapped-r5-forest",
+      "state": {
+        "$kind": "park",
+        "$duration": "long"
+      },
+      "visibleImageCount": 1,
+      "emptyStateVisible": false,
+      "modelRequests": 2,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "849:386",
+          "text": "公园步道",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_7",
+          "hashcode": "849:412",
+          "text": "约2小时",
+          "focused": "false",
+          "checked": "false"
+        }
+      ],
+      "revision": 10,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "mapped-r5-forest-image",
+      "state": {
+        "$kind": "park",
+        "$duration": "long"
+      },
+      "visibleImageCount": 1,
+      "emptyStateVisible": false,
+      "modelRequests": 2,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "849:386",
+          "text": "公园步道",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_7",
+          "hashcode": "849:412",
+          "text": "约2小时",
+          "focused": "false",
+          "checked": "false"
+        }
+      ],
+      "revision": 10,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "mapped-r5-selection",
+      "state": {
+        "$kind": "park",
+        "$duration": "long"
+      },
+      "visibleImageCount": 1,
+      "emptyStateVisible": false,
+      "modelRequests": 2,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "849:386",
+          "text": "公园步道",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_7",
+          "hashcode": "849:412",
+          "text": "约2小时",
+          "focused": "false",
+          "checked": "false"
+        }
+      ],
+      "revision": 11,
+      "renderStatus": "rendered"
+    }
+  ],
+  "listSelectIdentitiesRetained": true,
+  "plan": [
+    {
+      "tag": "planner-r5-model",
+      "stage": 1,
+      "state": {
+        "$planName": "",
+        "$notes": "",
+        "$gear": {
+          "camera": false,
+          "water": false
+        }
+      },
+      "fieldErrorCount": 0,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false,
+      "revision": 5,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "planner-r5-required",
+      "stage": 1,
+      "state": {
+        "$planName": "",
+        "$notes": "",
+        "$gear": {
+          "camera": false,
+          "water": false
+        }
+      },
+      "fieldErrorCount": 2,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false,
+      "revision": 6,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "planner-r5-both",
+      "stage": 1,
+      "state": {
+        "$planName": "Walk",
+        "$notes": "BringWater",
+        "$gear": {
+          "camera": true,
+          "water": true
+        }
+      },
+      "fieldErrorCount": 0,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false,
+      "revision": 22,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "planner-r5-water-only",
+      "stage": 1,
+      "state": {
+        "$planName": "Walk",
+        "$notes": "BringWater",
+        "$gear": {
+          "camera": false,
+          "water": true
+        }
+      },
+      "fieldErrorCount": 0,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false,
+      "revision": 23,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "planner-r5-reset",
+      "stage": 1,
+      "state": {
+        "$planName": "",
+        "$notes": "",
+        "$gear": {
+          "camera": false,
+          "water": false
+        }
+      },
+      "fieldErrorCount": 0,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false,
+      "revision": 25,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "planner-r5-filled",
+      "stage": 1,
+      "state": {
+        "$planName": "Walk",
+        "$notes": "BringWater",
+        "$gear": {
+          "camera": true,
+          "water": true
+        }
+      },
+      "fieldErrorCount": 0,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false,
+      "revision": 41,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "planner-r5-result",
+      "stage": 2,
+      "state": {},
+      "fieldErrorCount": 0,
+      "externalActionCount": 1,
+      "modelRequests": 3,
+      "readOnly": true,
+      "revision": 44,
+      "renderStatus": "rendered"
+    }
+  ],
+  "typing": [
+    {
+      "tag": "planner-r5-keyboard-w",
+      "planName": "W",
+      "nativeInput": {
+        "id": "openui_m9_4",
+        "hashcode": "849:678",
+        "text": "W",
+        "focused": "true",
+        "checked": "false"
+      },
+      "remainingErrors": 1
+    },
+    {
+      "tag": "planner-r5-keyboard-wa",
+      "planName": "Wa",
+      "nativeInput": {
+        "id": "openui_m9_4",
+        "hashcode": "849:678",
+        "text": "Wa",
+        "focused": "true",
+        "checked": "false"
+      },
+      "remainingErrors": 1
+    },
+    {
+      "tag": "planner-r5-keyboard-walk",
+      "planName": "Walk",
+      "nativeInput": {
+        "id": "openui_m9_4",
+        "hashcode": "849:678",
+        "text": "Walk",
+        "focused": "true",
+        "checked": "false"
+      },
+      "remainingErrors": 1
+    }
+  ],
+  "submittedContext": {
+    "message": "提交计划",
+    "context": {
+      "intent": "save-plan",
+      "itemId": "forest-trail"
+    },
+    "formName": "plan",
+    "formState": {
+      "plan": {
+        "planName": "Walk",
+        "notes": "BringWater",
+        "gear": {
+          "camera": true,
+          "water": true
+        }
+      }
+    }
+  },
+  "selectedItemId": "forest-trail",
+  "process": {
+    "sameProcessThroughout": true,
+    "startPid": "27517",
+    "endPid": "27517",
+    "checkedAt": "2026-10-20T13:58:38.870988+00:00",
+    "checkedCrashMarkers": [
+      "Signal:SIGSEGV",
+      "Signal:SIGABRT",
+      "Reason:Signal",
+      "appfreeze",
+      "FatalException"
+    ],
+    "markersFound": [],
+    "scope": "Own live process logs available at the end of the recorded native flow"
+  },
+  "nativeBounds": {
+    "nativeLeaves": 4,
+    "allWithinHost": true,
+    "checks": [
+      {
+        "bounds": [
+          119,
+          1054,
+          1201,
+          1316
+        ],
+        "host": [
+          119,
+          816,
+          1201,
+          2758
+        ],
+        "withinHost": true
+      },
+      {
+        "bounds": [
+          119,
+          1358,
+          1201,
+          1830
+        ],
+        "host": [
+          119,
+          816,
+          1201,
+          2758
+        ],
+        "withinHost": true
+      },
+      {
+        "bounds": [
+          119,
+          1997,
+          1201,
+          2165
+        ],
+        "host": [
+          119,
+          816,
+          1201,
+          2758
+        ],
+        "withinHost": true
+      },
+      {
+        "bounds": [
+          119,
+          2207,
+          1201,
+          2375
+        ],
+        "host": [
+          119,
+          816,
+          1201,
+          2758
+        ],
+        "withinHost": true
+      }
+    ]
+  }
+}

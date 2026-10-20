@@ -14,7 +14,7 @@ function fixture(){
  const controlsClass='class ControlsFixture {kind:string="";stringValue:string="";numberValue:number=0;boolValue:boolean=false;controlState:string="";nativeValue:OpenUiFieldValue="";liveStringValue:string="";liveNumberValue:number=0;liveBoolValue:boolean=false;selectedDate:Date=new Date();selectedTime:Date=new Date(2000,0,1);dialogVisible:boolean=false;onModalReady:(close:()=>void)=>void=()=>{};onString:(value:string)=>void=()=>{};onNumber:(value:number)=>void=()=>{};onBoolean:(value:boolean)=>void=()=>{};'+pickerMethods+'}';
  const view=read('render/OpenUiView');
  const methods=view.slice(view.indexOf('  aboutToAppear():'),view.indexOf('  build() {'));
- const fakeView='class ViewFixture { controller: OpenUiController = new OpenUiController(); surfaceId:string="s"; theme:OpenUiTheme=OpenUiThemes.create(); nativeInstance:number=0;visibleEpoch:number=0;errorLabel:string="";observerId:number=-1;epoch:number=0;contentWidth:number=0;outerWidth:number=0;eventSerial:number=0;lifetime:string="fixture";fingerprint:string="";mountedSurface:string="";manager:SurfaceManager|undefined;nativeSession:OpenUiNativeSession|undefined;details:Map<string,boolean>=new Map();getUIContext():UIContext {return {window:this.lifetime} as UIContext;}'+methods+'}';
+ const fakeView='class ViewFixture { controller: OpenUiController = new OpenUiController(); surfaceId:string="s"; theme:OpenUiTheme=OpenUiThemes.create(); nativeInstance:number=0;visibleEpoch:number=0;errorLabel:string="";observerId:number=-1;epoch:number=0;contentWidth:number=0;outerWidth:number=0;eventSerial:number=0;refreshTimer:number=-1;lifetime:string="fixture";fingerprint:string="";mountedSurface:string="";manager:SurfaceManager|undefined;nativeSession:OpenUiNativeSession|undefined;details:Map<string,boolean>=new Map();getUIContext():UIContext {return {window:this.lifetime} as UIContext;}'+methods+'}';
  const sources=[read('core/OpenUiTypes'),read('core/OpenUiCatalog'),read('core/OpenUiController'),read('render/OpenUiControlModel'),read('render/OpenUiTheme'),read('render/OpenUiRenderDiagnostics'),read('render/OpenUiNativeIds'),read('render/OpenUiProjection'),native.split('@Builder')[0],native.slice(native.indexOf('export class OpenUiNativeElement')),view.split('@Component')[0],fakeView,intrinsicClass,controlsClass];
  const text=sources.join('\n').replace(/^import[\s\S]*?;\r?\n/gm,'');
  const js=stripTypeScriptTypes(text).replace(/^export /gm,'');
@@ -295,11 +295,72 @@ test('mapped filter patches retain the manager, field identity and current-revis
  c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'patch',surfaceId:'s',components:nodes('all')});
  const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],initialRevision=c.getSurface('s').revision,epoch=view.epoch;
  const filter=manager.nodes.find(n=>n.component==='OpenUiSelect'),native=s.hybridViews.get(filter.id);native.focusMarker={cursor:7};
- native.edit('train');assert.equal(c.getSurface('s').revision,initialRevision+1);assert.equal(s.managers.length,1);assert.equal(view.epoch,epoch);assert.equal(view.nativeSession.ids.nativeId('filter'),filter.id);assert.equal(s.hybridViews.get(filter.id),native);assert.equal(native.focusMarker.cursor,7);assert.equal(native.stringValue,'train');
+ native.edit('train');assert.equal(c.getSurface('s').revision,initialRevision+1);s.flushTimers();assert.equal(s.managers.length,1);assert.equal(view.epoch,epoch);assert.equal(view.nativeSession.ids.nativeId('filter'),filter.id);assert.equal(s.hybridViews.get(filter.id),native);assert.equal(native.focusMarker.cursor,7);assert.equal(native.stringValue,'train');
  assert.deepEqual(Array.from(manager.patches.at(-1),n=>n.component),['Text'],'only result count changes; native Select does not reenter its active onChange stack');
  const button=view.nativeSession.ids.nativeId('result');manager.listener.onReceiveActionEvent(JSON.stringify({version:'v0.9',action:{surfaceId:'s',sourceComponentId:button,name:'choose',context:{productId:'train-42'}}}));
  assert.equal(actions.length,1);assert.equal(actions[0].revision,c.getSurface('s').revision);assert.equal(actions[0].sourceComponentId,'result');assert.equal(actions[0].context.productId,'train-42');
- native.edit('all');assert.equal(s.managers.length,1);assert.equal(native.stringValue,'all');assert.equal(c.getSurface('s').components.find(n=>n.id==='count').text,'2 results');view.aboutToDisappear();
+ native.edit('all');s.flushTimers();assert.equal(s.managers.length,1);assert.equal(native.stringValue,'all');assert.equal(c.getSurface('s').components.find(n=>n.id==='count').text,'2 results');view.aboutToDisappear();
+});
+
+test('mapped typing coalesces dynamic control props after native onChange without replacing the editor',()=>{
+ const s=fixture();let c;
+ const nodes=(value,label)=>[
+  {id:'root',component:'Column',children:['name','summary']},
+  {id:'name',component:'OpenUiInput',field:'name',label,placeholder:label,value},
+  {id:'summary',component:'Text',text:value||'Empty'}
+ ];
+ c=new s.Controller({onFieldChange:e=>{
+  c.apply({kind:'patch',surfaceId:'s',components:nodes(e.value,'Intermediate'),syncFieldValues:true});
+  c.apply({kind:'patch',surfaceId:'s',components:nodes(e.value,'Final label'),syncFieldValues:true});
+ }});
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'patch',surfaceId:'s',components:nodes('','Initial')});
+ const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],id=view.nativeSession.ids.nativeId('name'),native=s.hybridViews.get(id),epoch=view.epoch;
+ native.focusMarker={selectionStart:2,keyboard:'open'};
+ let active=false;const receive=manager.receiveTextChunk.bind(manager);
+ manager.receiveTextChunk=text=>{assert.equal(active,false,'native parser cannot reenter an active control callback');receive(text)};
+ for(const value of ['L','Li','Lin']){
+  const before=manager.patches.length;active=true;native.edit(value);
+  assert.equal(manager.patches.length,before,'even dynamic placeholder changes wait until callback return');
+  assert.equal(c.getSurface('s').components.find(n=>n.id==='name').value,value,'controller state is already authoritative');
+  assert.equal(native.stringValue,value);assert.equal(s.timers.size,1,'multiple mapped evaluations share one refresh');
+  active=false;s.flushTimers();
+  assert.equal(s.managers.length,1);assert.equal(view.epoch,epoch);assert.equal(s.hybridViews.get(id),native);
+  assert.equal(native.controlLabel,'Final label');assert.equal(native.placeholder,'Final label');
+  assert.deepEqual(native.focusMarker,{selectionStart:2,keyboard:'open'});
+  assert.equal(view.nativeSession.documentRevision,c.getSurface('s').revision);
+ }
+ assert.equal(native.stringValue,'Lin');view.aboutToDisappear();
+});
+
+test('a host replacement requested from native onChange waits before destroying that callback owner',()=>{
+ const s=fixture();let c;
+ c=new s.Controller({onFieldChange:e=>{if(typeof e.value==='string')c.apply({kind:'components',surfaceId:'s',replace:true,components:[
+  {id:'root',component:'Column',children:['field']},{id:'field',component:'OpenUiCheckbox',field:'checked',label:'New control',value:false}
+ ]})}});
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'components',surfaceId:'s',components:[
+  {id:'root',component:'Column',children:['field']},{id:'field',component:'OpenUiInput',field:'name',label:'Name'}
+ ]});
+ const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],old=s.hybridViews.get(view.nativeSession.ids.nativeId('field'));
+ let active=true;const destroy=manager.destroy.bind(manager);manager.destroy=()=>{assert.equal(active,false);destroy()};
+ old.edit('Replace');assert.equal(manager.disposed,false);assert.equal(s.managers.length,1);assert.equal(s.timers.size,1);
+ active=false;s.flushTimers();assert.equal(manager.disposed,true);assert.equal(s.managers.length,2);
+ const replacement=s.hybridViews.get(view.nativeSession.ids.nativeId('field'));assert.equal(replacement.getComponentType(),'OpenUiCheckbox');
+ old.edit('stale');assert.equal(c.getSurface('s').fieldValuesJson,'{}');replacement.edit(true);
+ assert.equal(JSON.parse(c.getSurface('s').fieldValuesJson).field,true);view.aboutToDisappear();
+});
+
+test('disposing a view cancels a deferred native-edit refresh and fences an already queued callback',()=>{
+ const s=fixture();let c;
+ c=new s.Controller({onFieldChange:e=>c.apply({kind:'patch',surfaceId:'s',syncFieldValues:true,components:[
+  {id:'root',component:'Column',children:['field']},{id:'field',component:'OpenUiInput',field:'name',label:'Updated',value:e.value}
+ ]})});
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'components',surfaceId:'s',components:[
+  {id:'root',component:'Column',children:['field']},{id:'field',component:'OpenUiInput',field:'name',label:'Name'}
+ ]});
+ const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],native=s.hybridViews.get(view.nativeSession.ids.nativeId('field'));
+ native.edit('Lin');assert.equal(s.timers.size,1);const queued=Array.from(s.timers.values())[0],patches=manager.patches.length;
+ view.aboutToDisappear();assert.equal(s.timers.size,0);assert.equal(manager.disposed,true);
+ queued();s.flushTimers();assert.equal(s.managers.length,1);assert.equal(manager.patches.length,patches);assert.equal(view.nativeSession,undefined);
 });
 
 test('filtered-out nodes lose callbacks and queued measurements, and returning nodes get fresh native identities',()=>{

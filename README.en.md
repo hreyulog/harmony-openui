@@ -8,7 +8,18 @@
 
 An independent community adapter that reuses the official OpenUI parser, renders model-generated component declarations with precompiled ArkUI components, and returns user actions to the host application. Built for choices, data entry, multistep forms, and result panels in chat. No WebView or on-device compilation of generated ArkTS is required.
 
-This is not an official OpenUI or Huawei SDK. v0.3 adds a general native mapping runtime that reuses the official OpenUI state and expression engine. It remains a bounded adaptation, not a complete port of OpenUI Lang 1.0 or all ArkUI components.
+This is not an official OpenUI or Huawei SDK. v0.4 extends the general mapping runtime with input, checkbox groups and live forms, reusing the official OpenUI state / expression engine and existing native controls. It remains a bounded adaptation, not a complete OpenUI or ArkUI implementation.
+
+**v0.4: model-generated image results → local filtering and selection → native form → model-generated result.** The generic mapped catalog now contains 15 components, adding text inputs, checkbox records and named forms while reusing existing native controls and the official state / expression engine. [Mapping architecture](docs/mapping.md)
+
+The complete flow ran on Nova with real MiniMax requests, checking typing focus, aggregate checkbox state, localized required errors, reset and live submitted values. The same generated sources passed all twelve filter combinations and nine form/result replay cases. Five provider requests included two bounded corrections; filtering, typing and reset required no model requests. [v0.4 verification](docs/verification-v04.md) · [Actual programs and receipt](docs/evidence/2026-10-20-v04/acceptance.json)
+
+| Filtered image result | Required validation | Native editing and multi-selection | Model-generated result |
+| --- | --- | --- | --- |
+| <img src="docs/images/nova-v04-20261020/filtered-forest.jpeg" width="210" alt="Locally filtered forest activity"> | <img src="docs/images/nova-v04-20261020/form-required.jpeg" width="210" alt="Localized required errors after blank submission"> | <img src="docs/images/nova-v04-20261020/form-filled.jpeg" width="210" alt="Live name, notes and both selected items"> | <img src="docs/images/nova-v04-20261020/model-result.jpeg" width="210" alt="Read-only model result retaining submitted values"> |
+
+<details>
+<summary>v0.3 historical device evidence: image filtering, reset and selection</summary>
 
 **v0.3: model-generated image result cards with native combined filters, reset and selection.** `OpenUiMappedRuntime` maps a subset of upstream components to existing AGenUI / ArkUI controls. Official `$state`, bindings and conditional expressions run locally without another model request. The v0.2 forms API remains available. [Mapping architecture and example](docs/mapping.md)
 
@@ -17,6 +28,8 @@ v0.3 completed **actual MiniMax generation → combined category/duration filter
 | Local filters and image | Museum result | Empty state | Host selection receipt |
 | --- | --- | --- | --- |
 | <img src="docs/images/nova-v03-20261020/filtered-forest.jpeg" width="210" alt="Filtered native forest result"> | <img src="docs/images/nova-v03-20261020/filtered-museum.jpeg" width="210" alt="Museum category and duration filter"> | <img src="docs/images/nova-v03-20261020/empty-result.jpeg" width="210" alt="Empty result state"> | <img src="docs/images/nova-v03-20261020/selection-receipt.jpeg" width="210" alt="Correct bookstore intent received by host"> |
+
+</details>
 
 <details>
 <summary>Historical v0.2 device evidence: forms, choices and confirmation</summary>
@@ -67,7 +80,18 @@ Harmony OpenUI adds a native adaptation layer around the official parser. It doe
 
 The model supplies declarations and content, rather than executable ArkTS. An action such as choosing an option returns data to the host; the host decides what happens next.
 
-## What v0.3 adds
+## What v0.4 adds
+
+- Six additional mappings: `Input`, `TextArea`, `CheckBoxItem`, `CheckBoxGroup`, `Buttons`, `Form`; 15 entries in total.
+- Existing native text editors and checkboxes, with boolean-record group state held by the official store.
+- Required-field / any-choice group validation and current `formName` / `formState` payloads, rather than model-guessed answers.
+- Remaining errors persist through editing; Reset clears validation state; new programs start with new defaults.
+- Structural work triggered inside native input callbacks is coalesced until the callback returns.
+- An independent filtered list → plan editor → result flow, with host-owned model requests and supplied facts.
+
+These v0.3 capabilities remain available:
+
+## Retained mapping features
 
 - One central mapping registry supplies schema, prompt, support manifest and native projection.
 - A bounded upstream-signature subset: `Stack`, `Card`, `CardHeader`, `TextContent`, `Image`, `Button`, `Select`, `SelectItem`, `FormControl`.
@@ -97,7 +121,7 @@ Build the HAR and add it as a local dependency to your HarmonyOS project, retain
 After building, run this in the host module directory:
 
 ```powershell
-ohpm install D:/openui-build/har-01/artifacts/harmony-openui-0.3.0.har
+ohpm install D:/openui-build/har-01/artifacts/harmony-openui-0.4.0.har
 ```
 
 Import the local package as `@hreyulog/harmony-openui`. The parser is bundled in the HAR; the host does not need a separate npm parser or model SDK.
@@ -179,6 +203,8 @@ To install the demo on a retail device, register its exact bundle, `com.hreyulog
 
 ## Demo and verification
 
+The v0.4 mapped demo connects image filtering to a plan editor. The model generates the list, editing card, and final result separately. Filters and inputs update locally; submission carries current raw values from the named form. Before displaying a generated list, the demo host checks all twelve filter combinations. An invalid program may receive one model repair request; the host never rewrites generated source. The SDK contains neither these fixture facts nor model transport.
+
 The demo uses explicitly fictional itinerary data to test interaction; it is not a live ticket search. It supports OpenAI-compatible and Anthropic-compatible HTTPS model requests. Keys entered through its configuration screen remain in memory. An optional developer configuration file must remain in the app-private directory, outside the package and repository.
 
 The current demo receives complete model HTTP responses and then feeds them to the parser in chunks. It does not implement provider SSE framing. The SDK can accept text chunks from a real network stream. After a choice, the host requests the result and updates the same surface.
@@ -197,7 +223,7 @@ See the [v0.2 verification record](docs/verification-v02.md) for exact scope, su
 - The A2UI adapter implements a limited subset, not full protocol conformance.
 - The SDK and demo are independent of Sofia; integration has not been implemented.
 
-Documentation: [v0.3 device verification](docs/verification-v03.md) · [Mapping layer](docs/mapping.md) · [Architecture](docs/architecture.md) · [Protocol and state](docs/protocol.md) · [Rendering and themes](docs/rendering.md) · [Build](docs/building.md) · [Verification](docs/verification.md)
+Documentation: [v0.4 device verification](docs/verification-v04.md) · [Mapping layer](docs/mapping.md) · [Architecture](docs/architecture.md) · [Protocol and state](docs/protocol.md) · [Rendering and themes](docs/rendering.md) · [Build](docs/building.md) · [Verification](docs/verification.md)
 
 Upstream references: [OpenUI architecture](https://www.openui.com/docs/openui-lang/architecture) · [Defining components](https://www.openui.com/docs/openui-lang/defining-components) · [ArkUI](https://developer.huawei.com/consumer/cn/arkui/) · [AGenUI](https://github.com/AGenUI/AGenUI)
 

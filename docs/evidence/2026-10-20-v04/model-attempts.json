@@ -1,0 +1,44 @@
+{
+  "provider": "MiniMax",
+  "model": "MiniMax-M3",
+  "actualProviderRequests": 5,
+  "validationRepairRequests": 2,
+  "attempts": [
+    {
+      "stage": "list",
+      "attempt": 1,
+      "decision": "rejected-demo-empty-state-validation",
+      "path": "model-candidates/list-1.openui",
+      "sha256": "235b01c6a7646cb760de1d65e9f3ae485d48afd1beb1a5d4a18e1c25a7fd5aa9"
+    },
+    {
+      "stage": "list",
+      "attempt": 2,
+      "decision": "accepted",
+      "path": "model-candidates/list-2.openui",
+      "sha256": "a0e52da4f6c3a02175ca86a88d4fc660bfeadd6a9cad057ae8294a929e636c22"
+    },
+    {
+      "stage": "form",
+      "attempt": 1,
+      "decision": "accepted",
+      "path": "model-candidates/form-1.openui",
+      "sha256": "bc71953c1729323d8f85660dcba738dd822bb0af208bdbec582d8386fae8649a"
+    },
+    {
+      "stage": "result",
+      "attempt": 1,
+      "decision": "rejected-nonliteral-state-initializer",
+      "path": "model-candidates/result-1.openui",
+      "sha256": "b45ffbce471edff0d3caa51dc227f04e7613a4e1ed610b87bdcbda8c02e13c6f"
+    },
+    {
+      "stage": "result",
+      "attempt": 2,
+      "decision": "accepted",
+      "path": "model-candidates/result-2.openui",
+      "sha256": "7fe7ad135303666fe37fce88fc83a9390b31a0515bdc04a151a1869ce4d1ca7d"
+    }
+  ],
+  "sourceWasManuallyRewritten": false
+}

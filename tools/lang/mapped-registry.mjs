@@ -18,11 +18,38 @@ const flex = {
   wrap: z.boolean().optional()
 };
 const binding = z.string().optional(); markReactive(binding);
+const rules = z.object({ required: z.boolean().optional() }).optional();
+const aggregateBinding = z.record(z.string(), z.boolean()).optional(); markReactive(aggregateBinding);
+const input = define('Input', 'A native single-line text field. This bounded profile accepts type=text only. Bind value to a declared $state or leave it local to its named Form.', {
+  name: z.string(), placeholder: z.string().optional(), type: z.literal('text').optional(), rules, value: binding
+});
+const textArea = define('TextArea', 'A native multiline text field. This bounded profile uses three native rows. Bind value to a declared $state or leave it local to its named Form.', {
+  name: z.string(), placeholder: z.string().optional(), rows: z.literal(3).optional(), rules, value: binding
+});
+const checkBoxItem = define('CheckBoxItem', 'One named boolean choice. description is required by the upstream signature; use an empty string when unnecessary.', {
+  label: z.string(), description: z.string(), name: z.string(), defaultChecked: z.boolean().optional()
+});
+const checkBoxGroup = define('CheckBoxGroup', 'A set of independent choices stored as a record of item name to boolean. A required group needs at least one checked item. The official spelling has a capital B.', {
+  name: z.string(), items: z.array(checkBoxItem.ref), rules, value: aggregateBinding
+});
 const selectItem = define('SelectItem', 'A supplied select option; value is its stable business key.', { value: z.string(), label: z.string() });
 const select = define('Select', 'A native select. Bind value to a declared $state variable to update the UI locally. Use FormControl to label it.', {
   name: z.string(), items: z.array(selectItem.ref), placeholder: z.string().optional(),
-  rules: z.object({ required: z.boolean().optional() }).optional(), value: binding,
+  rules, value: binding,
   size: z.enum(['small', 'medium', 'large']).optional()
+});
+const formControl = define('FormControl', 'A visible label, supported input and optional hint.', {
+  label: z.string(), input: z.union([input.ref, textArea.ref, select.ref, checkBoxGroup.ref]), hint: z.string().optional()
+});
+const button = define('Button', 'An action button. Set and Reset update local state; ToAssistant and OpenUrl return intent to the host. A primary ToAssistant inside a Form validates the live values before returning formState.', {
+  label: z.string(), action: action().optional(), variant: z.enum(['primary', 'secondary', 'tertiary']).optional(),
+  type: z.enum(['normal', 'destructive']).optional(), size: z.enum(['extra-small', 'small', 'medium', 'large']).optional()
+});
+const buttons = define('Buttons', 'A reusable group of action buttons. Official default direction is row; use column for long mobile captions.', {
+  buttons: z.array(button.ref), direction: z.enum(['row', 'column']).optional()
+});
+const form = define('Form', 'A named form with explicit buttons and labelled fields. Form(name, Buttons([...]), fields). Do not nest forms or invent a Submit action; use @ToAssistant and the host receives the validated live formState.', {
+  name: z.string(), buttons: buttons.ref, fields: z.array(formControl.ref).default([])
 });
 const definitions = [
   define('Stack', 'An ordinary row or column of children. This native profile supports wrap=false only.', { children: z.array(z.any()), ...flex }),
@@ -34,20 +61,16 @@ const definitions = [
     text: z.string(), size: z.enum(['small', 'default', 'large', 'small-heavy', 'large-heavy']).optional()
   }),
   define('Image', 'A native image. Use only an exact supplied HTTPS URL and meaningful alternative text.', { alt: z.string(), src: z.string().optional() }),
-  define('Button', 'An action button. Set and Reset update local state; ToAssistant and OpenUrl return intent to the host.', {
-    label: z.string(), action: action().optional(), variant: z.enum(['primary', 'secondary', 'tertiary']).optional(),
-    type: z.enum(['normal', 'destructive']).optional(), size: z.enum(['extra-small', 'small', 'medium', 'large']).optional()
-  }), select, selectItem,
-  define('FormControl', 'A visible label, supported input and optional hint.', { label: z.string(), input: select.ref, hint: z.string().optional() })
+  button, select, selectItem, formControl, input, textArea, checkBoxGroup, checkBoxItem, buttons, form
 ];
 
 const gapPx = { none: '0px', xs: '8px', s: '16px', m: '24px', l: '32px', xl: '40px', '2xl': '48px' };
 function layout(p) {
   if (p.wrap) throw Error('OPENUI_MAPPED_WRAP_UNSUPPORTED');
-  if ((p.gap !== undefined && !Object.prototype.hasOwnProperty.call(gapPx, p.gap)) ||
-    (p.direction !== undefined && !['row', 'column'].includes(p.direction)) ||
-    (p.align !== undefined && !['start', 'center', 'end', 'stretch', 'baseline'].includes(p.align)) ||
-    (p.justify !== undefined && !['start', 'center', 'end', 'between', 'around', 'evenly'].includes(p.justify))) throw Error('OPENUI_MAPPED_LAYOUT_VALUE');
+  if ((p.gap != null && !Object.prototype.hasOwnProperty.call(gapPx, p.gap)) ||
+    (p.direction != null && !['row', 'column'].includes(p.direction)) ||
+    (p.align != null && !['start', 'center', 'end', 'stretch', 'baseline'].includes(p.align)) ||
+    (p.justify != null && !['start', 'center', 'end', 'between', 'around', 'evenly'].includes(p.justify))) throw Error('OPENUI_MAPPED_LAYOUT_VALUE');
   return { component: p.direction === 'row' ? 'Row' : 'Column',
     ...(p.align ? { align: p.align } : {}), ...(p.justify ? { justify: p.justify } : {}),
     ...(p.gap ? { styles: { gap: gapPx[p.gap] } } : {}) };
@@ -57,12 +80,36 @@ function text(id, content, variant = 'body', styles) {
   return { id, component: 'Text', text: content, variant, ...(styles ? { styles } : {}) };
 }
 function container(id, p, context) { return { id, ...layout(p), children: context.children(p.children) }; }
+function fieldName(value) {
+  if (typeof value !== 'string' || !/^[A-Za-z_][A-Za-z0-9_.-]{0,63}$/.test(value) || ['__proto__', 'constructor', 'prototype'].includes(value)) throw Error('OPENUI_MAPPED_FIELD_NAME');
+  return value;
+}
+function requiredRule(value) {
+  if (value == null) return undefined;
+  if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(key => key !== 'required') ||
+    (value.required !== undefined && typeof value.required !== 'boolean')) throw Error('OPENUI_MAPPED_FIELD_RULE');
+  return value.required;
+}
+function fieldLabel(name, placeholder, context) {
+  const label = context.label || placeholder || name;
+  if (typeof label !== 'string' || !label || label.length > 500) throw Error('OPENUI_MAPPED_FIELD_LABEL');
+  return label;
+}
+function inputMap(id, p, c, multiline) {
+  const name = fieldName(p.name), required = requiredRule(p.rules);
+  if (multiline ? p.rows != null && p.rows !== 3 : p.type != null && p.type !== 'text') throw Error('OPENUI_MAPPED_INPUT_VARIANT');
+  if (p.placeholder != null && (typeof p.placeholder !== 'string' || p.placeholder.length > 500)) throw Error('OPENUI_MAPPED_INPUT_PLACEHOLDER');
+  return { id, component: 'OpenUiInput', field: name, label: fieldLabel(name, p.placeholder, c),
+    variant: multiline ? 'textarea' : 'text', inputType: 'text', value: c.field(id, name, p.value, { kind: 'text', required }),
+    ...(p.placeholder == null ? {} : { placeholder: p.placeholder }), ...(required === undefined ? {} : { required }) };
+}
 
 // One registry owns catalog metadata AND executable projection. A new mapping
 // is added here, then its schema, prompt and support manifest are regenerated.
 export const mappedRegistry = [
   { name: 'Stack', native: ['Column', 'Row'], source: 'Stack/schema.ts', map: container },
   { name: 'Card', native: ['Card', 'Column', 'Row'], source: 'Card/schema.ts', map(id, p, c) {
+    if (p.variant != null && !['card', 'clear'].includes(p.variant)) throw Error('OPENUI_MAPPED_CARD_VARIANT');
     const child = 's_' + id + '_content'; c.add(container(child, p, c));
     return { id, component: 'Card', child, ...(p.variant === 'clear' ? { styles: { 'background-color': 'transparent' } } : {}) };
   } },
@@ -84,23 +131,48 @@ export const mappedRegistry = [
   } },
   { name: 'Button', native: ['Button', 'Text'], source: 'Button/schema.ts', map(id, p, c) {
     const child = 's_' + id + '_label'; c.add(text(child, p.label));
-    return { id, component: 'Button', child, variant: p.variant === 'tertiary' ? 'borderless' : 'primary', action: c.action(id, p.action, p.label) };
+    return { id, component: 'Button', child, variant: p.variant === 'tertiary' ? 'borderless' : 'primary', action: c.action(id, p.action, p.label, { variant: p.variant ?? 'primary' }) };
   } },
   { name: 'Select', native: ['OpenUiSelect'], source: 'Select/schema.ts', map(id, p, c) {
-    if (typeof p.name !== 'string' || !/^[A-Za-z_][A-Za-z0-9_.-]{0,63}$/.test(p.name) || ['__proto__','constructor','prototype'].includes(p.name)) throw Error('OPENUI_MAPPED_FIELD_NAME');
-    if (p.rules?.required !== undefined && typeof p.rules.required !== 'boolean') throw Error('OPENUI_MAPPED_FIELD_RULE');
+    const name = fieldName(p.name), required = requiredRule(p.rules);
     const options = p.items.map(item => {
       if (item?.typeName !== 'SelectItem') throw Error('OPENUI_MAPPED_SELECT_ITEM');
       return { label: item.props.label, value: item.props.value };
     });
-    const value = c.field(id, p.name, p.value, options);
-    const label = c.label || p.placeholder || p.name;
-    if (typeof label !== 'string' || !label || label.length > 500) throw Error('OPENUI_MAPPED_FIELD_LABEL');
-    return { id, component: 'OpenUiSelect', field: p.name, label,
-      value, options, ...(p.rules?.required === undefined ? {} : { required: p.rules.required }) };
+    const value = c.field(id, name, p.value, { kind: 'select', options, required });
+    return { id, component: 'OpenUiSelect', field: name, label: fieldLabel(name, p.placeholder, c),
+      value, options, ...(required === undefined ? {} : { required }) };
+  } },
+  { name: 'Input', native: ['OpenUiInput'], source: 'Input/schema.ts', map(id, p, c) { return inputMap(id, p, c, false); } },
+  { name: 'TextArea', native: ['OpenUiInput'], source: 'TextArea/schema.ts', map(id, p, c) { return inputMap(id, p, c, true); } },
+  { name: 'CheckBoxItem', native: [], source: 'CheckBoxGroup/schema.ts', dataOnly: true },
+  { name: 'CheckBoxGroup', native: ['Column', 'Text', 'OpenUiCheckbox'], source: 'CheckBoxGroup/schema.ts', map(id, p, c) {
+    const name = fieldName(p.name), required = requiredRule(p.rules), label = fieldLabel(name, '', c);
+    if (!Array.isArray(p.items) || p.items.length < 1 || p.items.length > 30 || p.items.some(item => item?.typeName !== 'CheckBoxItem')) throw Error('OPENUI_MAPPED_CHECKBOX_ITEMS');
+    const group = c.checkboxGroup(id, name, p.value, p.items.map(item => ({ ...item.props, name: fieldName(item.props.name) })), { required });
+    const labelId = 's_' + id + '_label'; c.add(text(labelId, label + (required ? ' *' : ''), 'body'));
+    const children = [labelId];
+    for (const item of group.items) {
+      c.add({ id: item.id, component: 'OpenUiCheckbox', field: item.field, label: item.label, value: item.value }); children.push(item.id);
+      if (item.description) { const descriptionId = 's_' + item.id + '_hint'; c.add(text(descriptionId, item.description, 'caption')); children.push(descriptionId); }
+    }
+    return { id, component: 'Column', children };
+  } },
+  { name: 'Buttons', native: ['Column', 'Row'], source: 'Buttons/schema.ts', map(id, p, c) {
+    if (!Array.isArray(p.buttons) || p.buttons.length < 1 || p.buttons.length > 10 || p.buttons.some(item => item?.typeName !== 'Button') ||
+      (p.direction != null && !['row', 'column'].includes(p.direction))) throw Error('OPENUI_MAPPED_FORM_BUTTONS');
+    return { id, component: p.direction === 'column' ? 'Column' : 'Row', children: c.children(p.buttons), styles: { gap: '16px' } };
+  } },
+  { name: 'Form', native: ['OpenUiForm'], source: 'Form/schema.ts', map(id, p, c) {
+    const name = fieldName(p.name); c.registerForm(name);
+    if (p.buttons?.typeName !== 'Buttons' || !Array.isArray(p.fields) || p.fields.length > 30 || p.fields.some(item => item?.typeName !== 'FormControl')) throw Error('OPENUI_MAPPED_FORM_FIELDS');
+    const children = p.fields.map((child, index) => c.visit(child, 'field_' + index, '', name)).filter(Boolean);
+    children.push(c.visit(p.buttons, 'buttons', '', name));
+    return { id, component: 'OpenUiForm', name, children };
   } },
   { name: 'SelectItem', native: [], source: 'Select/schema.ts', dataOnly: true },
-  { name: 'FormControl', native: ['Column', 'Text', 'OpenUiSelect'], source: 'FormControl/schema.ts', map(id, p, c) {
+  { name: 'FormControl', native: ['Column', 'Text', 'OpenUiSelect', 'OpenUiInput', 'OpenUiCheckbox'], source: 'FormControl/schema.ts', map(id, p, c) {
+    if (typeof p.label !== 'string' || !p.label || p.label.length > 500) throw Error('OPENUI_MAPPED_FIELD_LABEL');
     const child = c.visit(p.input, 'input', p.label); const children = child ? [child] : [];
     if (p.hint) { const key = 's_' + id + '_hint'; c.add(text(key, p.hint, 'caption')); children.push(key); }
     return { id, component: 'Column', children };
@@ -109,9 +181,10 @@ export const mappedRegistry = [
 export const mappedLibrary = createLibrary({ components: definitions, root: 'Stack' });
 export const mappedSupport = { ...mappedReference, components: mappedRegistry.map(({ name, native, source, dataOnly }) => ({
   name, native, source: 'packages/react-ui/src/genui-lib/' + source, ...(dataOnly ? { dataOnly: true } : {})
-})), capabilities: ['$state', 'conditional-expression', 'select-binding', '@Set', '@Reset', '@ToAssistant-context', '@OpenUrl'],
+})), capabilities: ['$state', 'conditional-expression', 'select-binding', 'input-binding', 'checkbox-record-binding', 'form-live-state', 'form-required-validation', '@Set', '@Reset', '@ToAssistant-context', '@OpenUrl'],
 limitations: ['Bounded official component signatures, not full react-ui or ArkUI parity.', 'No Query/Mutation, HTML, Markdown, wrapping, custom code or network execution.',
-  'State declarations are unique string/number/boolean literal defaults. Derived state declarations are not supported; put expressions inline.',
+  'State declarations are unique literal defaults. Checkbox groups bind a record of declared item names to boolean values. Derived state declarations are not supported; put expressions inline.',
+  'Input supports type=text only. TextArea supports the native three-row geometry only. Form validation supports required only; no blur rules or advanced validation.',
   'Card variant sunk and advanced form rules are not in this profile.', 'Image geometry, control sizes, button variants and destructive tone follow the native host theme.'] };
 export const mappedPromptOptions = {
   preamble: 'Generate a native HarmonyOS interface using the bounded official OpenUI component mapping profile. Use the user language.',
@@ -119,13 +192,20 @@ export const mappedPromptOptions = {
   additionalRules: [
     'This is a separate mapped profile, not the legacy Harmony v0.2 component signatures. Emit only OpenUI Lang source, no fences or commentary.',
     'Start with root = Stack([...]). Declare local filters as $name = "default". Use Select(name, items, placeholder, null, $name) inside FormControl(label, input).',
-    'Declare each $state variable exactly once, initialized only to a string, number or boolean literal. Never write $derived = expression, never redeclare a $state variable, and never assign $state outside @Set/@Reset. Put all derived conditions inline in the component props or conditional children, for example ($kind == "all" || $kind == "park") && ($duration == "all" || $duration == "short") ? namedCard : null.',
+    'Declare each $state variable exactly once, initialized only to a string, number, boolean, or a flat record of named boolean choices. Never write $derived = expression, never redeclare a $state variable, and never assign $state outside @Set/@Reset. Put all derived conditions inline in the component props or conditional children, for example ($kind == "all" || $kind == "park") && ($duration == "all" || $duration == "short") ? namedCard : null.',
     'SelectItem uses the official order SelectItem(value, label). Image uses the official order Image(alt, src).',
+    'Card and Stack have different positional arguments. Card(children, variant, direction, gap, align, justify, wrap) has variant SECOND; Stack(children, direction, gap, align, justify, wrap) has direction SECOND. For a vertical card with small spacing write Card([...], "card", "column", "s"). Never write Card([...], "column", "s"). Use "card" or "clear" for Card.variant; omitted optional positions may use null.',
+    'Prefer Card(children) and Stack(children) with the native default layout. Supply optional positional arguments only when necessary; do not emit every default position. Card takes at most seven arguments total, and Stack at most six. Do not add an extra alignment or justification argument.',
+    'For reusable forms use Form(name, Buttons([Button("继续", @ToAssistant("提交资料", {intent:"supplied intent"}))], "column"), [FormControl(label, input), ...]). The host returns live formState; do not put guessed field values into action.context and do not use @Submit.',
+    'Input(name, placeholder, "text", rules, value) and TextArea(name, placeholder, 3, rules, value) reuse native controls. Only type=text and three-row TextArea are supported. Use rules={required:true} only where necessary; no other rule keys are supported.',
+    'CheckBoxGroup has the exact official spelling and signature CheckBoxGroup(name, [CheckBoxItem(label, description, name, defaultChecked), ...], rules, value). Its value is a record such as {quiet:false,accessible:false}, not an array or one boolean. Declare a record $preferences for reactive group state or omit value for local Form state. A required group needs any one item checked, not all items.',
+    'Give every Form and field a unique safe identifier; forms cannot nest. Primary ToAssistant buttons validate required fields before returning live formState. Secondary or tertiary actions are available for non-validating navigation or cancellation.',
     'For local filtering, place conditional children directly in Stack: $kind == "all" || $kind == "park" ? namedCard : null. Keep fixed child slots and named reusable declarations. Do not use Each, Filter, Query or Mutation.',
     'Use only supplied result facts and exact supplied HTTPS image URLs. Never invent price, availability, bookings, URLs or business outcomes.',
     'Build results from ordinary Card, Image, CardHeader, TextContent and Button components, not business-specific components. Use only as many cards as supplied facts require.',
     'Use @Reset($kind) or @Set($kind, "value") for internal state changes. These execute locally without another model request. Use @ToAssistant("message", {itemId:"supplied id"}) to pass intent and business context to the host.',
     'Keep mobile rows short; default to a column. wrap must be false. The host controls exact typography, colors and dimensions. Only required validation rules are supported here.'
   ],
-  examples: ['$kind = "all"\nroot = Stack([heading, filter, reset, $kind == "all" || $kind == "park" ? result : null])\nheading = CardHeader("发现周末去处", "示例数据")\nfilter = FormControl("类型", Select("kind", [SelectItem("all", "全部"), SelectItem("park", "公园")], "选择类型", null, $kind))\nreset = Button("重置", @Reset($kind), "tertiary")\nresult = Card([CardHeader("城市公园", "开放空间"), TextContent("适合散步"), Button("选择", @ToAssistant("选择城市公园", {itemId:"park-1"}))])']
+  examples: ['$kind = "all"\nroot = Stack([heading, filter, reset, $kind == "all" || $kind == "park" ? result : null])\nheading = CardHeader("发现周末去处", "示例数据")\nfilter = FormControl("类型", Select("kind", [SelectItem("all", "全部"), SelectItem("park", "公园")], "选择类型", null, $kind))\nreset = Button("重置", @Reset($kind), "tertiary")\nresult = Card([CardHeader("城市公园", "开放空间"), TextContent("适合散步"), Button("选择", @ToAssistant("选择城市公园", {itemId:"park-1"}))])',
+    '$name = ""\n$preferences = {quiet:false,accessible:false}\nroot = Stack([trip])\ntrip = Form("trip", Buttons([Button("继续", @ToAssistant("提交出行偏好", {intent:"trip-preferences"}))], "column"), [FormControl("称呼", Input("name", "请输入称呼", "text", {required:true}, $name)), FormControl("备注", TextArea("notes", "可选备注", 3)), FormControl("偏好", CheckBoxGroup("preferences", [CheckBoxItem("安静", "", "quiet"), CheckBoxItem("无障碍", "", "accessible")], {required:true}, $preferences))])']
 };

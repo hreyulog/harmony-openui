@@ -1,0 +1,12 @@
+root = Stack([header, planForm], "column", "s")
+header = CardHeader("林间步道", "这是一个周末去处资料编辑示例。")
+$planName = ""
+$notes = ""
+$gear = {camera:false,water:false}
+planNameField = FormControl("计划名称", Input("planName", "给计划起个名字", "text", {required:true}, $planName))
+notesField = FormControl("备注", TextArea("notes", "可选备注", 3, null, $notes))
+gearItems = [CheckBoxItem("带相机", "", "camera"), CheckBoxItem("带水", "", "water")]
+gearField = FormControl("准备物品", CheckBoxGroup("gear", gearItems, {required:true}, $gear), "至少选择一项")
+planButtons = Buttons([Button("保存计划", @ToAssistant("提交计划", {intent:"save-plan",itemId:"forest-trail"})), Button("重置资料", @Reset($planName, $notes, $gear), "tertiary")], "column")
+planFields = [planNameField, notesField, gearField]
+planForm = Form("plan", planButtons, planFields)

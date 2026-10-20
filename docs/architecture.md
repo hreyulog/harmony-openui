@@ -40,7 +40,7 @@ The **document** contains component definitions, data bindings, selection/read-o
 
 Snapshots can preserve both kinds of state. The host chooses whether and where to persist them; the SDK has no filesystem, account, cloud synchronization, or retention policy of its own. Older v0.1 snapshots without field maps can be loaded with empty maps. Restored documents receive new render revisions.
 
-## Submit is a validated receipt
+## Legacy Submit is a validated receipt
 
 ```text
 root = Stack([trip])
@@ -59,6 +59,16 @@ The declaration's action context is only `{form: 'trip'}`. It does not contain a
 Empty required inputs, invalid options/date/time/numbers, read-only or obsolete callbacks, and forged field payloads cannot produce an accepted Submit receipt. Disabled fields are omitted. The host still decides what business operation is permitted and what happens after submission.
 
 An ordinary `@Choose`, `@ToAssistant`, or `@OpenUrl` remains action data. The SDK does not execute business effects. A `Dialog` is an explicit native confirmation-sheet launcher; it does not automatically open, bypass Submit checks, or establish that a purchase happened.
+
+## Mapped forms
+
+The mapped profile adds upstream-signature Input, TextArea, CheckBoxGroup, Buttons and Form compositions. The official store holds text and boolean-record values; checkbox leaves remain scalar native controls. Primary conversation actions validate required fields and return a normalized current formName / formState payload. This differs from the legacy custom Submit action and from upstream React hook storage wrappers; see [mapping.md](mapping.md) for the exact boundary.
+
+The mapped runtime owns validation visibility; the controller displays revision-fenced errors through replaceFieldErrors without changing values or document revision. A native field event can create a new evaluated program revision, but compatible native structure remains mounted. Native parser / teardown work is deferred until an active editor callback returns.
+
+Controller observers and host callbacks can synchronously replace a program or change its document. `apply()` returns the revision committed by that call, captured before observers run. The mapped adapter fences subsequent state notifications and actions to that revision and program generation; a retired field event cannot write into a replacement session.
+
+The independent Planner page receives a selected fictional activity, asks the model for an editor, and passes accepted live fields to another model request for a read-only result. It performs no booking or business side effect.
 
 ## Multistep demo
 

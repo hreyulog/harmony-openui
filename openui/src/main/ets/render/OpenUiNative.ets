@@ -127,6 +127,14 @@ export class OpenUiNativeSession {
     this.fieldValues = OpenUiControlModel.values(surface); this.fieldErrors = OpenUiControlModel.errors(surface);
     for (const element of this.elements.values()) { element.syncField(); }
   }
+  /** A mapped evaluation may change structure or control props synchronously
+   * from onChange. The view must wait until that native callback has returned
+   * before entering the native parser or destroying its current owner. */
+  isEditingNativeControl(): boolean {
+    if (!this.current()) { return false; }
+    for (const element of this.elements.values()) { if (element.isEditing()) { return true; } }
+    return false;
+  }
   value(node: OpenUiComponent): OpenUiFieldValue { return OpenUiControlModel.value(this.definitions.get(node.id) ?? node, this.fieldValues); }
   error(id: string): string { return OpenUiControlModel.error(Object.keys(this.fieldErrors).includes(id) ? this.fieldErrors[id] : ''); }
   edit(id: string, value: OpenUiFieldValue): boolean {
@@ -266,6 +274,7 @@ export class OpenUiNativeElement extends A2UIComponent {
     const state: OpenUiControlState = { value, revision: this.renderRevision };
     return JSON.stringify(state);
   }
+  isEditing(): boolean { return this.nativeEditDepth > 0; }
   edit(value: OpenUiFieldValue): void {
     if (!this.canEdit() || !OpenUiControlModel.isField(this.getComponentType())) { return; }
     // The native control has already displayed this value. Remember it before

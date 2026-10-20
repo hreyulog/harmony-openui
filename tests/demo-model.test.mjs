@@ -32,7 +32,7 @@ function setup({responseCode = 200, reply = {}, result, transportError} = {}) {
   };
   const model = vm.runInNewContext(executable + '\nDemoModel', {http});
   const config = protocol => ({endpoint:'https://model.example.test/messages', model:'demo-model', apiKey:testKey, protocol});
-  return {state, generate:protocol => model.generate(config(protocol), 'SYSTEM CATALOG', 'USER FACTS')};
+  return {state, model, config, generate:protocol => model.generate(config(protocol), 'SYSTEM CATALOG', 'USER FACTS')};
 }
 
 test('Anthropic returns only text blocks, keeping thinking and signatures out of the UI', async () => {
@@ -126,4 +126,42 @@ test('transport failure and oversized output both destroy their HTTP request', a
   const oversized = setup({reply:{choices:[{finish_reason:'stop',message:{content:'x'.repeat(100001)}}]}});
   await assert.rejects(oversized.generate('openai'), error => /超过示例大小上限/.test(error.message));
   assert.equal(oversized.state.destroyed, 1);
+});
+
+test('validated demo generation returns a valid first program without a repair request', async () => {
+  const {model, config} = setup(); const prompts = [], candidates = []; let attempts = 0;
+  model.generate = async (_config, _system, prompt) => { prompts.push(prompt); return ui; };
+  const output = await model.generateValidated(config('anthropic'), 'CATALOG', 'FACTS', source => assert.equal(source, ui),
+    {onAttempt:() => attempts++,onCandidate:source => candidates.push(source)});
+  assert.equal(output, ui); assert.equal(attempts, 1); assert.deepEqual(candidates, [ui]); assert.deepEqual(prompts, ['FACTS']);
+});
+
+test('invalid UI receives exactly one model repair with original facts and validation feedback', async () => {
+  const {model, config} = setup(); const prompts = [], candidates = []; let attempts = 0;
+  model.generate = async (_config, _system, prompt) => { prompts.push(prompt); return prompts.length === 1 ? 'invalid Card order' : ui; };
+  const output = await model.generateValidated(config('anthropic'), 'CATALOG', 'SUPPLIED FACTS', source => {
+    if (source !== ui) throw Error('OPENUI_MAPPED_CARD_VARIANT');
+  }, {onAttempt:() => attempts++,onCandidate:source => candidates.push(source)});
+  assert.equal(output, ui); assert.equal(attempts, 2); assert.equal(candidates.length, 2);
+  assert.match(prompts[1], /SUPPLIED FACTS/); assert.match(prompts[1], /OPENUI_MAPPED_CARD_VARIANT/);
+  assert.match(prompts[1], /invalid Card order/); assert.equal(prompts[1].includes(testKey), false);
+});
+
+test('a second invalid candidate stops, while transport errors do not trigger UI repair', async () => {
+  const {model, config} = setup(); let calls = 0;
+  model.generate = async () => { calls++; return 'invalid'; };
+  await assert.rejects(model.generateValidated(config('anthropic'), '', 'facts', () => { throw Error('INVALID_UI'); }), /INVALID_UI/);
+  assert.equal(calls, 2);
+  calls = 0; model.generate = async () => { calls++; throw Error('quota unavailable'); };
+  await assert.rejects(model.generateValidated(config('anthropic'), '', 'facts', () => {}), /quota unavailable/);
+  assert.equal(calls, 1);
+});
+
+test('leaving the demo during generation suppresses stale candidates and further repair calls', async () => {
+  const {model, config} = setup(); let current = true, calls = 0, candidates = 0, resolve;
+  model.generate = async () => { calls++; return await new Promise(done => { resolve = done; }); };
+  const pending = model.generateValidated(config('anthropic'), '', 'facts', () => { throw Error('invalid'); },
+    {isCurrent:() => current,onCandidate:() => candidates++});
+  current = false; resolve('stale candidate');
+  await assert.rejects(pending, /DEMO_MODEL_CANCELLED/); assert.equal(calls, 1); assert.equal(candidates, 0);
 });

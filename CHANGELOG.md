@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.4.0 — 2026-10-20
+
+Extend the opt-in native mapping profile to reusable text input, checkbox groups and forms, while retaining the established language profile and native controls.
+
+- Map upstream `Input`, `TextArea`, `CheckBoxItem`, `CheckBoxGroup`, `Buttons` and `Form`; the mapped catalog now has 15 entries.
+- Keep group state as a named boolean record in the official store and project it to existing scalar native checkboxes. Required groups need at least one selected item.
+- Validate required fields before primary conversation actions and attach a normalized, current `formName` / `formState` payload. Preserve external action context.
+- Preserve remaining validation messages while editing, expose revision-fenced adapter error replacement, and reset native overrides on a new mapped program.
+- Defer structural renderer work until native input callbacks return, coalesce updates, and cancel retired-owner work.
+- Fence reentrant action batches and retired field edits to their exact program and commit revision. `controller.apply()` returns its own commit revision even if a synchronous observer changes the document again.
+- Add an independent activity-plan editor and model-generated result flow after the filtered list. Reuse the existing demo facts and keep Sofia separate.
+- Validate the demo list against its finite supplied facts, including all twelve filter combinations and empty states, and allow one bounded model correction. This validation and transport remain demo-host responsibilities.
+- Input is text-only, TextArea uses the existing three-row native geometry, and validation remains required-only. This does not claim the full upstream form catalog.
+
+## 0.3.0 — 2026-10-20
+
+- Add the opt-in official-semantics mapping runtime, reusing `lang-core` parsing, store, evaluation and field bindings.
+- Generate schema, prompt and support manifest from a centralized mapping registry; initially expose nine mappings.
+- Add local state, conditional result filtering, Set / Reset and context-preserving ToAssistant callbacks.
+- Patch compatible native structures in place; retire removed node identities and periodically recycle managers after bounded identity churn.
+- Verify an actual model-generated image list and combined filters on Nova; retain actual source, screenshots and separate all-combination host replay.
+
 ## 0.2.0 — 2026-10-20
 
 Extend the bounded native catalog from choice/result cards to forms and richer results. Device acceptance of the new flow is recorded separately from the retained v0.1 evidence.

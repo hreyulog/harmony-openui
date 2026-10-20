@@ -99,7 +99,7 @@ export interface OpenUiChange {
   catalogId?: string;
   components?: OpenUiComponent[];
   replace?: boolean;
-  /** Only for a complete patch from a state-owning adapter; defaults stay authoritative. */
+  /** For a complete patch or components replace:true from a state-owning adapter. */
   syncFieldValues?: boolean;
   path?: string;
   valueJson?: string;

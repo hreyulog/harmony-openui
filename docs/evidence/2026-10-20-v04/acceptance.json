@@ -1,0 +1,198 @@
+{
+  "format": "harmony-openui/acceptance@4",
+  "status": "accepted",
+  "createdAt": "2026-10-20T14:00:16.930555+00:00",
+  "version": "0.4.0",
+  "build": "build-r5",
+  "sourceCommitBase": "bcdebd66536822fea32afee3889d4774b5ca5ca4",
+  "compiledSourcesUnchanged": true,
+  "compiledInputCount": 62,
+  "buildCompletedAt": "2026-10-20T13:53:36.583247+00:00",
+  "artifacts": [
+    {
+      "target": "har",
+      "sha256": "772226c361d7b74f63ad4d72b382675699eb3d039d229481c0c5d37b99e2fccc",
+      "bytes": 1187643,
+      "distributionNoticesComplete": true,
+      "artifact": "harmony-openui-0.4.0.har"
+    },
+    {
+      "target": "demo",
+      "sha256": "dbf6d07cfb4e33fd96e5280ce27a6d9150da815d84d4acdbf25ff622c07912f0",
+      "bytes": 8036021,
+      "signed": true,
+      "distributionNoticesComplete": true,
+      "publicNativeLibrariesVerified": 4,
+      "artifact": "harmony-openui-demo-0.4.0-signed.hap"
+    }
+  ],
+  "signature": {
+    "signatureVerifierExitCode": 0,
+    "embeddedProfileExactMatch": true,
+    "signerContainsExactAgcLeaf": true,
+    "verified": true,
+    "status": "verified"
+  },
+  "host": {
+    "nodeTestsPassed": 157,
+    "pythonTestsPassed": 2,
+    "source": "root-reported final host test run"
+  },
+  "native": {
+    "device": "HUAWEI nova 15 Pro",
+    "api": 26,
+    "bundle": "com.hreyulog.harmonyopenui.demo",
+    "actualModelGeneratedOnDevice": true,
+    "model": "MiniMax-M3",
+    "actualProviderRequests": 5,
+    "validationRepairRequests": 2,
+    "selectionCallbacks": 1,
+    "formCallbacks": 1,
+    "nativeCheckpoints": 16,
+    "selectedItemId": "forest-trail",
+    "submittedValues": {
+      "planName": "Walk",
+      "notes": "BringWater",
+      "gear": {
+        "camera": true,
+        "water": true
+      }
+    },
+    "continuousTypingRetainedFocusAndIdentity": true,
+    "resultReadOnly": true,
+    "forestImageVisuallyLoaded": true,
+    "process": {
+      "sameProcessThroughout": true,
+      "startPid": "27517",
+      "endPid": "27517",
+      "checkedAt": "2026-10-20T13:58:38.870988+00:00",
+      "checkedCrashMarkers": [
+        "Signal:SIGSEGV",
+        "Signal:SIGABRT",
+        "Reason:Signal",
+        "appfreeze",
+        "FatalException"
+      ],
+      "markersFound": [],
+      "scope": "Own live process logs available at the end of the recorded native flow"
+    },
+    "nativeBounds": {
+      "nativeLeaves": 4,
+      "allWithinHost": true,
+      "checks": [
+        {
+          "bounds": [
+            119,
+            1054,
+            1201,
+            1316
+          ],
+          "host": [
+            119,
+            816,
+            1201,
+            2758
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1358,
+            1201,
+            1830
+          ],
+          "host": [
+            119,
+            816,
+            1201,
+            2758
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1997,
+            1201,
+            2165
+          ],
+          "host": [
+            119,
+            816,
+            1201,
+            2758
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            2207,
+            1201,
+            2375
+          ],
+          "host": [
+            119,
+            816,
+            1201,
+            2758
+          ],
+          "withinHost": true
+        }
+      ]
+    }
+  },
+  "replay": {
+    "modelFree": true,
+    "filterCombinationsPassed": 12,
+    "emptyStatesCorrect": 12,
+    "cardActionsChecked": 16,
+    "formAndResultCasesPassed": 9
+  },
+  "screenshots": [
+    {
+      "path": "docs/images/nova-v04-20261020/filtered-forest.jpeg",
+      "sha256": "0f9b4ff18af97413cce27925168bd21c28b7468f65c2374cf88e094d3f40b40e",
+      "bytes": 252165,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v04-20261020/empty-result.jpeg",
+      "sha256": "f9b6e9bf2e3ab59b48746203dcb54b7387a44b137ecd34df42ddf5c5375bb3a0",
+      "bytes": 165810,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v04-20261020/form-required.jpeg",
+      "sha256": "3f470b39ae9eabac4fc47e0ac599d147eecf8417bb5470f7b83efb618a58024b",
+      "bytes": 167740,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v04-20261020/form-filled.jpeg",
+      "sha256": "c51f236e264ecf6d5213d3f9117b46a56cb129722a3350a454257adb4f3588ff",
+      "bytes": 158339,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v04-20261020/model-result.jpeg",
+      "sha256": "9e793d84eca335ab8fdbd82264b1264a276df1e1c60439588c94623c147cb1ec",
+      "bytes": 222809,
+      "originalDeviceCapture": true
+    }
+  ],
+  "boundaries": [
+    "Independent repository and demo; no Sofia integration.",
+    "Fictional host-supplied activities and illustrative photos; no live search, booking or payment.",
+    "Physical device evidence is the recorded subset on one Nova/API 26; all 12 filter combinations additionally passed host replay.",
+    "Model source needed two bounded repair requests in the accepted run; visual copy and spacing remain prototype quality.",
+    "The mapped catalog is limited to 15 components; no full ArkUI/OpenUI parity, Query/Mutation or provider SSE.",
+    "Build artifacts and signing credentials remain outside the public checkout."
+  ],
+  "modelSourceHashes": {
+    "model-list.openui": "a0e52da4f6c3a02175ca86a88d4fc660bfeadd6a9cad057ae8294a929e636c22",
+    "model-form.openui": "bc71953c1729323d8f85660dcba738dd822bb0af208bdbec582d8386fae8649a",
+    "model-result.openui": "7fe7ad135303666fe37fce88fc83a9390b31a0515bdc04a151a1869ce4d1ca7d"
+  }
+}
