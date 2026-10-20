@@ -1,0 +1,396 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "Stack": {
+      "$ref": "#/$defs/Stack"
+    },
+    "Card": {
+      "$ref": "#/$defs/Card"
+    },
+    "CardHeader": {
+      "$ref": "#/$defs/CardHeader"
+    },
+    "TextContent": {
+      "$ref": "#/$defs/TextContent"
+    },
+    "Image": {
+      "$ref": "#/$defs/Image"
+    },
+    "Button": {
+      "$ref": "#/$defs/Button"
+    },
+    "Select": {
+      "$ref": "#/$defs/Select"
+    },
+    "SelectItem": {
+      "$ref": "#/$defs/SelectItem"
+    },
+    "FormControl": {
+      "$ref": "#/$defs/FormControl"
+    }
+  },
+  "required": [
+    "Stack",
+    "Card",
+    "CardHeader",
+    "TextContent",
+    "Image",
+    "Button",
+    "Select",
+    "SelectItem",
+    "FormControl"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "Stack": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "type": "array",
+          "items": {}
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "row",
+            "column"
+          ]
+        },
+        "gap": {
+          "type": "string",
+          "enum": [
+            "none",
+            "xs",
+            "s",
+            "m",
+            "l",
+            "xl",
+            "2xl"
+          ]
+        },
+        "align": {
+          "type": "string",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch",
+            "baseline"
+          ]
+        },
+        "justify": {
+          "type": "string",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "between",
+            "around",
+            "evenly"
+          ]
+        },
+        "wrap": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "An ordinary row or column of children. This native profile supports wrap=false only."
+    },
+    "Card": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "type": "array",
+          "items": {}
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "card",
+            "clear"
+          ]
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "row",
+            "column"
+          ]
+        },
+        "gap": {
+          "type": "string",
+          "enum": [
+            "none",
+            "xs",
+            "s",
+            "m",
+            "l",
+            "xl",
+            "2xl"
+          ]
+        },
+        "align": {
+          "type": "string",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch",
+            "baseline"
+          ]
+        },
+        "justify": {
+          "type": "string",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "between",
+            "around",
+            "evenly"
+          ]
+        },
+        "wrap": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "A native card composed from ordinary image, text and button children. No domain-specific business logic."
+    },
+    "CardHeader": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "subtitle": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A card title and optional short subtitle."
+    },
+    "TextContent": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "small",
+            "default",
+            "large",
+            "small-heavy",
+            "large-heavy"
+          ]
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "additionalProperties": false,
+      "description": "Plain native text. Markdown is not supported in this profile."
+    },
+    "Image": {
+      "type": "object",
+      "properties": {
+        "alt": {
+          "type": "string"
+        },
+        "src": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "alt"
+      ],
+      "additionalProperties": false,
+      "description": "A native image. Use only an exact supplied HTTPS URL and meaningful alternative text."
+    },
+    "Button": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "action": {
+          "$ref": "#/$defs/ActionExpression"
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "primary",
+            "secondary",
+            "tertiary"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "destructive"
+          ]
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "extra-small",
+            "small",
+            "medium",
+            "large"
+          ]
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "An action button. Set and Reset update local state; ToAssistant and OpenUrl return intent to the host."
+    },
+    "ActionExpression": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "open_url"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "url"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "continue_conversation"
+            },
+            "context": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "params": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Select": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SelectItem"
+          }
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "rules": {
+          "type": "object",
+          "properties": {
+            "required": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "value": {
+          "type": "string"
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "small",
+            "medium",
+            "large"
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "items"
+      ],
+      "additionalProperties": false,
+      "description": "A native select. Bind value to a declared $state variable to update the UI locally. Use FormControl to label it."
+    },
+    "SelectItem": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "A supplied select option; value is its stable business key."
+    },
+    "FormControl": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "input": {
+          "$ref": "#/$defs/Select"
+        },
+        "hint": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "input"
+      ],
+      "additionalProperties": false,
+      "description": "A visible label, supported input and optional hint."
+    }
+  }
+}

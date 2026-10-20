@@ -21,7 +21,8 @@ function actionDefinition(value) {
     return { event: { name: 'submit', context: { form: step.params.form } } };
   }
   if (step.type === 'continue_conversation' && typeof step.message === 'string') {
-    return { event: { name: 'continue_conversation', context: { message: step.message } } };
+    return { event: { name: 'continue_conversation', context: { message: step.message,
+      ...(step.context === undefined ? {} : { context: step.context }) } } };
   }
   if (step.type === 'open_url' && typeof step.url === 'string') {
     return { event: { name: 'open_url', context: { url: step.url } } };

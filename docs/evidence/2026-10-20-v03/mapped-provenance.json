@@ -1,0 +1,98 @@
+{
+  "repository": "https://github.com/thesysdev/openui",
+  "commit": "9823ec05d4b29bc78d101676dc16b44fe17f1830",
+  "profile": "harmony-openui/mapped@1",
+  "components": [
+    {
+      "name": "Stack",
+      "native": [
+        "Column",
+        "Row"
+      ],
+      "source": "packages/react-ui/src/genui-lib/Stack/schema.ts"
+    },
+    {
+      "name": "Card",
+      "native": [
+        "Card",
+        "Column",
+        "Row"
+      ],
+      "source": "packages/react-ui/src/genui-lib/Card/schema.ts"
+    },
+    {
+      "name": "CardHeader",
+      "native": [
+        "Column",
+        "Text"
+      ],
+      "source": "packages/react-ui/src/genui-lib/CardHeader/schema.ts"
+    },
+    {
+      "name": "TextContent",
+      "native": [
+        "Text"
+      ],
+      "source": "packages/react-ui/src/genui-lib/TextContent/schema.ts"
+    },
+    {
+      "name": "Image",
+      "native": [
+        "Image"
+      ],
+      "source": "packages/react-ui/src/genui-lib/Image/schema.ts"
+    },
+    {
+      "name": "Button",
+      "native": [
+        "Button",
+        "Text"
+      ],
+      "source": "packages/react-ui/src/genui-lib/Button/schema.ts"
+    },
+    {
+      "name": "Select",
+      "native": [
+        "OpenUiSelect"
+      ],
+      "source": "packages/react-ui/src/genui-lib/Select/schema.ts"
+    },
+    {
+      "name": "SelectItem",
+      "native": [],
+      "source": "packages/react-ui/src/genui-lib/Select/schema.ts",
+      "dataOnly": true
+    },
+    {
+      "name": "FormControl",
+      "native": [
+        "Column",
+        "Text",
+        "OpenUiSelect"
+      ],
+      "source": "packages/react-ui/src/genui-lib/FormControl/schema.ts"
+    }
+  ],
+  "capabilities": [
+    "$state",
+    "conditional-expression",
+    "select-binding",
+    "@Set",
+    "@Reset",
+    "@ToAssistant-context",
+    "@OpenUrl"
+  ],
+  "limitations": [
+    "Bounded official component signatures, not full react-ui or ArkUI parity.",
+    "No Query/Mutation, HTML, Markdown, wrapping, custom code or network execution.",
+    "State declarations are unique string/number/boolean literal defaults. Derived state declarations are not supported; put expressions inline.",
+    "Card variant sunk and advanced form rules are not in this profile.",
+    "Image geometry, control sizes, button variants and destructive tone follow the native host theme."
+  ],
+  "parser": "@openuidev/lang-core",
+  "version": "1.0.1",
+  "license": "MIT",
+  "runtimeSha256": "9d89ac84ecabc1c4ece5683b16a8211621b072933c9c072f1fab8812f15cf050",
+  "schemaSha256": "9a616cb7d7d06b943d78f2dfa1fbbfafb04f20b423bad1ed2cd9606403a6beed",
+  "bytes": 913385
+}

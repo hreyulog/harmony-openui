@@ -8,13 +8,26 @@
 
 An independent community adapter that reuses the official OpenUI parser, renders model-generated component declarations with precompiled ArkUI components, and returns user actions to the host application. Built for choices, data entry, multistep forms, and result panels in chat. No WebView or on-device compilation of generated ArkTS is required.
 
-This is not an official OpenUI or Huawei SDK. v0.2 adds forms, images, lists, and confirmation dialogs to a bounded catalog; it is not a complete port of OpenUI Lang 1.0 or the entire ArkUI component system.
+This is not an official OpenUI or Huawei SDK. v0.3 adds a general native mapping runtime that reuses the official OpenUI state and expression engine. It remains a bounded adaptation, not a complete port of OpenUI Lang 1.0 or all ArkUI components.
+
+**v0.3: model-generated image result cards with native combined filters, reset and selection.** `OpenUiMappedRuntime` maps a subset of upstream components to existing AGenUI / ArkUI controls. Official `$state`, bindings and conditional expressions run locally without another model request. The v0.2 forms API remains available. [Mapping architecture and example](docs/mapping.md)
+
+v0.3 completed **actual MiniMax generation → combined category/duration filters → empty state → reset → correct callbacks for all four items** on Nova. The accepted run used one model request and retained both native Select identities. The same program also passed all twelve host-replayed filter combinations. [v0.3 verification](docs/verification-v03.md) · [Actual model program and receipt](docs/evidence/2026-10-20-v03/acceptance.json)
+
+| Local filters and image | Museum result | Empty state | Host selection receipt |
+| --- | --- | --- | --- |
+| <img src="docs/images/nova-v03-20261020/filtered-forest.jpeg" width="210" alt="Filtered native forest result"> | <img src="docs/images/nova-v03-20261020/filtered-museum.jpeg" width="210" alt="Museum category and duration filter"> | <img src="docs/images/nova-v03-20261020/empty-result.jpeg" width="210" alt="Empty result state"> | <img src="docs/images/nova-v03-20261020/selection-receipt.jpeg" width="210" alt="Correct bookstore intent received by host"> |
+
+<details>
+<summary>Historical v0.2 device evidence: forms, choices and confirmation</summary>
 
 v0.2 completed **model-generated form → native editing and validation → confirmation sheet → model-generated result** on a physical Nova phone. Reopening chosen dates, repeated time changes, cancel-without-submit, and native image loading were checked. Travel is an acceptance fixture; the SDK contains no ticket-booking business logic. [v0.2 verification](docs/verification-v02.md) · [Actual model output and build receipt](docs/evidence/2026-10-20-v02/acceptance.json)
 
 | Model form | Native controls | User confirmation | Model result and image |
 | --- | --- | --- | --- |
 | <img src="docs/images/nova-v02-20261020/model-form.jpeg" width="210" alt="Model-generated native trip form"> | <img src="docs/images/nova-v02-20261020/preferences.jpeg" width="210" alt="Native input and selection controls"> | <img src="docs/images/nova-v02-20261020/confirmation.jpeg" width="210" alt="User-triggered native confirmation sheet"> | <img src="docs/images/nova-v02-20261020/result-image.jpeg" width="210" alt="Model result with native list and loaded image"> |
+
+</details>
 
 <details>
 <summary>Historical v0.1 device evidence: choices, themes and card isolation</summary>
@@ -54,7 +67,17 @@ Harmony OpenUI adds a native adaptation layer around the official parser. It doe
 
 The model supplies declarations and content, rather than executable ArkTS. An action such as choosing an option returns data to the host; the host decides what happens next.
 
-## What v0.2 includes
+## What v0.3 adds
+
+- One central mapping registry supplies schema, prompt, support manifest and native projection.
+- A bounded upstream-signature subset: `Stack`, `Card`, `CardHeader`, `TextContent`, `Image`, `Button`, `Select`, `SelectItem`, `FormControl`.
+- Official local store, expressions and bindings; local `@Set` / `@Reset`; business context preserved in `@ToAssistant`.
+- Reactive structural patches retain the native manager and surviving node identities. Removed nodes receive new identities on reappearance.
+- A standalone filtered image-list demo. Sofia remains separate and unchanged.
+
+The existing `OpenUiLanguageStream` API retains these features:
+
+## Retained v0.2 features
 
 - The official parser, generated component schema, and model system prompt.
 - Incremental parsing, retention of the last valid interface, and complete-program replacement. Incomplete native properties do not interrupt incoming text chunks.
@@ -74,7 +97,7 @@ Build the HAR and add it as a local dependency to your HarmonyOS project, retain
 After building, run this in the host module directory:
 
 ```powershell
-ohpm install D:/openui-build/har-01/artifacts/harmony-openui-0.2.0.har
+ohpm install D:/openui-build/har-01/artifacts/harmony-openui-0.3.0.har
 ```
 
 Import the local package as `@hreyulog/harmony-openui`. The parser is bundled in the HAR; the host does not need a separate npm parser or model SDK.
@@ -168,13 +191,13 @@ See the [v0.2 verification record](docs/verification-v02.md) for exact scope, su
 
 ## Current limitations
 
-- `$state`, Query / Mutation, multi-step actions, charts, video, navigation, arbitrary drawing, and the complete upstream / ArkUI catalogs are not supported. A multistep form is a host-orchestrated sequence of single-step submissions, not an executable model-defined workflow.
-- The native backend uses AGenUI's public extension API and ArkUI builders. Structural updates still remount a surface; field edits synchronize values and errors without remounting. Complete fine-grained structural diffing is not implemented. Hosts can coalesce frequent model updates.
+- The new mapping API supports `$state`, conditions and local Set / Reset. Query / Mutation, charts, video, navigation, arbitrary drawing and the complete upstream / ArkUI catalogs remain outside scope. Business workflows remain host-owned.
+- Mapping-driven local structural changes use native patches. New programs, theme / width changes and incompatible component identities still remount safely. The legacy stream retains complete-structure replacement. The mapped API currently accepts complete programs, not streaming program edits.
 - Images need host-supplied HTTPS URLs and a working network/permission environment. The library does not search for images or guarantee remote availability. Lists have bounded data and viewports, without remote pagination or infinite loading.
 - The A2UI adapter implements a limited subset, not full protocol conformance.
 - The SDK and demo are independent of Sofia; integration has not been implemented.
 
-Documentation: [Architecture](docs/architecture.md) · [Protocol and state](docs/protocol.md) · [Rendering and themes](docs/rendering.md) · [Build](docs/building.md) · [Verification](docs/verification.md)
+Documentation: [v0.3 device verification](docs/verification-v03.md) · [Mapping layer](docs/mapping.md) · [Architecture](docs/architecture.md) · [Protocol and state](docs/protocol.md) · [Rendering and themes](docs/rendering.md) · [Build](docs/building.md) · [Verification](docs/verification.md)
 
 Upstream references: [OpenUI architecture](https://www.openui.com/docs/openui-lang/architecture) · [Defining components](https://www.openui.com/docs/openui-lang/defining-components) · [ArkUI](https://developer.huawei.com/consumer/cn/arkui/) · [AGenUI](https://github.com/AGenUI/AGenUI)
 

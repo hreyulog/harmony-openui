@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { OpenUiCatalog } from './OpenUiCatalog';
 import { OpenUiActionReceipt, OpenUiChange, OpenUiComponent, OpenUiControllerOptions, OpenUiFieldChange, OpenUiFieldValue,
-  OpenUiRenderEvent, OpenUiRenderStatus, OpenUiSurface, OpenUiUserAction } from './OpenUiTypes';
+  OpenUiRenderEvent, OpenUiRenderStatus, OpenUiSurface, OpenUiUpdateMode, OpenUiUserAction } from './OpenUiTypes';
 
 interface NativeActionEnvelope { action: OpenUiUserAction; }
 interface A2uiCreate { surfaceId: string; catalogId?: string; }
@@ -37,37 +37,49 @@ export class OpenUiController {
   private current(id: string): OpenUiSurface {
     const value = this.state.get(id); if (!value) { throw new Error('OPENUI_SURFACE_MISSING'); } return value;
   }
-  private changed(surface: OpenUiSurface): void {
+  private changed(surface: OpenUiSurface, mode: OpenUiUpdateMode = 'replace'): void {
+    surface.updateMode = mode;
     surface.revision = ++this.serial; surface.renderStatus = 'pending'; surface.error = ''; this.publish();
   }
 
   apply(change: OpenUiChange): void {
     if (!change || typeof change.surfaceId !== 'string' || !change.surfaceId || change.surfaceId.length > 160) { throw new Error('OPENUI_SURFACE_ID'); }
+    if (change.syncFieldValues !== undefined && (change.kind !== 'patch' || typeof change.syncFieldValues !== 'boolean')) { throw new Error('OPENUI_PATCH_FIELD_SYNC'); }
     const id = change.surfaceId;
     if (change.kind === 'create') {
       if (this.state.has(id)) { throw new Error('OPENUI_SURFACE_EXISTS'); }
       const catalog = change.catalogId ?? OpenUiCatalog.id;
       if (catalog !== OpenUiCatalog.id) { throw new Error('OPENUI_CATALOG'); }
-      const surface: OpenUiSurface = { id, catalogId: catalog, revision: ++this.serial,
+      const surface: OpenUiSurface = { id, catalogId: catalog, revision: ++this.serial, updateMode: 'replace',
         components: [], dataModelJson: '{}', fieldValuesJson: '{}', fieldErrorsJson: '{}', readOnly: false, selectedComponent: '', renderStatus: 'pending', error: '' };
       this.state.set(id, surface); this.publish(); return;
     }
     const surface = this.current(id);
     if (change.kind === 'delete') { this.state.delete(id); ++this.serial; this.publish(); return; }
-    if (change.kind === 'components') {
+    if (change.kind === 'components' || change.kind === 'patch') {
       if (!Array.isArray(change.components)) { throw new Error('OPENUI_COMPONENTS'); }
       const batch: OpenUiComponent[] = JSON.parse(JSON.stringify(change.components));
       const incoming: Set<string> = new Set<string>();
       const merged: Map<string, OpenUiComponent> = new Map<string, OpenUiComponent>();
-      if (change.replace !== true) { for (const item of surface.components) { merged.set(item.id, item); } }
+      if (change.kind !== 'patch' && change.replace !== true) { for (const item of surface.components) { merged.set(item.id, item); } }
       for (const item of batch) {
         OpenUiCatalog.validate(item); if (incoming.has(item.id)) { throw new Error('OPENUI_DUPLICATE_ID'); }
         incoming.add(item.id); merged.set(item.id, item);
       }
       const candidate = Array.from(merged.values()); OpenUiCatalog.validateTree(candidate);
-      this.reconcileFields(surface, candidate); surface.components = candidate;
+      let mode: OpenUiUpdateMode = 'replace';
+      if (change.kind === 'patch') {
+        OpenUiController.completePatch(candidate);
+        mode = OpenUiController.patchCompatible(surface.components, candidate) ? 'patch' : 'replace';
+      }
+      if (change.syncFieldValues === true) {
+        // A mapped runtime owns its state. Its evaluated field defaults must not
+        // be shadowed by old native overrides (for example after @ResetState).
+        surface.fieldValuesJson = '{}'; surface.fieldErrorsJson = '{}';
+      } else { this.reconcileFields(surface, candidate); }
+      surface.components = candidate;
       if (!merged.has(surface.selectedComponent)) { surface.selectedComponent = ''; }
-      this.changed(surface); return;
+      this.changed(surface, mode); return;
     }
     if (change.kind === 'data') {
       if (typeof change.valueJson !== 'string') { throw new Error('OPENUI_DATA_VALUE_REQUIRED'); }
@@ -192,6 +204,26 @@ export class OpenUiController {
   private static fieldIdentity(nodes: OpenUiComponent[], node: OpenUiComponent): string {
     return JSON.stringify([node.component, node.field, OpenUiController.formName(nodes, node.id), node.variant ?? 'text', node.inputType ?? 'text']);
   }
+  private static completePatch(nodes: OpenUiComponent[]): void {
+    const ids: Set<string> = new Set<string>(nodes.map((node: OpenUiComponent): string => node.id));
+    if (!ids.has('root')) { throw new Error('OPENUI_PATCH_ROOT'); }
+    for (const node of nodes) {
+      if ((node.children ?? (node.child ? [node.child] : [])).some((id: string): boolean => !ids.has(id))) { throw new Error('OPENUI_PATCH_REFERENCE'); }
+    }
+  }
+  /** A semantic identity change needs a new native owner, even when the ID is reused. */
+  private static patchCompatible(previous: OpenUiComponent[], next: OpenUiComponent[]): boolean {
+    for (const node of next) {
+      const old = previous.find((item: OpenUiComponent): boolean => item.id === node.id);
+      if (!old) { continue; }
+      if (old.component !== node.component || (OpenUiCatalog.isField(node) &&
+        OpenUiController.fieldIdentity(previous, old) !== OpenUiController.fieldIdentity(next, node))) { return false; }
+      // An open confirmation sheet belongs to the exact document the user saw.
+      // Replacing its contents or action must close it before a new confirmation.
+      if (node.component === 'OpenUiDialog' && OpenUiController.canonical(old) !== OpenUiController.canonical(node)) { return false; }
+    }
+    return true;
+  }
   private static fieldValue(values: Record<string, OpenUiFieldValue>, node: OpenUiComponent): OpenUiFieldValue {
     return Object.keys(values).includes(node.id) ? values[node.id] : OpenUiCatalog.defaultFieldValue(node);
   }
@@ -280,7 +312,7 @@ export class OpenUiController {
         const node = surface.components.find((item: OpenUiComponent): boolean => item.id === key);
         if (!node || !OpenUiCatalog.isField(node) || typeof errors[key] !== 'string' || errors[key].length > 500) { throw new Error('OPENUI_SNAPSHOT_FIELD'); }
       }
-      surface.renderStatus = 'pending'; surface.error = ''; next.set(surface.id, surface);
+      surface.updateMode = 'replace'; surface.renderStatus = 'pending'; surface.error = ''; next.set(surface.id, surface);
     }
     // Renew render revisions so callbacks from before restore cannot act on imported surfaces.
     for (const surface of next.values()) { surface.revision = ++serial; }

@@ -1,0 +1,151 @@
+{
+  "format": "harmony-openui/acceptance@3",
+  "createdAt": "2026-10-20T13:14:03.951696+00:00",
+  "version": "0.3.0",
+  "sourceCommitBase": "719931580a7be0dd6059b69580ef84c25c83605b",
+  "compiledSourcesUnchanged": true,
+  "buildCompletedAt": "2026-10-20T13:05:03.461292+00:00",
+  "artifacts": [
+    {
+      "target": "har",
+      "artifact": "harmony-openui-0.3.0.har",
+      "sha256": "8c91b9332b18c0f8d089cc9b22b243b049c9d24165bf53a2eb619bbc57057626",
+      "bytes": 1169221,
+      "distributionNoticesComplete": true
+    },
+    {
+      "target": "demo",
+      "artifact": "harmony-openui-demo-0.3.0-signed.hap",
+      "sha256": "97fe2e207b34baf154453e985726f00c99bf4313c937f5192c74e5e21729ecdc",
+      "bytes": 7932728,
+      "distributionNoticesComplete": true,
+      "publicNativeLibrariesVerified": 4,
+      "signed": true
+    }
+  ],
+  "signature": {
+    "signatureVerifierExitCode": 0,
+    "embeddedProfileExactMatch": true,
+    "signerContainsExactAgcLeaf": true
+  },
+  "host": {
+    "nodeTestsPassed": 124,
+    "pythonTestsPassed": 2
+  },
+  "native": {
+    "device": "HUAWEI nova 15 Pro",
+    "api": 26,
+    "bundle": "com.hreyulog.harmonyopenui.demo",
+    "model": "MiniMax-M3",
+    "actualModelGeneratedOnDevice": true,
+    "modelRequestsDuringAcceptedRun": 1,
+    "nativeFilterSnapshots": 10,
+    "nativeSelectedItemIds": [
+      "forest-trail",
+      "lake-walk",
+      "city-museum",
+      "corner-books"
+    ],
+    "bothSelectNativeIdsAndUiNodeHashesRetained": true,
+    "resetRestoredBothFieldsAndAllResults": true,
+    "imagesVisuallyInspected": [
+      "lake-walk",
+      "forest-trail",
+      "city-museum",
+      "corner-books"
+    ],
+    "process": {
+      "sameProcessThroughout": true,
+      "signalCrashMarkers": 0,
+      "claim": "same application PID across the accepted model generation and native filter/selection run; own-process log marker scan only"
+    },
+    "bounds": {
+      "nativeLeaves": 2,
+      "allWithinHost": true,
+      "checks": [
+        {
+          "bounds": [
+            119,
+            782,
+            1201,
+            838
+          ],
+          "host": [
+            119,
+            782,
+            1201,
+            2758
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1006,
+            1201,
+            1268
+          ],
+          "host": [
+            119,
+            782,
+            1201,
+            2758
+          ],
+          "withinHost": true
+        }
+      ]
+    }
+  },
+  "replay": {
+    "kind": "model-free replay of the actual device-generated source",
+    "filterCombinationsPassed": 12,
+    "cardActionsChecked": 16
+  },
+  "modelSourceSha256": "61d072c0e0d740b800898e5bee873acd65ca3a30f91e839d5d6a0dfb8dbd8d26",
+  "screenshots": [
+    {
+      "path": "docs/images/nova-v03-20261020/result-list.jpeg",
+      "sha256": "c250bac71f75b0d1433903acb4d0388450c9e2c8e4915be99f0ce5b21ecb8329",
+      "bytes": 232840,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v03-20261020/filtered-forest.jpeg",
+      "sha256": "a8fa98b402e9020f20d9f73568746fa3239f91f7178dc14ed569494b90f703c9",
+      "bytes": 247135,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v03-20261020/filtered-museum.jpeg",
+      "sha256": "5bc13a050954b0164caa3694cda1b633cada635bc6bd616a699f00c7067167be",
+      "bytes": 205702,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v03-20261020/filtered-bookstore.jpeg",
+      "sha256": "2ecb5b4d3d59d28f393f6e1a4f2ba46511a6508c8274ee64e7e33991166b352c",
+      "bytes": 212140,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v03-20261020/selection-receipt.jpeg",
+      "sha256": "7483cc75db02ca29d51eacee8791018e41dd520b8e5bcd7954f5601687801d40",
+      "bytes": 207917,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v03-20261020/empty-result.jpeg",
+      "sha256": "7561bc697a2438dac0998b28371ffa8b891a0434da096d333bc6ffbe2bb7b975",
+      "bytes": 210248,
+      "originalDeviceCapture": true
+    }
+  ],
+  "boundaries": [
+    "Independent repository and demo; no Sofia integration.",
+    "Fictional host-supplied activity facts; no live venue search, booking or payment.",
+    "Native operation checks cover the recorded subset; all 12 filter combinations additionally passed host replay.",
+    "Native acceptance is API 26 only, not every supported API level.",
+    "Model-generated visual copy/spacing are prototype quality, not final design acceptance.",
+    "The mapped profile is bounded; Query/Mutation and full ArkUI/OpenUI parity are not implemented."
+  ]
+}

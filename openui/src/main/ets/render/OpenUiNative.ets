@@ -7,6 +7,7 @@ import { OpenUiNativeIds } from './OpenUiNativeIds';
 import { OpenUiIntrinsicLayout, OpenUiFactValue } from './OpenUiIntrinsicLayout';
 import { OpenUiRenderDiagnostics } from './OpenUiRenderDiagnostics';
 import { OpenUiControlModel, OpenUiControlState } from './OpenUiControlModel';
+import { OpenUiProjection } from './OpenUiProjection';
 import { OpenUiControlsLayout } from './OpenUiControlsLayout';
 import { OpenUiComponent, OpenUiFieldValue, OpenUiSurface, OpenUiSelectOption, OpenUiListItem } from '../core/OpenUiTypes';
 
@@ -19,8 +20,9 @@ export class OpenUiNativeSession {
   readonly manager: SurfaceManager;
   readonly surfaceId: string;
   readonly theme: OpenUiTheme;
-  readonly readOnly: boolean;
-  readonly selectedId: string;
+  readOnly: boolean;
+  selectedId: string;
+  documentRevision: number = 0;
   readonly expanded: Map<string, boolean>;
   readonly uiContext: UIContext | undefined;
   readonly ids: OpenUiNativeIds;
@@ -32,6 +34,8 @@ export class OpenUiNativeSession {
   private fieldValues: Record<string, OpenUiFieldValue> = {};
   private fieldErrors: Record<string, string> = {};
   private onField: ((id: string, value: OpenUiFieldValue) => boolean) | undefined;
+  private definitions: Map<string, OpenUiComponent> = new Map<string, OpenUiComponent>();
+  private projected: Map<string, string> = new Map<string, string>();
   active: boolean = true;
   constructor(manager: SurfaceManager, surfaceId: string, theme: OpenUiTheme, readOnly: boolean,
     selectedId: string, expanded: Map<string, boolean>, uiContext: UIContext | undefined, ids: OpenUiNativeIds, onMeasured?: () => void, contentWidth: number = 0,
@@ -42,7 +46,16 @@ export class OpenUiNativeSession {
     this.ids = ids;
     this.contentWidth = contentWidth;
     this.onField = onField;
-    if (initialSurface) { this.fieldValues = OpenUiControlModel.values(initialSurface); this.fieldErrors = OpenUiControlModel.errors(initialSurface); }
+    if (initialSurface) {
+      this.documentRevision = initialSurface.revision;
+      this.fieldValues = OpenUiControlModel.values(initialSurface); this.fieldErrors = OpenUiControlModel.errors(initialSurface);
+      for (const node of initialSurface.components ?? []) { this.definitions.set(node.id, node); }
+      if (initialSurface.components) {
+        for (const node of OpenUiProjection.nativeComponents(initialSurface, this.theme, this.ids, this.contentWidth)) {
+          this.projected.set(node.id, this.nodeSignature(node));
+        }
+      }
+    }
     this.expected = new Set<string>(ids.semanticIds()); this.onMeasured = onMeasured;
     if (!OpenUiNativeSession.installed) {
       for (const name of ['OpenUiOption', 'OpenUiFacts', 'OpenUiStatus', 'OpenUiDetails'].concat(OpenUiControlModel.names)) {
@@ -67,12 +80,54 @@ export class OpenUiNativeSession {
   }
   allMeasured(): boolean { return this.measured.size === this.expected.size; }
   attach(element: OpenUiNativeElement): void { this.elements.set(element.getNodeId(), element); }
+  canPatch(surface: OpenUiSurface, theme: OpenUiTheme, width: number): boolean {
+    return this.current() && surface.id === this.surfaceId && surface.updateMode === 'patch' &&
+      // AGenUI releases removed native views, but may retain source-model
+      // metadata. Periodically replace the manager after identity churn.
+      this.ids.allocatedCount() < 1024 &&
+      JSON.stringify(theme) === JSON.stringify(this.theme) && Math.abs(width - this.contentWidth) <= 0.5;
+  }
+  private nodeSignature(node: OpenUiComponent): string {
+    // Controlled values use syncFields instead of crossing the native parser
+    // from an active onChange stack. All other properties remain diffable.
+    if (!OpenUiControlModel.isField(node.component)) { return JSON.stringify(node); }
+    const copy = JSON.parse(JSON.stringify(node)) as OpenUiComponent; copy.value = undefined;
+    return JSON.stringify(copy);
+  }
+  /** Full validated document in; only changed native nodes out. No new Surface. */
+  patch(surface: OpenUiSurface): string {
+    this.documentRevision = surface.revision; this.readOnly = surface.readOnly; this.selectedId = surface.selectedComponent;
+    this.definitions.clear(); for (const node of surface.components) { this.definitions.set(node.id, node); }
+    this.ids.sync(surface.components);
+    const current = new Set<string>(this.ids.nativeIds());
+    for (const id of Array.from(this.elements.keys())) {
+      if (!current.has(id)) { this.elements.get(id)?.deactivate(); this.elements.delete(id); }
+      else if (this.ids.sourceId(id) === undefined) { this.elements.get(id)?.deactivate(); }
+    }
+    for (const id of Array.from(OpenUiNativeSession.nodeOwners.keys())) {
+      if (OpenUiNativeSession.nodeOwners.get(id) === this && !current.has(id)) { OpenUiNativeSession.nodeOwners.delete(id); }
+    }
+    for (const id of current) { OpenUiNativeSession.nodeOwners.set(id, this); }
+    this.expected = new Set<string>(this.ids.semanticIds());
+    for (const id of Array.from(this.measured)) { if (!this.expected.has(id)) { this.measured.delete(id); } }
+    const nodes = OpenUiProjection.nativeComponents(surface, this.theme, this.ids, this.contentWidth);
+    const next: Map<string, string> = new Map<string, string>();
+    const changed: OpenUiComponent[] = [];
+    for (const node of nodes) {
+      const signature = this.nodeSignature(node); next.set(node.id, signature);
+      if (this.projected.get(node.id) !== signature) {
+        changed.push(node); this.measured.delete(node.id); this.elements.get(node.id)?.invalidateMeasurement();
+      }
+    }
+    this.projected = next; this.syncFields(surface);
+    return changed.length ? OpenUiProjection.update(this.surfaceId, changed) : '';
+  }
   syncFields(surface: OpenUiSurface): void {
     if (!this.current()) { return; }
     this.fieldValues = OpenUiControlModel.values(surface); this.fieldErrors = OpenUiControlModel.errors(surface);
     for (const element of this.elements.values()) { element.syncField(); }
   }
-  value(node: OpenUiComponent): OpenUiFieldValue { return OpenUiControlModel.value(node, this.fieldValues); }
+  value(node: OpenUiComponent): OpenUiFieldValue { return OpenUiControlModel.value(this.definitions.get(node.id) ?? node, this.fieldValues); }
   error(id: string): string { return OpenUiControlModel.error(Object.keys(this.fieldErrors).includes(id) ? this.fieldErrors[id] : ''); }
   edit(id: string, value: OpenUiFieldValue): boolean {
     const source = this.ids.sourceId(id);
@@ -195,10 +250,15 @@ export class OpenUiNativeElement extends A2UIComponent {
   }
   skin(): OpenUiTheme { return this.owner?.theme ?? this.fallbackTheme; }
   widthLimit(): number { return this.owner?.contentWidth ?? 0; }
+  private owned(): boolean {
+    return this.owner !== undefined && this.owner.current() && this.owner.ids.sourceId(this.getNodeId()) !== undefined;
+  }
   isSelected(): boolean { return this.owner !== undefined && this.owner.selectedId === this.owner.ids.sourceId(this.getNodeId()); }
-  canAct(): boolean { return this.interactive && this.owner !== undefined && this.owner.current() && !this.owner.readOnly; }
+  canAct(): boolean { return this.interactive && this.canEdit(); }
   activate(): void { if (this.canAct() && !this.disabled) { this.owner?.dispatch(this.getNodeId(), this.getComponentType()); } }
-  canEdit(): boolean { return !this.disabled && this.owner !== undefined && this.owner.current() && !this.owner.readOnly; }
+  canEdit(): boolean {
+    return !this.disabled && this.owned() && this.owner?.readOnly === false;
+  }
   controlState(): string {
     const kind = this.getComponentType();
     const value: OpenUiFieldValue = kind === 'OpenUiSlider' ? this.numberValue :
@@ -232,12 +292,12 @@ export class OpenUiNativeElement extends A2UIComponent {
     this.renderRevision++; return true;
   }
   private redraw(): void {
-    if (!this.owner?.current()) { return; }
+    if (!this.owned()) { return; }
     if (this.nativeEditDepth > 0) {
       if (this.updateTimer >= 0) { return; }
       this.updateTimer = setTimeout((): void => {
         this.updateTimer = -1;
-        if (this.owner?.current()) { this.updateArkUI(); }
+        if (this.owned()) { this.updateArkUI(); }
       }, 0);
       return;
     }
@@ -245,18 +305,20 @@ export class OpenUiNativeElement extends A2UIComponent {
     this.updateArkUI();
   }
   syncField(update: boolean = true): void {
-    if (!this.owner?.current() || !this.definition || !OpenUiControlModel.isField(this.getComponentType())) { return; }
+    if (!this.owned() || !this.owner || !this.definition || !OpenUiControlModel.isField(this.getComponentType())) { return; }
     const value = this.owner.value(this.definition); const error = this.owner.error(this.definition.id);
     const changed = this.storeFieldValue(value);
     if (!changed && this.fieldError === error) { return; }
     this.fieldError = error; this.renderRevision++;
     if (update) { this.redraw(); }
   }
-  setModalCloser(close: () => void): void { if (this.owner?.current()) { this.modalCloser = close; } else { close(); } }
+  setModalCloser(close: () => void): void { if (this.owned()) { this.modalCloser = close; } else { close(); } }
   closeModal(): void { this.modalCloser?.(); this.modalCloser = undefined; }
   deactivate(): void {
     this.closeModal();
     if (this.updateTimer >= 0) { clearTimeout(this.updateTimer); this.updateTimer = -1; }
+    if (this.sizeTimer >= 0) { clearTimeout(this.sizeTimer); this.sizeTimer = -1; }
+    this.pendingSize = undefined;
   }
   isExpanded(): boolean {
     const source = this.owner?.ids.sourceId(this.getNodeId());
@@ -264,12 +326,12 @@ export class OpenUiNativeElement extends A2UIComponent {
   }
   toggle(): void {
     const source = this.owner?.ids.sourceId(this.getNodeId());
-    if (!this.owner?.current() || source === undefined) { return; }
+    if (!this.owned() || !this.owner || source === undefined) { return; }
     this.owner.expanded.set(source, !this.isExpanded()); this.renderRevision++; this.updateArkUI();
   }
   scheduleSize(size: SizeResult): void {
     OpenUiRenderDiagnostics.log('schedule node=' + this.getNodeId() + ' current=' + String(this.owner?.current()) + ' width=' + size.width.toString() + ' height=' + size.height.toString());
-    if (!this.owner?.current() || !Number.isFinite(size.width) || !Number.isFinite(size.height) || size.width <= 0 || size.height <= 0) { return; }
+    if (!this.owned() || !Number.isFinite(size.width) || !Number.isFinite(size.height) || size.width <= 0 || size.height <= 0) { return; }
     this.pendingSize = size;
     if (this.sizeTimer >= 0) { return; }
     // Do not mutate native/Yoga state from ArkUI's measurement callback.
@@ -283,8 +345,9 @@ export class OpenUiNativeElement extends A2UIComponent {
     if (this.sizeTimer >= 0) { clearTimeout(this.sizeTimer); this.sizeTimer = -1; }
     this.pendingSize = undefined;
   }
+  invalidateMeasurement(): void { this.lastWidth = -1; this.lastHeight = -1; }
   sizeChanged(size: SizeOptions): void {
-    if (!this.owner?.current()) { return; }
+    if (!this.owned() || !this.owner) { return; }
     const width = size.width as number; const height = size.height as number;
     if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0 ||
       this.owner.contentWidth <= 0 || width > this.owner.contentWidth + 0.5 ||

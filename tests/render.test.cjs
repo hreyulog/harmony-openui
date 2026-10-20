@@ -32,15 +32,22 @@ function fixture(){
   addListener(listener){this.listener=listener}beginTextStream(){}endTextStream(){}
   destroy(){this.disposed=true;for(const id of this.customIds){hybridViews.get(id)?.toDestroyArkTsView();hybridViews.delete(id)}}
   receiveTextChunk(text){
-   this.payload=text;const messages=text.split('\n').map(line=>JSON.parse(line));this.surfaceId=messages[0].createSurface.surfaceId;this.nodes=messages[1].updateComponents.components;
-   for(const node of this.nodes){
+   this.payload=text;const messages=text.split('\n').map(line=>JSON.parse(line));
+   this.patches??=[];this.nodes??=[];
+   for(const message of messages){
+    if(message.createSurface){this.surfaceId=message.createSurface.surfaceId;this.listener.onCreateSurface({surfaceId:this.surfaceId});continue}
+    if(!message.updateComponents)continue;
+    this.patches.push(message.updateComponents.components);
+    for(const node of message.updateComponents.components){
+    const prior=this.nodes.findIndex(n=>n.id===node.id);if(prior>=0)this.nodes[prior]=node;else this.nodes.push(node);
     const factory=factories.get(node.component);if(!factory)continue;
     // Public 1.6 calls the factory before setting ComponentState.instanceId:
     // the callback receives 0 even though this manager has a nonzero ID.
+    const existing=hybridViews.get(node.id);if(existing){existing.updateProperties(node);continue}
     const element=factory(this.surfaceId,node.id,node.component,0n,0);element.updateProperties(node);
     if(element.toCreateArkUIView()){hybridViews.set(node.id,element);this.customIds.push(node.id)}
+    }
    }
-   this.listener.onCreateSurface({surfaceId:this.surfaceId});
   }
   updateNative(id,patch){const element=hybridViews.get(id);if(element)element.updateProperties({...element.props,...patch})}
  }
@@ -265,4 +272,91 @@ test('atomic controlled state rolls back strings, booleans and slider numbers to
   control[change](edited);assert.equal(control[key],edited,'the native selection is tracked locally without a Surface remount');
   control.controlState=JSON.stringify({value:initial,revision:22});control.receivedControl();assert.equal(control[key],initial,kind+' rollback must be visible even if the old parent prop value never changed');assert.equal(control.nativeValue,initial);
  }
+});
+
+test('generic mapped Image uses the pinned native Image and Yoga aspect ratio without a hybrid image widget',()=>{
+ const s=fixture(),surface={id:'s',catalogId:'test',revision:1,readOnly:false,selectedComponent:'',dataModelJson:'{}',fieldValuesJson:'{}',fieldErrorsJson:'{}',components:[
+  {id:'root',component:'Column',children:['cover']},{id:'cover',component:'Image',source:'https://example.com/cover.png',alt:'A cover',aspectRatio:2}
+ ]};
+ const ids=new s.NativeIds(surface.components),node=s.Projection.nativeComponents(surface,s.Themes.create(),ids,310).find(n=>n.component==='Image');
+ assert.equal(node.url,'https://example.com/cover.png');assert.equal(node.source,undefined);assert.equal(node.fit,'cover');assert.equal(node.styles.width,'100%');assert.equal(node.styles['aspect-ratio'],'2');assert.equal(node.accessibility.label,'A cover');assert.deepEqual(Array.from(ids.semanticIds()),[]);
+});
+
+test('mapped filter patches retain the manager, field identity and current-revision action routing',()=>{
+ const s=fixture(),actions=[],options=[{label:'All',value:'all'},{label:'Train',value:'train'}];let c;
+ const nodes=value=>[
+  {id:'root',component:'Column',children:['filter','count','result']},
+  {id:'filter',component:'OpenUiSelect',field:'mode',label:'Filter',options,value},
+  {id:'count',component:'Text',text:value==='all'?'2 results':'1 result'},
+  {id:'result',component:'Button',child:'label',action:{event:{name:'choose',context:{productId:'train-42'}}}},
+  {id:'label',component:'Text',text:'View train'}
+ ];
+ c=new s.Controller({onAction:e=>actions.push(e),onFieldChange:e=>c.apply({kind:'patch',surfaceId:'s',components:nodes(e.value),syncFieldValues:true})});
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'patch',surfaceId:'s',components:nodes('all')});
+ const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],initialRevision=c.getSurface('s').revision,epoch=view.epoch;
+ const filter=manager.nodes.find(n=>n.component==='OpenUiSelect'),native=s.hybridViews.get(filter.id);native.focusMarker={cursor:7};
+ native.edit('train');assert.equal(c.getSurface('s').revision,initialRevision+1);assert.equal(s.managers.length,1);assert.equal(view.epoch,epoch);assert.equal(view.nativeSession.ids.nativeId('filter'),filter.id);assert.equal(s.hybridViews.get(filter.id),native);assert.equal(native.focusMarker.cursor,7);assert.equal(native.stringValue,'train');
+ assert.deepEqual(Array.from(manager.patches.at(-1),n=>n.component),['Text'],'only result count changes; native Select does not reenter its active onChange stack');
+ const button=view.nativeSession.ids.nativeId('result');manager.listener.onReceiveActionEvent(JSON.stringify({version:'v0.9',action:{surfaceId:'s',sourceComponentId:button,name:'choose',context:{productId:'train-42'}}}));
+ assert.equal(actions.length,1);assert.equal(actions[0].revision,c.getSurface('s').revision);assert.equal(actions[0].sourceComponentId,'result');assert.equal(actions[0].context.productId,'train-42');
+ native.edit('all');assert.equal(s.managers.length,1);assert.equal(native.stringValue,'all');assert.equal(c.getSurface('s').components.find(n=>n.id==='count').text,'2 results');view.aboutToDisappear();
+});
+
+test('filtered-out nodes lose callbacks and queued measurements, and returning nodes get fresh native identities',()=>{
+ const s=fixture(),c=new s.Controller(),base=[{id:'root',component:'Column',children:['item']},{id:'item',component:'OpenUiOption',title:'Old item',action:{event:{name:'pick',context:{id:'old'}}}}];
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'patch',surfaceId:'s',components:base});const view=new s.View();view.controller=c;mount(view);
+ const manager=s.managers[0],oldId=view.nativeSession.ids.nativeId('item'),old=s.hybridViews.get(oldId);let closed=0;old.setModalCloser(()=>closed++);old.scheduleSize({width:310,height:100});assert.equal(s.timers.size,1);
+ c.apply({kind:'patch',surfaceId:'s',components:[{id:'root',component:'Column',children:[]}]});assert.equal(s.managers.length,1);assert.equal(view.nativeSession.ids.sourceId(oldId),undefined);assert.equal(s.timers.size,0);assert.equal(closed,1);
+ old.activate();old.scheduleSize({width:310,height:180});old.sizeChanged({width:310,height:180});s.flushTimers();assert.equal(s.events.length,0);assert.equal(s.sizes.length,0,'an old native pointer cannot receive a late layout report');
+ c.apply({kind:'patch',surfaceId:'s',components:base.map(n=>({...n,title:n.id==='item'?'New item':undefined}))});const nextId=view.nativeSession.ids.nativeId('item'),next=s.hybridViews.get(nextId);
+ assert.notEqual(nextId,oldId);assert.equal(next.heading,'New item');next.activate();assert.equal(s.events.length,1);assert.equal(s.events[0].nodeId,nextId);assert.equal(manager.disposed,false);view.aboutToDisappear();
+});
+
+test('same-ID native property patches reset omitted optional values and preserve unrelated measured leaves',()=>{
+ const s=fixture(),c=new s.Controller(),nodes=text=>[{id:'root',component:'Column',children:['details','keep']},{id:'details',component:'OpenUiOption',title:'Details',...(text?{description:text}: {}),action:{event:{name:'pick',context:{id:'one'}}}},{id:'keep',component:'OpenUiStatus',text:'Stable'}];
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'patch',surfaceId:'s',components:nodes('Old body')});const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],detailId=view.nativeSession.ids.nativeId('details'),keepId=view.nativeSession.ids.nativeId('keep'),detail=s.hybridViews.get(detailId),keep=s.hybridViews.get(keepId);
+ detail.sizeChanged({width:310,height:100});keep.sizeChanged({width:310,height:60});view.laidOut(view.epoch,{width:310,height:200});assert.equal(c.getSurface('s').renderStatus,'rendered');
+ c.apply({kind:'patch',surfaceId:'s',components:nodes('')});assert.equal(s.managers.length,1);assert.equal(detail.supporting,'');assert.equal(s.hybridViews.get(keepId),keep);assert.equal(c.getSurface('s').renderStatus,'pending');assert.equal(manager.patches.at(-1).length,1);
+ detail.sizeChanged({width:310,height:100});assert.equal(c.getSurface('s').renderStatus,'rendered','same-size changed content still acknowledges its new measurement');view.aboutToDisappear();
+});
+
+test('a patch rejects prior business context while retaining the same native button identity',()=>{
+ const s=fixture(),actions=[],c=new s.Controller({onAction:e=>actions.push(e)}),nodes=id=>[{id:'root',component:'Button',child:'label',action:{event:{name:'choose',context:{id}}}},{id:'label',component:'Text',text:'Choose'}];
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'patch',surfaceId:'s',components:nodes('a')});const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],id=view.nativeSession.ids.nativeId('root');
+ c.apply({kind:'patch',surfaceId:'s',components:nodes('b')});assert.equal(s.managers.length,1);assert.equal(view.nativeSession.ids.nativeId('root'),id);
+ const emit=value=>manager.listener.onReceiveActionEvent(JSON.stringify({version:'v0.9',action:{surfaceId:'s',sourceComponentId:id,name:'choose',context:{id:value}}}));emit('a');assert.equal(actions.length,0);emit('b');assert.equal(actions.length,1);assert.equal(actions[0].context.id,'b');view.aboutToDisappear();
+});
+
+test('mapped patches preserve namespace isolation and fall back to replace after a field kind change',()=>{
+ const s=fixture(),a=new s.Controller(),b=new s.Controller(),nodes=kind=>[{id:'root',component:'Column',children:['field']},{id:'field',component:kind,field:'value',label:'Value'}];
+ for(const c of [a,b]){c.apply({kind:'create',surfaceId:'same'});c.apply({kind:'patch',surfaceId:'same',components:nodes('OpenUiInput')})}
+ const va=new s.View(),vb=new s.View();va.controller=a;vb.controller=b;va.surfaceId=vb.surfaceId='same';mount(va);mount(vb);const originalA=va.nativeSession.ids.nativeId('field'),originalB=vb.nativeSession.ids.nativeId('field'),mb=s.managers[1],fieldB=s.hybridViews.get(originalB);
+ a.apply({kind:'patch',surfaceId:'same',components:nodes('OpenUiSelect').map(n=>n.id==='field'?{...n,options:[{label:'One',value:'one'}]}:n)});
+ assert.equal(s.managers.length,3);assert.equal(s.managers[0].disposed,true);assert.equal(mb.disposed,false);assert.equal(s.hybridViews.get(originalB),fieldB);assert.notEqual(va.nativeSession.ids.nativeId('field'),originalA);fieldB.edit('Still active');assert.equal(b.getSurface('same').fieldValuesJson,JSON.stringify({field:'Still active'}));va.aboutToDisappear();vb.aboutToDisappear();
+});
+
+test('retained but unreachable definitions cannot reactivate their former native callbacks',()=>{
+ const s=fixture(),c=new s.Controller(),field={id:'field',component:'OpenUiInput',field:'name',label:'Name'},nodes=visible=>[{id:'root',component:'Column',children:visible?['field']:[]},field];
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'patch',surfaceId:'s',components:nodes(true)});const view=new s.View();view.controller=c;mount(view);const oldId=view.nativeSession.ids.nativeId('field'),old=s.hybridViews.get(oldId);
+ c.apply({kind:'patch',surfaceId:'s',components:nodes(false)});const orphanId=view.nativeSession.ids.nativeId('field');assert.notEqual(orphanId,oldId);assert.equal(old.canEdit(),false);assert.equal(view.nativeSession.ids.sourceId(orphanId),undefined);old.edit('hidden');assert.equal(c.getSurface('s').fieldValuesJson,'{}');
+ c.apply({kind:'patch',surfaceId:'s',components:nodes(true)});const currentId=view.nativeSession.ids.nativeId('field');assert.notEqual(currentId,orphanId);assert.notEqual(currentId,oldId);assert.equal(old.canEdit(),false);const current=s.hybridViews.get(currentId);current.edit('Current');assert.equal(c.getSurface('s').fieldValuesJson,JSON.stringify({field:'Current'}));view.aboutToDisappear();
+});
+
+test('long-lived mapped surfaces recycle the manager after bounded identity churn without resetting controller state',()=>{
+ const s=fixture(),c=new s.Controller(),nodes=visible=>[
+  {id:'root',component:'Column',children:visible?['field','item']:['field']},
+  {id:'field',component:'OpenUiInput',field:'name',label:'Name'},
+  ...(visible?[{id:'item',component:'Text',text:'Conditional result'}]:[])
+ ];
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'patch',surfaceId:'s',components:nodes(true)});const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],ids=view.nativeSession.ids;
+ assert.equal(ids.allocatedCount(),3);c.setFieldValue('s','field','Retained');
+ c.apply({kind:'patch',surfaceId:'s',components:nodes(false)});assert.equal(ids.allocatedCount(),3,'retirement does not reset the cumulative allocation counter');
+ c.apply({kind:'patch',surfaceId:'s',components:nodes(true)});assert.equal(ids.allocatedCount(),4);assert.equal(s.managers.length,1);
+ // Simulate the cumulative counter near the fixed production limit instead
+ // of spending 1,020 equivalent native allocation cycles in a unit test.
+ ids.serial=1023;c.apply({kind:'patch',surfaceId:'s',components:nodes(false)});assert.equal(s.managers.length,1);
+ c.apply({kind:'patch',surfaceId:'s',components:nodes(true)});assert.equal(ids.allocatedCount(),1024);assert.equal(s.managers.length,1,'the patch reaching the budget completes on its current manager');
+ c.apply({kind:'patch',surfaceId:'s',components:nodes(false)});assert.equal(s.managers.length,2);assert.equal(manager.disposed,true);assert.equal(view.nativeSession.ids.allocatedCount(),2,'fresh manager starts from the current bounded tree');
+ assert.equal(c.getSurface('s').fieldValuesJson,JSON.stringify({field:'Retained'}));const field=s.hybridViews.get(view.nativeSession.ids.nativeId('field'));assert.equal(field.stringValue,'Retained');
+ c.apply({kind:'patch',surfaceId:'s',components:nodes(true)});assert.equal(s.managers.length,2,'normal subsequent filtering resumes incremental updates');view.aboutToDisappear();
 });

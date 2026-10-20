@@ -7,7 +7,7 @@ export class OpenUiCatalog {
   static readonly componentNames: string[] = ['Column', 'Row', 'Card', 'Text', 'Button',
     'OpenUiOption', 'OpenUiFacts', 'OpenUiStatus', 'OpenUiDetails', 'OpenUiForm', 'OpenUiInput',
     'OpenUiCheckbox', 'OpenUiToggle', 'OpenUiSelect', 'OpenUiRadioGroup', 'OpenUiSlider',
-    'OpenUiDatePicker', 'OpenUiTimePicker', 'OpenUiImage', 'OpenUiList', 'OpenUiDialog'];
+    'OpenUiDatePicker', 'OpenUiTimePicker', 'OpenUiImage', 'OpenUiList', 'OpenUiDialog', 'Image'];
 
   static identifier(value: string | undefined): boolean {
     return typeof value === 'string' && /^[A-Za-z_][A-Za-z0-9_.-]{0,63}$/.test(value) &&
@@ -154,7 +154,7 @@ export class OpenUiCatalog {
           (component.maxDate !== undefined && (typeof component.maxDate !== 'string' || !OpenUiCatalog.date(component.maxDate))) ||
           (component.minDate !== undefined && component.maxDate !== undefined && component.minDate > component.maxDate)) { throw new Error('OPENUI_DATE_RANGE'); }
         break;
-      case 'OpenUiImage':
+      case 'OpenUiImage': case 'Image':
         keys.push('source', 'alt', 'aspectRatio');
         if (typeof component.source !== 'string' || component.source.length > 2048 || !/^https:\/\/[A-Za-z0-9][^\s<>]*$/.test(component.source) ||
           typeof component.alt !== 'string' || component.alt.length > 500 ||

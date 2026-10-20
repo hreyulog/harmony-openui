@@ -3,7 +3,11 @@ import { OpenUiComponent, OpenUiFact, OpenUiSurface, OpenUiText } from '../core/
 import { OpenUiTheme } from './OpenUiTheme';
 import { OpenUiNativeIds } from './OpenUiNativeIds';
 
-interface RenderNode extends OpenUiComponent { selectable?: boolean; selected?: boolean; }
+interface RenderNode extends OpenUiComponent {
+  selectable?: boolean; selected?: boolean; url?: string; fit?: string;
+  accessibility?: NativeAccessibility;
+}
+interface NativeAccessibility { label: string; }
 interface NativeCreate { version: string; createSurface: NativeSurface; }
 interface NativeSurface { surfaceId: string; catalogId: string; }
 interface NativeUpdate { version: string; updateComponents: NativeComponents; }
@@ -63,6 +67,17 @@ export class OpenUiProjection {
       }
       if (node.action) { node.action.event.context = OpenUiProjection.resolve(node.action.event.context, data) as Record<string, Object>; }
       if (node.component === 'OpenUiForm') { node.component = 'Column'; node.name = undefined; }
+      if (node.component === 'Image') {
+        // OpenUI's generic image maps directly to the pinned renderer's Image.
+        // Yoga's aspect-ratio uses the actual parent width, including Card inset.
+        node.url = node.source; node.fit = 'cover';
+        node.accessibility = { label: node.alt ?? '' };
+        const imageStyles: Record<string, string> = {};
+        imageStyles['width'] = '100%'; imageStyles['aspect-ratio'] = (node.aspectRatio ?? 1.7777778).toString();
+        imageStyles['border-radius'] = (theme.dimensions.radius * 2).toString() + 'px';
+        node.styles = imageStyles;
+        node.source = undefined; node.alt = undefined; node.aspectRatio = undefined;
+      }
       if (node.component === 'OpenUiDialog' && surface.readOnly) { node.action = undefined; node.disabled = true; }
       if (node.component === 'Button' && surface.readOnly) {
         output.push({ id: node.id, component: 'Column', children: [node.child!] }); continue;
@@ -94,7 +109,7 @@ export class OpenUiProjection {
     }
     return output;
   }
-  static messages(surface: OpenUiSurface, theme: OpenUiTheme, ids: OpenUiNativeIds, contentWidth: number): string {
+  static nativeComponents(surface: OpenUiSurface, theme: OpenUiTheme, ids: OpenUiNativeIds, contentWidth: number): RenderNode[] {
     const nodes = OpenUiProjection.components(surface, theme);
     const referenced: Set<string> = new Set<string>();
     for (const node of nodes) { for (const child of node.children ?? (node.child ? [node.child] : [])) { referenced.add(child); } }
@@ -111,8 +126,15 @@ export class OpenUiProjection {
     rootStyles['width'] = (contentWidth * 2).toString() + 'px'; rootStyles['gap'] = (theme.dimensions.spacing * 2).toString() + 'px';
     const root: RenderNode = { id: 'root', component: 'Column', children: top.map((id: string): string => ids.nativeId(id)), styles: rootStyles };
     nodes.unshift(root);
+    return nodes;
+  }
+  static update(surfaceId: string, nodes: RenderNode[]): string {
+    const update: NativeUpdate = { version: 'v0.9', updateComponents: { surfaceId, components: nodes } };
+    return JSON.stringify(update);
+  }
+  static messages(surface: OpenUiSurface, theme: OpenUiTheme, ids: OpenUiNativeIds, contentWidth: number): string {
+    const nodes = OpenUiProjection.nativeComponents(surface, theme, ids, contentWidth);
     const create: NativeCreate = { version: 'v0.9', createSurface: { surfaceId: surface.id, catalogId: surface.catalogId } };
-    const update: NativeUpdate = { version: 'v0.9', updateComponents: { surfaceId: surface.id, components: nodes } };
-    return JSON.stringify(create) + '\n' + JSON.stringify(update);
+    return JSON.stringify(create) + '\n' + OpenUiProjection.update(surface.id, nodes);
   }
 }

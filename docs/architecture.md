@@ -30,11 +30,11 @@ flowchart TD
 | Native renderer | `openui/src/main/ets/render/`, `@agenui/agenui@1.6.0` | Mount isolation, actual ArkUI controls, measurement, themes and event projection. |
 | Host | Your app; the standalone demo is one example | Model HTTP/SSE transport, trusted facts, resource URLs, business rules, tools, history and persistence. |
 
-The official parser is not a substitute for core validation. The native catalog validates limits, types, calendar dates, field uniqueness, form ancestry, and static action context before state is committed. Unsupported syntax is not converted into invented success. Model declarations are limited to 23 registered components, mapping to 21 native IR kinds.
+The official parser is not a substitute for core validation. The native catalog validates limits, types, calendar dates, field uniqueness, form ancestry, and static action context before state is committed. Unsupported syntax is not converted into invented success. The legacy profile exposes 23 model components. v0.3 adds a separate bounded upstream-signature mapping profile; both share core validation and native rendering. See [mapping.md](mapping.md) for the official reactive runtime, generated registry and exact subset.
 
 ## A surface has two kinds of state
 
-The **document** contains component definitions, data bindings, selection/read-only decisions, and a revision. A structural change creates a new revision and native mount; old callbacks cannot act on the new document. Native IDs are namespaced for each mount and reversed back to source IDs before controller validation.
+The **document** contains component definitions, data bindings, selection/read-only decisions, and a revision. A structural change creates a new revision. Complete program replacement remounts; compatible mapped-state patches retain the native manager and surviving nodes. Retired node identities and old mount callbacks cannot act on the new document. Native IDs are namespaced for each mount and reversed back to source IDs before controller validation.
 
 **Live field state** stores typed scalar values and validation errors separately from declarations. A user edit does not change document revision. The existing native session receives updated field properties without destroying the keyboard focus or rebuilding the whole card. Field identity is reconciled when a document changes; removed or incompatible fields do not inherit unrelated answers.
 
@@ -68,8 +68,8 @@ This is host orchestration of single-step submissions, not a model-defined workf
 
 ## Boundaries
 
-- v0.2 is a bounded extension, not all of ArkUI or all of OpenUI Lang. `$state`, Query/Mutation, multistep actions, video, navigation, charts, and arbitrary drawing are outside this catalog.
-- Native field updates are incremental; complete fine-grained structural diffing is not implemented.
+- Both profiles are bounded. The mapped profile reuses official local state and local actions; Query/Mutation, video, navigation, charts and arbitrary drawing remain outside scope. Component signatures must not be mixed across profiles.
+- Native field updates and compatible mapped-state structural updates are incremental. Full program replacement and incompatible changes still remount.
 - Images use host-supplied HTTPS URLs and platform loading. The host controls resource policy and network permissions. Actual loading needs its own device check.
 - A2UI v0.9/v0.9.1 NDJSON is an optional subset adapter sharing the controller and renderer; it does not replace the official OpenUI Lang entry point or claim complete protocol conformance.
 - Host tests establish contracts; compilation establishes ArkTS/API compatibility. Actual display, editing, pickers, scrolling, image loading, and confirmation require independent device evidence in [verification.md](verification.md).

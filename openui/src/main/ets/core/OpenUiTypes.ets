@@ -46,10 +46,13 @@ export interface OpenUiComponent {
   cancelLabel?: string;
 }
 export type OpenUiRenderStatus = 'pending' | 'rendered' | 'error';
+/** Renderer hint only. Revisions still fence every document update. */
+export type OpenUiUpdateMode = 'replace' | 'patch';
 export interface OpenUiSurface {
   id: string;
   catalogId: string;
   revision: number;
+  updateMode?: OpenUiUpdateMode;
   components: OpenUiComponent[];
   dataModelJson: string;
   fieldValuesJson: string;
@@ -91,11 +94,13 @@ export interface OpenUiControllerOptions {
   validationMessage?: (code: string, component: OpenUiComponent) => string;
 }
 export interface OpenUiChange {
-  kind: 'create' | 'components' | 'data' | 'delete';
+  kind: 'create' | 'components' | 'patch' | 'data' | 'delete';
   surfaceId: string;
   catalogId?: string;
   components?: OpenUiComponent[];
   replace?: boolean;
+  /** Only for a complete patch from a state-owning adapter; defaults stay authoritative. */
+  syncFieldValues?: boolean;
   path?: string;
   valueJson?: string;
 }

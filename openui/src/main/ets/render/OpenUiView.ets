@@ -80,6 +80,24 @@ export struct OpenUiView {
     // Field edits/errors share a document revision. Updating the current native
     // elements preserves keyboard focus, selection and internal scroll state.
     if (signature === this.fingerprint) { if (surface) { this.nativeSession?.syncFields(surface); } return; }
+    if (surface && OpenUiProjection.ready(surface) && this.manager && this.nativeSession?.canPatch(surface, this.theme, this.contentWidth)) {
+      // The mapped runtime has validated a complete atomic replacement. Keep
+      // stable native identities and the container's scroll/focus lifetime.
+      this.fingerprint = signature; this.errorLabel = '';
+      try {
+        const epoch = this.epoch;
+        const update = this.nativeSession.patch(surface);
+        this.controller.reportRenderStatus(surface.id, surface.revision, 'pending');
+        // A host status callback may synchronously replace the document/view.
+        if (this.epoch !== epoch || this.nativeSession?.documentRevision !== surface.revision) { return; }
+        if (update) { this.manager.beginTextStream(); this.manager.receiveTextChunk(update); this.manager.endTextStream(); }
+        this.reportMeasured(this.epoch);
+      } catch (_) {
+        this.errorLabel = 'This view is unavailable.';
+        this.controller.reportRenderStatus(surface.id, surface.revision, 'error', 'Native renderer update failed');
+      }
+      return;
+    }
     this.fingerprint = signature; this.release(); this.errorLabel = '';
     if (this.mountedSurface !== this.surfaceId) { this.details.clear(); this.mountedSurface = this.surfaceId; }
     if (!surface || !OpenUiProjection.ready(surface) || this.contentWidth <= 0) { return; }
@@ -91,7 +109,8 @@ export struct OpenUiView {
       this.nativeSession = new OpenUiNativeSession(manager, id, this.theme, surface.readOnly, surface.selectedComponent, this.details, this.getUIContext(), ids,
         (): void => { this.reportMeasured(epoch); }, this.contentWidth,
         (logicalId: string, value: OpenUiFieldValue): boolean => {
-          return this.epoch === epoch && this.controller.setFieldValue(id, logicalId, value, revision);
+          return this.epoch === epoch && this.nativeSession !== undefined &&
+            this.controller.setFieldValue(id, logicalId, value, this.nativeSession.documentRevision);
         }, surface);
       manager.addListener(new OpenUiSurfaceListener((created: Surface): void => {
         if (this.epoch === epoch && created.surfaceId === id) { this.visibleEpoch = epoch; }
@@ -107,13 +126,15 @@ export struct OpenUiView {
           projected = JSON.stringify(event);
         } catch (_) { return; }
         const eventId = this.lifetime + ':' + epoch.toString() + ':' + (++this.eventSerial).toString();
-        this.controller.acceptAction(projected, revision, eventId);
+        const currentRevision = this.nativeSession?.documentRevision;
+        if (currentRevision !== undefined) { this.controller.acceptAction(projected, currentRevision, eventId); }
       }, (code: number): void => {
         if (this.epoch !== epoch) { return; }
         this.errorLabel = 'This view is unavailable.';
-        this.controller.reportRenderStatus(id, revision, 'error', 'Native renderer error ' + code.toString());
+        this.controller.reportRenderStatus(id, this.nativeSession?.documentRevision ?? revision, 'error', 'Native renderer error ' + code.toString());
       }));
       this.controller.reportRenderStatus(id, revision, 'pending');
+      if (this.epoch !== epoch || this.nativeSession?.documentRevision !== revision) { return; }
       manager.beginTextStream(); manager.receiveTextChunk(OpenUiProjection.messages(surface, this.theme, ids, this.contentWidth)); manager.endTextStream();
     } catch (_) {
       this.errorLabel = 'This view is unavailable.';

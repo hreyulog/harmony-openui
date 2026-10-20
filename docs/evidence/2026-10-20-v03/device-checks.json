@@ -1,0 +1,391 @@
+{
+  "format": "harmony-openui/native-mapped-checks@1",
+  "checks": [
+    {
+      "tag": "model",
+      "state": {
+        "$kind": "all",
+        "$duration": "all"
+      },
+      "visibleImageCount": 4,
+      "visibleImageUrls": [
+        "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop",
+        "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=75&fit=crop",
+        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop",
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"
+      ],
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "839:386",
+          "text": "全部类型"
+        },
+        {
+          "id": "openui_m5_8",
+          "hashcode": "839:412",
+          "text": "不限时长"
+        }
+      ],
+      "stats": {
+        "replacements": 1,
+        "evaluations": 1,
+        "stateUpdates": 0,
+        "internalActions": 0,
+        "externalActions": 0
+      },
+      "revision": 5,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "park",
+      "state": {
+        "$kind": "park",
+        "$duration": "all"
+      },
+      "visibleImageCount": 2,
+      "visibleImageUrls": [
+        "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop",
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"
+      ],
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "839:386",
+          "text": "公园步道"
+        },
+        {
+          "id": "openui_m5_8",
+          "hashcode": "839:412",
+          "text": "不限时长"
+        }
+      ],
+      "stats": {
+        "replacements": 1,
+        "evaluations": 2,
+        "stateUpdates": 1,
+        "internalActions": 0,
+        "externalActions": 0
+      },
+      "revision": 6,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "park-long",
+      "state": {
+        "$kind": "park",
+        "$duration": "long"
+      },
+      "visibleImageCount": 1,
+      "visibleImageUrls": [
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"
+      ],
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "839:386",
+          "text": "公园步道"
+        },
+        {
+          "id": "openui_m5_8",
+          "hashcode": "839:412",
+          "text": "约2小时"
+        }
+      ],
+      "stats": {
+        "replacements": 1,
+        "evaluations": 3,
+        "stateUpdates": 2,
+        "internalActions": 0,
+        "externalActions": 0
+      },
+      "revision": 7,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "park-short",
+      "state": {
+        "$kind": "park",
+        "$duration": "short"
+      },
+      "visibleImageCount": 1,
+      "visibleImageUrls": [
+        "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop"
+      ],
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "839:386",
+          "text": "公园步道"
+        },
+        {
+          "id": "openui_m5_8",
+          "hashcode": "839:412",
+          "text": "约1小时"
+        }
+      ],
+      "stats": {
+        "replacements": 1,
+        "evaluations": 5,
+        "stateUpdates": 3,
+        "internalActions": 0,
+        "externalActions": 1
+      },
+      "revision": 9,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "empty",
+      "state": {
+        "$kind": "museum",
+        "$duration": "short"
+      },
+      "visibleImageCount": 0,
+      "visibleImageUrls": [],
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "839:386",
+          "text": "展馆"
+        },
+        {
+          "id": "openui_m5_8",
+          "hashcode": "839:412",
+          "text": "约1小时"
+        }
+      ],
+      "stats": {
+        "replacements": 1,
+        "evaluations": 7,
+        "stateUpdates": 4,
+        "internalActions": 0,
+        "externalActions": 2
+      },
+      "revision": 11,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "museum",
+      "state": {
+        "$kind": "museum",
+        "$duration": "long"
+      },
+      "visibleImageCount": 1,
+      "visibleImageUrls": [
+        "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=75&fit=crop"
+      ],
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "839:386",
+          "text": "展馆"
+        },
+        {
+          "id": "openui_m5_8",
+          "hashcode": "839:412",
+          "text": "约2小时"
+        }
+      ],
+      "stats": {
+        "replacements": 1,
+        "evaluations": 8,
+        "stateUpdates": 5,
+        "internalActions": 0,
+        "externalActions": 2
+      },
+      "revision": 12,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "reset",
+      "state": {
+        "$kind": "all",
+        "$duration": "all"
+      },
+      "visibleImageCount": 4,
+      "visibleImageUrls": [
+        "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop",
+        "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=75&fit=crop",
+        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop",
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"
+      ],
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "839:386",
+          "text": "全部类型"
+        },
+        {
+          "id": "openui_m5_8",
+          "hashcode": "839:412",
+          "text": "不限时长"
+        }
+      ],
+      "stats": {
+        "replacements": 1,
+        "evaluations": 10,
+        "stateUpdates": 5,
+        "internalActions": 1,
+        "externalActions": 3
+      },
+      "revision": 14,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "all-short",
+      "state": {
+        "$kind": "all",
+        "$duration": "short"
+      },
+      "visibleImageCount": 2,
+      "visibleImageUrls": [
+        "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop",
+        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop"
+      ],
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "839:386",
+          "text": "全部类型"
+        },
+        {
+          "id": "openui_m5_8",
+          "hashcode": "839:412",
+          "text": "约1小时"
+        }
+      ],
+      "stats": {
+        "replacements": 1,
+        "evaluations": 11,
+        "stateUpdates": 6,
+        "internalActions": 1,
+        "externalActions": 3
+      },
+      "revision": 15,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "bookstore",
+      "state": {
+        "$kind": "bookstore",
+        "$duration": "short"
+      },
+      "visibleImageCount": 1,
+      "visibleImageUrls": [
+        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop"
+      ],
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "839:386",
+          "text": "书店"
+        },
+        {
+          "id": "openui_m5_8",
+          "hashcode": "839:412",
+          "text": "约1小时"
+        }
+      ],
+      "stats": {
+        "replacements": 1,
+        "evaluations": 12,
+        "stateUpdates": 7,
+        "internalActions": 1,
+        "externalActions": 3
+      },
+      "revision": 16,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "final",
+      "state": {
+        "$kind": "all",
+        "$duration": "all"
+      },
+      "visibleImageCount": 4,
+      "visibleImageUrls": [
+        "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop",
+        "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=75&fit=crop",
+        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop",
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"
+      ],
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "839:386",
+          "text": "全部类型"
+        },
+        {
+          "id": "openui_m5_8",
+          "hashcode": "839:412",
+          "text": "不限时长"
+        }
+      ],
+      "stats": {
+        "replacements": 1,
+        "evaluations": 14,
+        "stateUpdates": 7,
+        "internalActions": 2,
+        "externalActions": 4
+      },
+      "revision": 18,
+      "renderStatus": "rendered"
+    }
+  ],
+  "actions": [
+    {
+      "name": "continue_conversation",
+      "sourceComponentId": "n_root_7_3",
+      "revision": 7,
+      "context": {
+        "message": "选择林间步道",
+        "context": {
+          "itemId": "forest-trail"
+        }
+      }
+    },
+    {
+      "name": "continue_conversation",
+      "sourceComponentId": "n_root_4_3",
+      "revision": 9,
+      "context": {
+        "message": "选择湖畔慢走",
+        "context": {
+          "itemId": "lake-walk"
+        }
+      }
+    },
+    {
+      "name": "continue_conversation",
+      "sourceComponentId": "n_root_5_3",
+      "revision": 12,
+      "context": {
+        "message": "选择城市展馆",
+        "context": {
+          "itemId": "city-museum"
+        }
+      }
+    },
+    {
+      "name": "continue_conversation",
+      "sourceComponentId": "n_root_6_3",
+      "revision": 16,
+      "context": {
+        "message": "选择街角书店",
+        "context": {
+          "itemId": "corner-books"
+        }
+      }
+    }
+  ],
+  "selectNodeIdentityStable": true
+}

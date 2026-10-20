@@ -1350,6 +1350,48 @@
           "action"
         ],
         "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "not": {
+              "enum": [
+                "__proto__",
+                "prototype",
+                "constructor"
+              ]
+            }
+          },
+          "component": {
+            "type": "string",
+            "const": "Image"
+          },
+          "source": {
+            "type": "string",
+            "pattern": "^https://[A-Za-z0-9][^\\s<>]*$",
+            "maxLength": 2048
+          },
+          "alt": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "aspectRatio": {
+            "type": "number",
+            "minimum": 0.25,
+            "maximum": 4
+          }
+        },
+        "required": [
+          "id",
+          "component",
+          "source",
+          "alt"
+        ],
+        "additionalProperties": false,
+        "description": "Basic image mapped directly to the native AGenUI Image component. OpenUiImage remains the v0.2 custom image control."
       }
     ]
   },

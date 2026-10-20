@@ -8,3 +8,5 @@ export { OpenUiComponent, OpenUiFact, OpenUiText, OpenUiBinding, OpenUiSurface,
 export { OpenUiView } from './src/main/ets/render/OpenUiView';
 export { OpenUiThemes, OpenUiTheme, OpenUiPalette, OpenUiDimensions } from './src/main/ets/render/OpenUiTheme';
 export { OpenUiLanguageStream, OpenUiLanguageResult, OpenUiLanguageError } from './src/main/ets/lang/OpenUiLanguage';
+export { OpenUiMappedRuntime, OpenUiMappedResult, OpenUiMappedStats, OpenUiMappedBinding,
+  OpenUiMappedOptions } from './src/main/ets/lang/OpenUiMappedRuntime';

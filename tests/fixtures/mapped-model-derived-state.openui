@@ -1,0 +1,56 @@
+root = Stack([heading, filterRow, $showLake ? lakeCard : null, $showMuseum ? museumCard : null, $showBooks ? booksCard : null, $showForest ? forestCard : null, $showNone ? noneHint : null, footerNote], "column", "m")
+
+heading = CardHeader("发现周末去处", "虚构演示 · 图片为活动类型配图")
+
+$kind = "all"
+$duration = "all"
+
+$showLake = $kind == "all" || $kind == "park"
+$showMuseum = $kind == "all" || $kind == "museum"
+$showBooks = $kind == "all" || $kind == "bookstore"
+$showForest = $kind == "all" || $kind == "park"
+$showNone = !$showLake && !$showMuseum && !$showBooks && !$showForest
+
+$lakeDuration = $duration == "all" || $duration == "short"
+$museumDuration = $duration == "all" || $duration == "long"
+$booksDuration = $duration == "all" || $duration == "short"
+$forestDuration = $duration == "all" || $duration == "long"
+
+$showLake = $showLake && $lakeDuration
+$showMuseum = $showMuseum && $museumDuration
+$showBooks = $showBooks && $booksDuration
+$showForest = $showForest && $forestDuration
+$showNone = !$showLake && !$showMuseum && !$showBooks && !$showForest
+
+kindOptions = [SelectItem("all", "全部类型"), SelectItem("park", "公园步道"), SelectItem("museum", "展馆"), SelectItem("bookstore", "书店")]
+durationOptions = [SelectItem("all", "不限时长"), SelectItem("short", "约 1 小时"), SelectItem("long", "约 2 小时")]
+
+kindSelect = Select("kind", kindOptions, "选择类型", null, $kind)
+durationSelect = Select("duration", durationOptions, "选择时长", null, $duration)
+
+kindControl = FormControl("类型", kindSelect)
+durationControl = FormControl("时长", durationSelect)
+
+resetBtn = Button("重置筛选", @Reset($kind, $duration), "tertiary", "normal", "small")
+
+filterRow = Stack([kindControl, durationControl, resetBtn], "column", "s")
+
+lakeImg = Image("湖畔慢走配图", "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop")
+lakeBtn = Button("选择湖畔慢走", @ToAssistant("选择湖畔慢走", {itemId:"lake-walk"}), "primary", "normal", "small")
+lakeCard = Card([lakeImg, CardHeader("湖畔慢走", "公园步道 · 约 1 小时"), TextContent("户外 · 约 1 小时 · 适合轻松散步"), lakeBtn], "card", "column", "s")
+
+museumImg = Image("城市展馆配图", "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=75&fit=crop")
+museumBtn = Button("选择城市展馆", @ToAssistant("选择城市展馆", {itemId:"city-museum"}), "primary", "normal", "small")
+museumCard = Card([museumImg, CardHeader("城市展馆", "展馆 · 约 2 小时"), TextContent("室内 · 约 2 小时 · 看一场主题展览"), museumBtn], "card", "column", "s")
+
+booksImg = Image("街角书店配图", "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop")
+booksBtn = Button("选择街角书店", @ToAssistant("选择街角书店", {itemId:"corner-books"}), "primary", "normal", "small")
+booksCard = Card([booksImg, CardHeader("街角书店", "书店 · 约 1 小时"), TextContent("室内 · 约 1 小时 · 阅读与休息"), booksBtn], "card", "column", "s")
+
+forestImg = Image("林间步道配图", "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop")
+forestBtn = Button("选择林间步道", @ToAssistant("选择林间步道", {itemId:"forest-trail"}), "primary", "normal", "small")
+forestCard = Card([forestImg, CardHeader("林间步道", "公园步道 · 约 2 小时"), TextContent("户外 · 约 2 小时 · 适合步行探索"), forestBtn], "card", "column", "s")
+
+noneHint = TextContent("没有匹配结果，请调整筛选", "default")
+
+footerNote = TextContent("虚构演示 · 图片为活动类型配图非场馆实景", "small")
