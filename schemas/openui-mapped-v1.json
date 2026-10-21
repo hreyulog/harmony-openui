@@ -215,7 +215,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "A card title and optional short subtitle."
+      "description": "A section or card heading with an optional short supporting subtitle. Native typography keeps the title visually distinct from the caption."
     },
     "TextContent": {
       "type": "object",
@@ -238,7 +238,7 @@
         "text"
       ],
       "additionalProperties": false,
-      "description": "Plain native text. Markdown is not supported in this profile."
+      "description": "Plain native text. Use small for supporting metadata, default for body content, and large-heavy for a short important value. The host theme owns typography. Markdown is not supported in this profile."
     },
     "Image": {
       "type": "object",
@@ -254,7 +254,7 @@
         "alt"
       ],
       "additionalProperties": false,
-      "description": "A native image. Use only an exact supplied HTTPS URL and meaningful alternative text."
+      "description": "A native photograph with host-controlled mobile geometry. Use only an exact supplied HTTPS URL and meaningful alternative text."
     },
     "Button": {
       "type": "object",
@@ -294,7 +294,7 @@
         "label"
       ],
       "additionalProperties": false,
-      "description": "An action button. Set and Reset update local state; ToAssistant and OpenUrl return intent to the host. A primary ToAssistant inside a Form validates the live values before returning formState."
+      "description": "An action button. Primary is the main filled action, secondary is a quieter alternative, and tertiary is a low-emphasis text action. Set and Reset update local state; ToAssistant and OpenUrl return intent to the host. A primary ToAssistant inside a Form validates the live values before returning formState."
     },
     "ActionExpression": {
       "anyOf": [

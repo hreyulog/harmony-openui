@@ -14,16 +14,18 @@ export interface OpenUiTheme { mode: 'light' | 'dark'; palette: OpenUiPalette; d
 export class OpenUiThemes {
   static create(mode: 'light' | 'dark' = 'light'): OpenUiTheme {
     const palette: OpenUiPalette = mode === 'dark' ? {
-      canvas: '#111318', surface: '#1A1D24', group: '#222630', text: '#EDF0F7', secondary: '#B4BDCC', divider: '#394252',
-      accent: '#ADBDFF', accentContainer: '#283A66', positive: '#8BD9B4', positiveContainer: '#173B30',
+      canvas: '#101318', surface: '#1B2028', group: '#252C36', text: '#EEF2F8', secondary: '#AAB4C4', divider: '#353F4D',
+      accent: '#4169E1', accentContainer: '#253457', positive: '#8BD9B4', positiveContainer: '#173B30',
       caution: '#F0C583', cautionContainer: '#46351E'
     } : {
-      canvas: '#F5F7FB', surface: '#FFFFFF', group: '#F3F5F9', text: '#182235', secondary: '#586579', divider: '#DDE3ED',
-      accent: '#3856C8', accentContainer: '#EDF1FF', positive: '#216B4D', positiveContainer: '#EAF6EF',
+      canvas: '#F6F7F9', surface: '#FFFFFF', group: '#F1F3F6', text: '#172033', secondary: '#667085', divider: '#E5E9F0',
+      accent: '#315EE9', accentContainer: '#EDF2FF', positive: '#237452', positiveContainer: '#EAF6EF',
       caution: '#815918', cautionContainer: '#FFF4DB'
     };
-    return { mode, palette, dimensions: { headline: 18, body: 16, supporting: 14, bodyLine: 24,
-      supportingLine: 21, inset: 14, spacing: 12, radius: 12, targetHeight: 64 } };
+    // The host owns page margins; a view is no longer an extra padded card.
+    // Retain the public token names so existing host themes remain compatible.
+    return { mode, palette, dimensions: { headline: 22, body: 16, supporting: 13, bodyLine: 24,
+      supportingLine: 20, inset: 0, spacing: 12, radius: 16, targetHeight: 48 } };
   }
   static copy(theme: OpenUiTheme): OpenUiTheme { return JSON.parse(JSON.stringify(theme)) as OpenUiTheme; }
 }

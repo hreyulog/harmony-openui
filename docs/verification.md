@@ -1,6 +1,6 @@
 # Historical v0.1 verification — 2026-10-20
 
-Current form/media acceptance is recorded separately in [v0.2 verification](verification-v02.md). The evidence below describes v0.1 only.
+Current visual acceptance is recorded in [v0.6 verification](verification-v06.md); earlier form/media acceptance is in [v0.2 verification](verification-v02.md). The evidence below describes v0.1 only.
 
 The independent demo was installed and exercised on a physical HUAWEI nova 15 Pro (API 26, portrait, 1320 × 2856). The accepted build is **final-r9**, with renderer diagnostics disabled in both source and staged compilation.
 

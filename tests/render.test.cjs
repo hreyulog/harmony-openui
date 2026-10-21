@@ -65,6 +65,84 @@ test('projection resolves live data, applies accessible defaults and never mutat
  assert.equal(nodes.find(n=>n.id==='option').title,'Observed choice');assert.equal(nodes.find(n=>n.id==='option').meta,'42');assert.equal(nodes.find(n=>n.id==='option').action.event.context.value,'a');assert.equal(nodes.find(n=>n.id==='facts').facts[0].value,'42');assert.equal(JSON.stringify(surface),before);
  c.setReadOnly('s',true);const readonly=s.Projection.components(c.getSurface('s'),s.Themes.create());assert.equal(readonly.find(n=>n.id==='option').selectable,false);assert.equal(readonly.find(n=>n.id==='option').action,undefined);
 });
+test('native text roles preserve heading, body and caption hierarchy while retaining authored styles in both themes',()=>{
+ const s=fixture(),c=new s.Controller(),roles=['h1','h2','h3','body','caption'];
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'components',surfaceId:'s',components:[
+  {id:'root',component:'Column',children:[...roles,'custom']},
+  ...roles.map(variant=>({id:variant,component:'Text',text:variant,variant})),
+  {id:'custom',component:'Text',text:'Host style',variant:'caption',styles:{'font-size':'30px','font-weight':'500',color:'#886644'}}
+ ]});
+ const original=c.exportSnapshot();
+ for(const mode of ['light','dark']){
+  const theme=s.Themes.create(mode),nodes=s.Projection.components(c.getSurface('s'),theme),node=id=>nodes.find(node=>node.id===id);
+  const sizes=roles.map(role=>parseFloat(node(role).styles['font-size']));
+  assert.ok(sizes.every((size,index)=>index===0||sizes[index-1]>size),'every semantic text tier has a distinct descending size');
+  for(const role of ['h1','h2','h3'])assert.equal(node(role).styles['font-weight'],'600');
+  assert.equal(node('body').styles['font-weight'],'400');assert.equal(node('caption').styles.color,theme.palette.secondary);
+  assert.equal(node('caption').styles['line-height'],(theme.dimensions.supportingLine*2)+'px');
+  assert.equal(node('body').styles.color,theme.palette.text);
+  assert.equal(node('custom').styles['font-size'],'30px');assert.equal(node('custom').styles['font-weight'],'500');assert.equal(node('custom').styles.color,'#886644');
+ }
+ assert.equal(c.exportSnapshot(),original,'visual projection does not rewrite the accepted document');
+});
+
+test('native button roles explicitly style fill, label and alignment without depending on unsupported native secondary variants',()=>{
+ const s=fixture(),c=new s.Controller(),roles=['primary','secondary','borderless'];
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'components',surfaceId:'s',components:[
+  {id:'root',component:'Column',children:roles},
+  ...roles.map(variant=>({id:variant,component:'Button',child:variant+'_label',variant,action:{event:{name:'choose',context:{role:variant}}}})),
+  ...roles.map(variant=>({id:variant+'_label',component:'Text',text:variant}))
+ ]});
+ for(const mode of ['light','dark']){
+  const theme=s.Themes.create(mode),nodes=s.Projection.components(c.getSurface('s'),theme),node=id=>nodes.find(node=>node.id===id);
+  assert.equal(node('primary').styles['background-color'],theme.palette.accent);assert.equal(node('primary_label').styles.color,'#FFFFFF');
+  assert.equal(node('secondary').styles['background-color'],theme.palette.group);assert.equal(node('secondary').styles['border-width'],'1px');
+  assert.equal(node('secondary_label').styles.color,theme.palette.text);assert.equal(node('secondary').variant,'borderless');
+  assert.equal(node('borderless').styles['background-color'],'transparent');assert.equal(node('borderless_label').styles.color,theme.palette.accent);
+  for(const role of roles){
+   assert.equal(node(role+'_label').styles['text-align'],'center');assert.equal(node(role+'_label').styles['font-weight'],'600');
+   assert.ok(parseFloat(node(role).styles.height)>=88);assert.deepEqual(JSON.parse(JSON.stringify(node(role).action.event.context)),{role});
+  }
+  const readonly={...c.getSurface('s'),readOnly:true},locked=s.Projection.components(readonly,theme);
+  assert.equal(locked.some(node=>node.component==='Button'||node.action),false);
+  assert.equal(locked.find(node=>node.id==='primary_label').styles.color,theme.palette.text,'readonly text must not remain white on a transparent container');
+ }
+});
+
+test('native cards have a shared surface and inset while clear cards stay transparent and image geometry remains explicit',()=>{
+ const s=fixture(),c=new s.Controller();c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'components',surfaceId:'s',components:[
+  {id:'root',component:'Column',children:['card','clear','image']},
+  {id:'card',component:'Card',child:'title'},{id:'title',component:'Text',text:'Card title'},
+  {id:'clear',component:'Card',child:'plain',styles:{'background-color':'transparent'}},{id:'plain',component:'Text',text:'Clear'},
+  {id:'image',component:'Image',source:'https://example.com/photo.jpg',alt:'Photo'}
+ ]});
+ for(const mode of ['light','dark']){
+  const theme=s.Themes.create(mode),nodes=s.Projection.components(c.getSurface('s'),theme),node=id=>nodes.find(node=>node.id===id);
+  assert.equal(node('card').styles['background-color'],theme.palette.surface);assert.equal(node('card').styles.padding,'32px');
+  assert.equal(node('card').styles['border-radius'],(theme.dimensions.radius*2)+'px');assert.equal(node('card').styles['border-color'],theme.palette.divider);
+  assert.equal(node('clear').styles['background-color'],'transparent');assert.equal(node('clear').styles.padding,'0px');assert.equal(node('clear').styles['border-width'],'0px');
+  assert.equal(node('image').styles['aspect-ratio'],'1.7777778');assert.equal(node('image').styles.width,'100%','network images never depend on intrinsic dimensions to obtain initial height');
+ }
+ const view=new s.View();view.controller=c;mount(view,337);assert.equal(view.nativeSession.contentWidth,337);assert.equal(s.managers[0].nodes.find(node=>node.id==='root').styles.width,'674px');view.aboutToDisappear();
+});
+
+test('ordinary Row children use equal shrinking native tracks while explicitly authored widths and nested text stay intact',()=>{
+ const s=fixture(),c=new s.Controller();c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'components',surfaceId:'s',components:[
+  {id:'root',component:'Row',children:['left','right','fixed'],styles:{gap:'24px'}},
+  {id:'left',component:'Column',children:['label']},{id:'label',component:'Text',text:'A long field label'},
+  {id:'right',component:'OpenUiSelect',field:'choice',label:'Choices',options:[{label:'All',value:'all'}]},
+  {id:'fixed',component:'Text',text:'80',styles:{width:'80px'}}
+ ]});
+ const nodes=s.Projection.components(c.getSurface('s'),s.Themes.create()),node=id=>nodes.find(node=>node.id===id);
+ for(const id of ['left','right']){
+  assert.equal(node(id).styles.width,'0px');assert.equal(node(id).styles['flex-basis'],'0px');assert.equal(node(id).styles['flex-grow'],'1');
+  assert.equal(node(id).styles['flex-shrink'],'1');assert.equal(node(id).styles['min-width'],'0px');
+ }
+ assert.equal(node('fixed').styles.width,'80px');assert.equal(node('fixed').styles['flex-grow'],undefined);
+ assert.equal(node('label').styles.width,'100%','text fills its own computed column rather than the entire outer Row');
+ assert.equal(c.getSurface('s').components.find(node=>node.id==='right').styles,undefined,'flex mechanics are native-only output, not new model-authored CSS');
+});
+
 test('native scopes isolate themes, read-only state and routes even when surface IDs match',()=>{
  const s=fixture(),a=new s.Manager(),b=new s.Manager(),light=s.Themes.create(),dark=s.Themes.create('dark');
  const ia=new s.NativeIds([{id:'a'}]),ib=new s.NativeIds([{id:'b'}]);
@@ -144,11 +222,11 @@ test('unreachable semantic leftovers do not prevent the visible tree from acknow
 });
 
 test('native rendering waits for host content width and seeds the synthetic root with that width',()=>{
- const s=fixture(),c=seed(s.Controller),view=new s.View();view.controller=c;view.aboutToAppear();assert.equal(s.managers.length,0,'the display viewport must not bootstrap a padded card');view.viewportChanged({width:0,height:0});assert.equal(s.managers.length,0);view.viewportChanged({width:337,height:100});assert.equal(s.managers.length,1);assert.equal(s.managers[0].nodes.find(n=>n.id==='root').styles.width,'618px');assert.equal(view.nativeSession.contentWidth,309);view.aboutToDisappear();
+ const s=fixture(),c=seed(s.Controller),view=new s.View();view.theme.dimensions.inset=14;view.controller=c;view.aboutToAppear();assert.equal(s.managers.length,0,'the display viewport must not bootstrap a padded card');view.viewportChanged({width:0,height:0});assert.equal(s.managers.length,0);view.viewportChanged({width:337,height:100});assert.equal(s.managers.length,1);assert.equal(s.managers[0].nodes.find(n=>n.id==='root').styles.width,'618px');assert.equal(view.nativeSession.contentWidth,309,'existing host themes can retain an explicit view inset');view.aboutToDisappear();
 });
 
 test('late viewport-width measurements cannot relock a narrower current card',()=>{
- const s=fixture(),c=seed(s.Controller),view=new s.View();view.controller=c;mount(view,337);const element=s.hybridViews.get(s.managers[0].customIds[0]);element.scheduleSize({width:377,height:82});s.flushTimers();assert.equal(s.sizes.length,0,'a deferred pre-bind viewport measurement is discarded, including its old height');element.scheduleSize({width:309,height:124});s.flushTimers();assert.equal(s.sizes.length,1);assert.equal(s.sizes[0].width,309);assert.equal(s.sizes[0].height,124);
+ const s=fixture(),c=seed(s.Controller),view=new s.View();view.theme.dimensions.inset=14;view.controller=c;mount(view,337);const element=s.hybridViews.get(s.managers[0].customIds[0]);element.scheduleSize({width:377,height:82});s.flushTimers();assert.equal(s.sizes.length,0,'a deferred pre-bind viewport measurement is discarded, including its old height');element.scheduleSize({width:309,height:124});s.flushTimers();assert.equal(s.sizes.length,1);assert.equal(s.sizes[0].width,309);assert.equal(s.sizes[0].height,124);
  const oldManager=s.managers[0];element.scheduleSize({width:309,height:140});view.viewportChanged({width:244,height:150});assert.equal(s.managers.length,2);assert.equal(oldManager.disposed,true);assert.equal(s.managers[1].nodes.find(n=>n.id==='root').styles.width,'432px');s.flushTimers();assert.equal(s.sizes.length,1,'queued measurements from the old width epoch cannot touch the new mount');view.aboutToDisappear();
 });
 

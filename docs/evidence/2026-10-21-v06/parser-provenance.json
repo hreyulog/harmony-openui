@@ -1,0 +1,207 @@
+{
+  "profiles": [
+    {
+      "runtime": "OpenUiLangRuntime.js",
+      "schema": "schemas/openui-lang-v0.1.json",
+      "parser": "@openuidev/lang-core",
+      "version": "1.0.1",
+      "license": "MIT",
+      "sourceRepository": "https://github.com/thesysdev/openui",
+      "referenceCommit": "9823ec05d4b29bc78d101676dc16b44fe17f1830",
+      "runtimeSha256": "6c2bb7ff54e2817e6a6aff2ef674f8a1062a34f31c8a3394ff19c672af78fff4",
+      "schemaSha256": "2eb2cf165a5620bbb1a586dd9b69f9eecad21fcd4d92bb13d92a26fc1f0ff550",
+      "bytes": 881427,
+      "modelProviderRequired": false
+    },
+    {
+      "runtime": "OpenUiMappedRuntime.js",
+      "schema": "schemas/openui-mapped-v1.json",
+      "parser": "@openuidev/lang-core",
+      "version": "1.0.1",
+      "license": "MIT",
+      "repository": "https://github.com/thesysdev/openui",
+      "commit": "9823ec05d4b29bc78d101676dc16b44fe17f1830",
+      "profile": "harmony-openui/mapped@1",
+      "runtimeSha256": "1cd5c92a041e9c12c7e91e9b1c2d1ca9cf386432da87fac4eb4b9f90ebc3d1d2",
+      "schemaSha256": "cc0d76105d7f1b90702392e26bdd6902d64171dcef00026316055ab426284b7d",
+      "bytes": 947085,
+      "components": [
+        {
+          "name": "Stack",
+          "native": [
+            "Column",
+            "Row"
+          ],
+          "source": "packages/react-ui/src/genui-lib/Stack/schema.ts"
+        },
+        {
+          "name": "Card",
+          "native": [
+            "Card",
+            "Column",
+            "Row"
+          ],
+          "source": "packages/react-ui/src/genui-lib/Card/schema.ts"
+        },
+        {
+          "name": "CardHeader",
+          "native": [
+            "Column",
+            "Text"
+          ],
+          "source": "packages/react-ui/src/genui-lib/CardHeader/schema.ts"
+        },
+        {
+          "name": "TextContent",
+          "native": [
+            "Text"
+          ],
+          "source": "packages/react-ui/src/genui-lib/TextContent/schema.ts"
+        },
+        {
+          "name": "Image",
+          "native": [
+            "Image"
+          ],
+          "source": "packages/react-ui/src/genui-lib/Image/schema.ts"
+        },
+        {
+          "name": "Button",
+          "native": [
+            "Button",
+            "Text"
+          ],
+          "source": "packages/react-ui/src/genui-lib/Button/schema.ts"
+        },
+        {
+          "name": "Select",
+          "native": [
+            "OpenUiSelect"
+          ],
+          "source": "packages/react-ui/src/genui-lib/Select/schema.ts"
+        },
+        {
+          "name": "RadioItem",
+          "native": [],
+          "source": "packages/react-ui/src/genui-lib/RadioGroup/schema.ts",
+          "dataOnly": true
+        },
+        {
+          "name": "RadioGroup",
+          "native": [
+            "OpenUiRadioGroup"
+          ],
+          "source": "packages/react-ui/src/genui-lib/RadioGroup/index.tsx"
+        },
+        {
+          "name": "Input",
+          "native": [
+            "OpenUiInput"
+          ],
+          "source": "packages/react-ui/src/genui-lib/Input/schema.ts"
+        },
+        {
+          "name": "TextArea",
+          "native": [
+            "OpenUiInput"
+          ],
+          "source": "packages/react-ui/src/genui-lib/TextArea/schema.ts"
+        },
+        {
+          "name": "CheckBoxItem",
+          "native": [],
+          "source": "packages/react-ui/src/genui-lib/CheckBoxGroup/schema.ts",
+          "dataOnly": true
+        },
+        {
+          "name": "CheckBoxGroup",
+          "native": [
+            "Column",
+            "Text",
+            "OpenUiCheckbox"
+          ],
+          "source": "packages/react-ui/src/genui-lib/CheckBoxGroup/schema.ts"
+        },
+        {
+          "name": "SwitchItem",
+          "native": [],
+          "source": "packages/react-ui/src/genui-lib/SwitchGroup/schema.ts",
+          "dataOnly": true
+        },
+        {
+          "name": "SwitchGroup",
+          "native": [
+            "Column",
+            "Text",
+            "Card",
+            "OpenUiToggle"
+          ],
+          "source": "packages/react-ui/src/genui-lib/SwitchGroup/schema.ts"
+        },
+        {
+          "name": "Buttons",
+          "native": [
+            "Column",
+            "Row"
+          ],
+          "source": "packages/react-ui/src/genui-lib/Buttons/schema.ts"
+        },
+        {
+          "name": "Form",
+          "native": [
+            "OpenUiForm"
+          ],
+          "source": "packages/react-ui/src/genui-lib/Form/schema.ts"
+        },
+        {
+          "name": "SelectItem",
+          "native": [],
+          "source": "packages/react-ui/src/genui-lib/Select/schema.ts",
+          "dataOnly": true
+        },
+        {
+          "name": "FormControl",
+          "native": [
+            "Column",
+            "Text",
+            "OpenUiSelect",
+            "OpenUiInput",
+            "OpenUiCheckbox",
+            "OpenUiRadioGroup"
+          ],
+          "source": "packages/react-ui/src/genui-lib/FormControl/schema.ts"
+        }
+      ],
+      "capabilities": [
+        "$state",
+        "conditional-expression",
+        "select-binding",
+        "input-binding",
+        "checkbox-record-binding",
+        "radio-binding",
+        "switch-record-binding",
+        "form-live-state",
+        "form-required-validation",
+        "@Each-display-only",
+        "@Filter",
+        "@Sort",
+        "@Count",
+        "@Set",
+        "@Reset",
+        "@ToAssistant-context",
+        "@OpenUrl"
+      ],
+      "limitations": [
+        "Bounded official component signatures, not full react-ui or ArkUI parity.",
+        "No Query/Mutation, HTML, Markdown, wrapping, custom code or network execution.",
+        "State declarations are unique literal defaults. Checkbox groups bind a record of declared item names to boolean values. Derived state declarations are not supported; put expressions inline.",
+        "Input supports type=text only. TextArea supports the native three-row geometry only. Form validation supports required only; no blur rules or advanced validation.",
+        "Each and nested computed child arrays are display/action-only: fields and forms are rejected because keyed editable lists are not implemented.",
+        "Only Each, Filter, Sort and Count computation functions are supported. Data arrays use ordinary declarations, not $state.",
+        "Computed-list bounds: 200 entries per literal array; one Each expansion level; nested UI arrays depth 8 and 1000 total flatten visits; 200 native IR nodes. Programs remain subject to AST/source/depth budgets.",
+        "Card and SwitchGroup variant sunk and advanced form rules are not in this profile.",
+        "The host theme owns image geometry, typography, control sizes and destructive tone. Primary, secondary and tertiary button emphasis is retained."
+      ]
+    }
+  ]
+}

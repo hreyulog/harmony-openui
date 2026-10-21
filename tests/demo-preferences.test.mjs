@@ -67,7 +67,7 @@ test('actual Planner preset validates two required fields, preserves independent
   assert.deepEqual(receipt.context.formState.plan, {planName:'周末慢游',mode:'transit',notes:'带上“大包”\n保留换行'});
   assert.deepEqual(receipt.context.context.preferences, {remind:false,accessible:true});
   assert.equal(receipt.context.formState.plan.preferences, undefined, 'independent switches do not become implicit form fields');
-  const result = surface(page), text = result.components.filter(node => node.component === 'Text').map(node => node.text).join('\n');
+  const result = surface(page), text = result.components.filter(node => node.component === 'Text').map(node => node.text).join('');
   assert.equal(result.readOnly, true); assert.equal(result.components.some(node => node.action || node.field), false);
   for (const expected of ['周末慢游','带上“大包”\n保留换行','公共交通','出发提醒：未选','无障碍路线：已选','未创建提醒']) assert.ok(text.includes(expected), expected);
   assert.ok(result.components.some(node => node.component === 'Image' && node.source === page.place.image));
@@ -102,8 +102,9 @@ test('actual Planner result validator rejects inverted switch states even when a
   const {page} = setup(); fillRequired(page); edit(page, 'preferences', true, 'remind');
   assert.equal(click(page, '保存计划', 'review-result'), true);
   const correct = page.resultSource(); assert.doesNotThrow(() => page.validateResult(correct));
-  const inverted = correct.replace('出发提醒：已选', '出发提醒：未选').replace('无障碍路线：未选', '无障碍路线：已选');
-  assert.notEqual(inverted, correct, 'mutate only the host-known boolean outcomes, retaining labels and facts');
+  const facts = plain(page.displayFields()).map(fact => ({...fact, value:fact.label === '出发提醒' ? '未选' : fact.label === '无障碍路线' ? '已选' : fact.value}));
+  const inverted = 'root = Stack([Image("活动配图",' + JSON.stringify(page.place.image) + '),' +
+    facts.map(fact => 'TextContent(' + JSON.stringify(fact.label + '：' + fact.value) + ')').join(',') + '])';
   assert.throws(() => page.validateResult(inverted), /UI_RESULT_/);
 });
 
@@ -115,6 +116,24 @@ test('actual Planner rejects the recorded Nova result that translated a submitte
   assert.throws(() => page.validateResult(source), /出行方式.*公共交通/);
   const corrected = source.replace('出行方式：步行', '出行方式：公共交通');
   assert.notEqual(corrected, source); assert.doesNotThrow(() => page.validateResult(corrected), 'all remaining recorded facts agree with the actual submitted host values');
+});
+
+test('actual Planner rejects the recorded six-column model result while accepting its normal two-column result with identical facts', () => {
+  const {page} = setup('forest-trail');
+  fillRequired(page); edit(page, 'notes', '带水和雨伞'); edit(page, 'preferences', true, 'remind');
+  assert.equal(click(page, '保存计划', 'overcrowded-fixture-facts'), true);
+  assert.deepEqual(plain(page.submitted), {planName:'周末慢游',notes:'带水和雨伞',mode:'transit',preferences:{remind:true,accessible:false}});
+  // This is the exact fictional program returned on Nova, without the private
+  // capture's device/account/runtime metadata. Its facts were already correct.
+  const source = fs.readFileSync(new URL('./fixtures/mapped-model-overcrowded-result.openui', import.meta.url), 'utf8');
+  const parsed = JSON.parse(createMappedSession().replace(source));
+  assert.ok(parsed.components.some(node => node.component === 'Row' && node.children.length === 6));
+  const visible = parsed.components.filter(node => node.component === 'Text').map(node => node.text).join('')
+    .replace(/\s/g, '').replace(/:/g, '：');
+  for (const fact of page.displayFields()) assert.ok(visible.includes((fact.label + '：' + fact.value).replace(/\s/g, '')),
+    'the recorded result contains the exact submitted fact: ' + fact.label);
+  assert.throws(() => page.validateResult(source), /UI_RESULT_LAYOUT/);
+  assert.doesNotThrow(() => page.validateResult(page.resultSource()), 'the normal result preserves those facts with at most two items per row');
 });
 
 test('actual Planner gives the model exact Chinese display facts rather than delegating enum and boolean translation', async () => {

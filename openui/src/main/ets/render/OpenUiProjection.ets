@@ -55,6 +55,12 @@ export class OpenUiProjection {
     const nodes = JSON.parse(JSON.stringify(surface.components)) as RenderNode[];
     const data: Object = JSON.parse(surface.dataModelJson);
     const output: RenderNode[] = [];
+    const authoredWidths: Set<string> = new Set<string>();
+    const buttonLabels: Map<string, string> = new Map<string, string>();
+    for (const node of nodes) {
+      if (node.styles?.['width']) { authoredWidths.add(node.id); }
+      if (!surface.readOnly && node.component === 'Button' && node.child) { buttonLabels.set(node.child, node.variant ?? 'primary'); }
+    }
     for (const node of nodes) {
       if (node.text !== undefined) { node.text = OpenUiProjection.text(node.text, data); }
       if (node.title !== undefined) { node.title = OpenUiProjection.text(node.title, data); }
@@ -74,7 +80,7 @@ export class OpenUiProjection {
         node.accessibility = { label: node.alt ?? '' };
         const imageStyles: Record<string, string> = {};
         imageStyles['width'] = '100%'; imageStyles['aspect-ratio'] = (node.aspectRatio ?? 1.7777778).toString();
-        imageStyles['border-radius'] = (theme.dimensions.radius * 2).toString() + 'px';
+        imageStyles['border-radius'] = (Math.max(8, theme.dimensions.radius - 4) * 2).toString() + 'px';
         node.styles = imageStyles;
         node.source = undefined; node.alt = undefined; node.aspectRatio = undefined;
       }
@@ -91,21 +97,59 @@ export class OpenUiProjection {
         if (!node.styles) { node.styles = {}; }
         const styles = node.styles;
         if (node.component === 'Text') {
-          const heading = ['h1', 'h2', 'h3'].includes(node.variant ?? '');
-          if (!styles['font-size']) { styles['font-size'] = ((heading ? theme.dimensions.headline : theme.dimensions.body) * 2).toString() + 'px'; }
-          if (!styles['line-height']) { styles['line-height'] = (theme.dimensions.bodyLine * 2).toString() + 'px'; }
-          if (!styles['color']) { styles['color'] = theme.palette.text; }
+          const variant = node.variant ?? 'body';
+          const heading = ['h1', 'h2', 'h3'].includes(variant), caption = variant === 'caption';
+          const size = heading ? theme.dimensions.headline + (variant === 'h1' ? 6 : variant === 'h3' ? -3 : 0) :
+            caption ? theme.dimensions.supporting : theme.dimensions.body;
+          const line = heading ? size + 8 : caption ? theme.dimensions.supportingLine : theme.dimensions.bodyLine;
+          const button = buttonLabels.get(node.id);
+          const borderless = button === 'borderless' || button === 'tertiary';
+          if (!styles['font-size']) { styles['font-size'] = (size * 2).toString() + 'px'; }
+          if (!styles['line-height']) { styles['line-height'] = (line * 2).toString() + 'px'; }
+          if (!styles['font-weight']) { styles['font-weight'] = heading || button !== undefined ? '600' : '400'; }
+          if (!styles['color']) { styles['color'] = button !== undefined ? (borderless ? theme.palette.accent : button === 'secondary' ? theme.palette.text : '#FFFFFF') :
+            caption ? theme.palette.secondary : theme.palette.text; }
+          if (button !== undefined && !styles['text-align']) { styles['text-align'] = 'center'; }
           if (!styles['width']) { styles['width'] = '100%'; }
           styles['line-clamp'] = '0';
         }
         if ((node.component === 'Column' || node.component === 'Row') && !styles['gap']) { styles['gap'] = (theme.dimensions.spacing * 2).toString() + 'px'; }
-        if (node.component === 'Button') {
-          if (!styles['height']) { styles['height'] = '88px'; }
-          if (!styles['background-color']) { styles['background-color'] = theme.palette.accentContainer; }
+        if (node.component === 'Card') {
+          const clear = styles['background-color'] === 'transparent' || styles['background-color'] === '#00000000';
+          if (!styles['background-color']) { styles['background-color'] = theme.palette.surface; }
+          if (!styles['padding']) { styles['padding'] = clear ? '0px' : '32px'; }
           if (!styles['border-radius']) { styles['border-radius'] = (theme.dimensions.radius * 2).toString() + 'px'; }
+          if (!styles['border-width']) { styles['border-width'] = clear ? '0px' : '1px'; }
+          if (!styles['border-color']) { styles['border-color'] = theme.palette.divider; }
+        }
+        if (node.component === 'Button') {
+          const secondary = node.variant === 'secondary';
+          const borderless = node.variant === 'borderless' || node.variant === 'tertiary';
+          if (!styles['height']) { styles['height'] = (Math.max(44, theme.dimensions.targetHeight) * 2).toString() + 'px'; }
+          if (!styles['padding']) { styles['padding'] = '0px 28px'; }
+          if (!styles['background-color']) { styles['background-color'] = borderless ? 'transparent' : secondary ? theme.palette.group : theme.palette.accent; }
+          if (!styles['border-radius']) { styles['border-radius'] = (Math.min(12, theme.dimensions.radius) * 2).toString() + 'px'; }
+          if (!styles['border-width']) { styles['border-width'] = secondary ? '1px' : '0px'; }
+          if (!styles['border-color']) { styles['border-color'] = theme.palette.divider; }
+          // The pinned native renderer understands primary and borderless.
+          // Secondary/tertiary styling is explicit and needs no native fork.
+          node.variant = secondary || borderless ? 'borderless' : 'primary';
         }
       }
       output.push(node);
+    }
+    const byId: Map<string, RenderNode> = new Map<string, RenderNode>();
+    for (const node of output) { byId.set(node.id, node); }
+    for (const row of output) {
+      if (row.component !== 'Row') { continue; }
+      for (const id of row.children ?? []) {
+        const child = byId.get(id); if (!child || authoredWidths.has(id)) { continue; }
+        if (!child.styles) { child.styles = {}; }
+        // Keep ordinary Row children in equal, shrinking tracks. A 100% text
+        // or hybrid control must not claim the entire parent inside a column.
+        child.styles['width'] = '0px'; child.styles['min-width'] = '0px';
+        child.styles['flex-grow'] = '1'; child.styles['flex-shrink'] = '1'; child.styles['flex-basis'] = '0px';
+      }
     }
     return output;
   }

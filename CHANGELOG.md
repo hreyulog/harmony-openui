@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 — 2026-10-21
+
+- Give headings, body text and captions distinct native typography; preserve mapped button priorities through explicit native backgrounds, borders and centered labels.
+- Define shared card surfaces, geometry and form styling; remove the View-level padded white shell and give ordinary Row children equal shrinking tracks unless a width is authored.
+- Keep the existing theme interface and add collapsed demo tools with host-controlled light/dark appearance.
+- Generate grouped native forms and readable submitted-fact layouts through the actual model. The demo host rejects overcrowded result rows and retains the actual six-column failure as a regression fixture; no new business widget or model-source rewriting is introduced.
+- Verify the final build on Nova, with original screenshots, exact model candidates and separate source replay. Sofia remains separate.
+
 ## 0.5.0 — 2026-10-21
 
 - Add upstream-signature RadioItem, RadioGroup, SwitchItem and SwitchGroup mappings: 19 model-facing declarations, reusing the same 22 native IR kinds.

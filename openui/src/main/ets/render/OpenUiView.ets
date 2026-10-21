@@ -181,8 +181,7 @@ export struct OpenUiView {
       } else {
         Text('Loading view…').fontSize(this.theme.dimensions.supporting).fontColor(this.theme.palette.secondary)
       }
-    }.width('100%').padding(this.theme.dimensions.inset).backgroundColor(this.theme.palette.surface)
-      .borderRadius(this.theme.dimensions.radius)
+    }.width('100%').padding(this.theme.dimensions.inset)
       .onSizeChange((_before: SizeOptions, after: SizeOptions): void => { this.viewportChanged(after); })
   }
 }

@@ -1,0 +1,136 @@
+{
+  "format": "harmony-openui/planner-model-replay@2",
+  "createdAt": "2026-10-21T08:18:13.308Z",
+  "scope": "Model-free replay of already generated Nova sources with the actual Controller, ETS wrapper and official generated runtime. Not extra device evidence.",
+  "editorSourceSha256": "bc06ba8d0c276eeeccbdfb1379d07378ab45837a987d598686484c39e63e1efb",
+  "resultSourceSha256": "1c413fcfcf04c622f54a62c19e7c9a7ec79b4ba6aa6c7eaa0f2aae44245c79e8",
+  "fixtureSourceSha256": "4310cd2c7c12a4d013b41c87ccf3c728bbb7b88c4761d688bc14dda7d2cc47f6",
+  "inputEditorActualModel": true,
+  "inputResultActualModel": true,
+  "inputEditorModelRequests": 1,
+  "inputResultModelRequests": 3,
+  "checks": [
+    {
+      "name": "actual editor and result retain the supplied selected place",
+      "pass": true,
+      "placeId": "forest-trail"
+    },
+    {
+      "name": "blank form exposes name and radio required errors without any host action",
+      "pass": true,
+      "errorCount": 2,
+      "externalActions": 0
+    },
+    {
+      "name": "editing only the name preserves the required radio error",
+      "pass": true,
+      "errorCount": 1
+    },
+    {
+      "name": "radio selection stores exactly one business value and retains native option descriptions",
+      "pass": true,
+      "mode": "transit",
+      "errorCount": 0
+    },
+    {
+      "name": "independent SwitchGroup edits merge the record without changing form values or invoking host actions",
+      "pass": true,
+      "preferences": {
+        "remind": false,
+        "accessible": true
+      },
+      "externalActions": 0
+    },
+    {
+      "name": "Reset restores all four defaults and clears errors without an external action",
+      "pass": true,
+      "state": {
+        "$planName": "",
+        "$notes": "",
+        "$mode": "",
+        "$preferences": {
+          "remind": false,
+          "accessible": false
+        }
+      },
+      "externalActions": 0,
+      "errorCount": 0
+    },
+    {
+      "name": "live outside-form preferences and normalized current formState remain separate",
+      "pass": true,
+      "formState": {
+        "plan": {
+          "planName": "周末慢游",
+          "mode": "transit",
+          "notes": "带水和雨伞"
+        }
+      },
+      "preferences": {
+        "remind": true,
+        "accessible": false
+      },
+      "stalePreferencesPayloadRejected": true,
+      "externalActions": 1
+    },
+    {
+      "name": "actual result is read-only, action-free and accurately shows the selected item and submitted values",
+      "pass": true,
+      "readOnly": true,
+      "actions": 0,
+      "imageSource": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop",
+      "submittedValuesAccurate": true,
+      "factPairs": [
+        {
+          "label": "计划名称",
+          "value": "周末慢游",
+          "matched": true
+        },
+        {
+          "label": "备注",
+          "value": "带水和雨伞",
+          "matched": true
+        },
+        {
+          "label": "去处",
+          "value": "林间步道",
+          "matched": true
+        },
+        {
+          "label": "出行方式",
+          "value": "公共交通",
+          "matched": true
+        },
+        {
+          "label": "出发提醒",
+          "value": "已选",
+          "matched": true
+        },
+        {
+          "label": "无障碍路线",
+          "value": "未选",
+          "matched": true
+        }
+      ]
+    },
+    {
+      "name": "replay reported no runtime errors",
+      "pass": true,
+      "runtimeErrors": 0
+    }
+  ],
+  "placeId": "forest-trail",
+  "submitted": {
+    "planName": "周末慢游",
+    "mode": "transit",
+    "notes": "带水和雨伞",
+    "preferences": {
+      "remind": true,
+      "accessible": false
+    }
+  },
+  "total": 9,
+  "passed": 9,
+  "pass": true,
+  "externalActions": 1
+}

@@ -112,7 +112,7 @@ export struct OpenUiControlsLayout {
   @Builder
   private heading() {
     if (this.label) {
-      Text(this.label + (this.required ? ' *' : '')).fontSize(this.theme.dimensions.body).fontWeight(FontWeight.Medium)
+      Text(this.label + (this.required ? ' *' : '')).fontSize(this.theme.dimensions.supporting + 1).fontWeight(FontWeight.Medium)
         .fontColor(this.theme.palette.text).width('100%').wordBreak(WordBreak.BREAK_WORD)
     }
   }
@@ -122,34 +122,43 @@ export struct OpenUiControlsLayout {
       Text(this.title).fontSize(this.theme.dimensions.headline).fontWeight(FontWeight.Medium).fontColor(this.theme.palette.text).width('100%')
       Text(this.text).fontSize(this.theme.dimensions.body).fontColor(this.theme.palette.secondary).width('100%').wordBreak(WordBreak.BREAK_WORD)
       Row({ space: 12 }) {
-        Button(this.cancelLabel).layoutWeight(1).height(48).onClick((): void => { this.dialogVisible = false; })
+        Button(this.cancelLabel).layoutWeight(1).height(48).fontColor(this.theme.palette.text).backgroundColor(this.theme.palette.group)
+          .onClick((): void => { this.dialogVisible = false; })
         Button(this.confirmLabel).layoutWeight(1).height(48).enabled(!this.disabled)
+          .fontColor('#FFFFFF').backgroundColor(this.theme.palette.accent)
           .onClick((): void => { this.dialogVisible = false; if (!this.disabled) { this.onAction(); } })
       }.width('100%')
     }.width('100%').padding(24).backgroundColor(this.theme.palette.surface)
   }
   build() {
-    Column({ space: 8 }) {
+    Column({ space: 6 }) {
       if (this.kind === 'OpenUiInput') {
         this.heading()
         if (this.variant === 'textarea') {
           TextArea({ text: this.liveStringValue, placeholder: this.placeholder }).id(this.nodeId).width('100%').height(108)
             .fontSize(this.theme.dimensions.body).fontColor(this.theme.palette.text).backgroundColor(this.theme.palette.group)
+            .borderRadius(12).padding(12).border({ width: 1, color: this.theme.palette.divider })
             .accessibilityText(this.label)
             .enabled(!this.disabled).onChange((value: string): void => { this.changedString(value); })
         } else if (this.variant === 'search') {
           Search({ value: this.liveStringValue, placeholder: this.placeholder }).id(this.nodeId).width('100%').height(48)
             .fontColor(this.theme.palette.text).backgroundColor(this.theme.palette.group).enabled(!this.disabled)
+            .borderRadius(12).border({ width: 1, color: this.theme.palette.divider })
             .accessibilityText(this.label)
             .onChange((value: string): void => { this.changedString(value); })
         } else {
           TextInput({ text: this.liveStringValue, placeholder: this.placeholder }).id(this.nodeId).width('100%').height(48)
             .type(this.inputType()).fontSize(this.theme.dimensions.body).fontColor(this.theme.palette.text)
+            .borderRadius(12).padding({ left: 14, right: 14 }).border({ width: 1, color: this.theme.palette.divider })
             .accessibilityText(this.label)
             .backgroundColor(this.theme.palette.group).enabled(!this.disabled).onChange((value: string): void => { this.changedString(value); })
         }
       } else if (this.kind === 'OpenUiCheckbox' || this.kind === 'OpenUiToggle') {
         Row({ space: 12 }) {
+          if (this.kind === 'OpenUiToggle') {
+            Text(this.label + (this.required ? ' *' : '')).layoutWeight(1).fontSize(this.theme.dimensions.body)
+              .fontColor(this.theme.palette.text).wordBreak(WordBreak.BREAK_WORD)
+          }
           if (this.kind === 'OpenUiCheckbox') {
             Checkbox({ name: this.nodeId }).id(this.nodeId).select(this.liveBoolValue).enabled(!this.disabled)
               .accessibilityText(this.label)
@@ -159,20 +168,23 @@ export struct OpenUiControlsLayout {
               .accessibilityText(this.label)
               .selectedColor(this.theme.palette.accent).onChange((value: boolean): void => { this.changedBoolean(value); })
           }
-          Text(this.label + (this.required ? ' *' : '')).layoutWeight(1).fontSize(this.theme.dimensions.body)
-            .fontColor(this.theme.palette.text).wordBreak(WordBreak.BREAK_WORD)
+          if (this.kind === 'OpenUiCheckbox') {
+            Text(this.label + (this.required ? ' *' : '')).layoutWeight(1).fontSize(this.theme.dimensions.body)
+              .fontColor(this.theme.palette.text).wordBreak(WordBreak.BREAK_WORD)
+          }
         }.width('100%').constraintSize({ minHeight: 48 })
       } else if (this.kind === 'OpenUiSelect') {
         this.heading()
         Select(this.options.map((option: OpenUiSelectOption): SelectOption => ({ value: option.label })))
           .id(this.nodeId).width('100%').height(48).selected(this.selectedIndex()).value(this.selectedLabel())
           .fontColor(this.theme.palette.text).backgroundColor(this.theme.palette.group).enabled(!this.disabled)
+          .borderRadius(12).border({ width: 1, color: this.theme.palette.divider })
           .accessibilityText(this.label)
           .onSelect((index: number): void => { if (index >= 0 && index < this.options.length) { this.changedString(this.options[index].value); } })
       } else if (this.kind === 'OpenUiRadioGroup') {
         this.heading()
         ForEach(this.options, (option: OpenUiSelectOption) => {
-          Row({ space: 12 }) {
+          Row({ space: 8 }) {
             Radio({ value: option.value, group: this.nodeId }).id(this.nodeId + '-' + option.value)
               .checked(this.liveStringValue === option.value).enabled(!this.disabled)
               .accessibilityText(this.radioAccessibilityText(option))
@@ -186,7 +198,9 @@ export struct OpenUiControlsLayout {
                   .wordBreak(WordBreak.BREAK_WORD)
               }
             }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-          }.width('100%').alignItems(VerticalAlign.Top).constraintSize({ minHeight: 44 })
+          }.width('100%').alignItems(VerticalAlign.Top).padding(12).constraintSize({ minHeight: 48 })
+            .backgroundColor(this.liveStringValue === option.value ? this.theme.palette.accentContainer : this.theme.palette.group)
+            .borderRadius(12).border({ width: 1, color: this.liveStringValue === option.value ? this.theme.palette.accent : this.theme.palette.divider })
         }, (option: OpenUiSelectOption): string => option.value)
       } else if (this.kind === 'OpenUiSlider') {
         this.heading()

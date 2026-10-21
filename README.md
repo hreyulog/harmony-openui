@@ -8,7 +8,18 @@
 
 一个独立的社区适配库：复用 OpenUI 官方解析器，以 AGenUI 为原生渲染后端，让模型输出的组件声明显示为鸿蒙界面，再把用户操作交回宿主应用。适合聊天里的方案选择、资料填写、多步骤表单和结果页面。无需 WebView，也不在设备上编译或执行模型生成的 ArkTS。
 
-这是社区项目，非 OpenUI 或华为官方 SDK。v0.5 在通用映射层中补充单选、开关及有界数据列表，复用 OpenUI 官方状态、表达式引擎及既有原生控件，仍未完整实现 OpenUI Lang 或整个 ArkUI 组件体系。
+这是社区项目，非 OpenUI 或华为官方 SDK。v0.6 完善通用映射的原生视觉层级，复用 OpenUI 官方状态、表达式引擎及既有原生控件，仍未完整实现 OpenUI Lang 或整个 ArkUI 组件体系。
+
+**v0.6：把原生视觉层级落实到渲染器。** 统一标题、正文、说明、卡片和三级按钮；筛选使用等分列，偏好开关和表单分组，结果突出实际提交值，示例调试工具默认收起。映射目录仍为 19 类，没有新增业务专用控件。[视觉规则](docs/visual-design.md)
+
+Nova 上已完成 **真实模型图文列表 → 本地筛选排序 → 中文填写与选择 → 模型只读结果**。最终流程 4 次实际模型请求，包含 1 次有界结果修正；本地交互无需模型。196 项 Node、2 项 Python 检查通过，实际列表另通过 24 组主机回放。[v0.6 验证](docs/verification-v06.md) · [原始截图对比](docs/visual-review-v06.html) · [模型程序与回执](docs/evidence/2026-10-21-v06/acceptance.json)
+
+| 图文结果与次级动作 | 分组表单与选中状态 | 主动作与文字动作 | 模型生成的只读结果 |
+| --- | --- | --- | --- |
+| <img src="docs/images/nova-v06-20261021/result-cards.jpeg" width="210" alt="分离的白色图文卡片与居中次级按钮"> | <img src="docs/images/nova-v06-20261021/preference-form.jpeg" width="210" alt="中文输入和原生偏好控件"> | <img src="docs/images/nova-v06-20261021/form-actions.jpeg" width="210" alt="蓝色保存按钮与透明重置动作"> | <img src="docs/images/nova-v06-20261021/model-result.jpeg" width="210" alt="标签和值分层且保留实际中文提交的结果"> |
+
+<details>
+<summary>v0.5 历史真机证据：数据列表与选择控件</summary>
 
 **v0.5：数据驱动图文列表、原生单选与偏好开关。** 映射目录增至 **19 类**，继续复用相同的 22 类原生 IR。列表直接使用官方 `Each / Filter / Sort / Count`，模型不用逐条手写筛选条件。[映射架构](docs/mapping.md) · [OpenUI / ArkUI 缺口对照](docs/gaps-v05.md)
 
@@ -17,6 +28,8 @@
 | 反向排序后的图文列表 | 单选、开关与说明 | 中文必填校验 | 保留实际选择的模型结果 |
 | --- | --- | --- | --- |
 | <img src="docs/images/nova-v05-20261021/reverse-results.jpeg" width="210" alt="反向排序后的林间步道和书店"> | <img src="docs/images/nova-v05-20261021/choice-form.jpeg" width="210" alt="提醒开启、无障碍关闭和公共交通单选"> | <img src="docs/images/nova-v05-20261021/form-required.jpeg" width="210" alt="计划名和单选组的中文必填提示"> | <img src="docs/images/nova-v05-20261021/model-result.jpeg" width="210" alt="准确保留名称备注出行方式和两项偏好的结果"> |
+
+</details>
 
 <details>
 <summary>v0.4 历史真机证据：输入、多选与实时表单</summary>
@@ -224,7 +237,7 @@ python tools/build.py --target all --unsigned --work-dir D:/openui-build/demo-01
 
 ## 示例与验证边界
 
-v0.5 的映射示例由“图文筛选与排序”进入“完善计划”：列表、编辑卡片和最终结果分别由模型生成。筛选和输入在本地更新，提交分别携带当前具名表单的原始值与独立开关的业务 context。示例宿主在显示列表前检查全部 24 种筛选排序组合，并把提交值转换为明确的显示事实交给结果模型。模型程序不满足约定时，最多请求模型修正一次，不手动改写生成程序。SDK 不包含这些示例数据或模型请求。
+v0.6 的映射示例由“图文筛选与排序”进入“完善计划”：列表、编辑卡片和最终结果分别由模型生成。筛选和输入在本地更新，提交分别携带当前具名表单的原始值与独立开关的业务 context。示例宿主在显示列表前检查全部 24 种筛选排序组合，并把提交值转换为明确的显示事实交给结果模型。模型程序不满足约定时，最多请求模型修正一次，不手动改写生成程序。SDK 不包含这些示例数据或模型请求。
 
 示例使用明确标注的虚构资料检查交互；不是实际订票查询。模型接口支持 OpenAI-compatible 与 Anthropic-compatible HTTPS 请求，API Key 在配置界面输入后仅存在内存。可选的开发者私有配置也必须留在应用私有目录，不能打进包。
 

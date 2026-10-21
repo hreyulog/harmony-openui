@@ -1,0 +1,37 @@
+{
+  "provider": "MiniMax",
+  "model": "MiniMax-M3",
+  "acceptedRunProviderRequests": 4,
+  "acceptedRunValidationRepairs": 1,
+  "sourceWasManuallyRewritten": false,
+  "attempts": [
+    {
+      "stage": "list",
+      "attempt": 1,
+      "decision": "accepted",
+      "path": "model-candidates/build-r3/list-1.openui",
+      "sha256": "8aed255ad8a49264121805902061bff56068eea38abc0b81194e41043e687135"
+    },
+    {
+      "stage": "form",
+      "attempt": 1,
+      "decision": "accepted",
+      "path": "model-candidates/build-r3/form-1.openui",
+      "sha256": "bc06ba8d0c276eeeccbdfb1379d07378ab45837a987d598686484c39e63e1efb"
+    },
+    {
+      "stage": "result",
+      "attempt": 1,
+      "decision": "rejected-host-validation",
+      "path": "model-candidates/build-r3/result-1.openui",
+      "sha256": "a735a295edcaef26f3333383b5d69172633e0b4a5f79911f87a0ccd8d61b8faa"
+    },
+    {
+      "stage": "result",
+      "attempt": 2,
+      "decision": "accepted",
+      "path": "model-candidates/build-r3/result-2.openui",
+      "sha256": "1c413fcfcf04c622f54a62c19e7c9a7ec79b4ba6aa6c7eaa0f2aae44245c79e8"
+    }
+  ]
+}

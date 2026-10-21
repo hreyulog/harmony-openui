@@ -1,0 +1,293 @@
+{
+  "format": "harmony-openui/acceptance@4",
+  "status": "accepted",
+  "createdAt": "2026-10-21T08:24:37.918943+00:00",
+  "version": "0.6.0",
+  "build": "build-r3",
+  "sourceCommitBase": "feac85e73d177a87920fa743a40caaa15e1d8264",
+  "compiledSourcesUnchanged": true,
+  "compiledInputCount": 62,
+  "buildCompletedAt": "2026-10-21T08:09:20.316775+00:00",
+  "artifacts": [
+    {
+      "target": "har",
+      "sha256": "ec2630e0bdc55c1c2e323423c054bb1960a29ab4e000eec3df689829e222603c",
+      "bytes": 1201111,
+      "distributionNoticesComplete": true,
+      "artifact": "harmony-openui-0.6.0.har"
+    },
+    {
+      "target": "demo",
+      "sha256": "054ff3000209f1f90a6803242a85a9ef99ccb63f65d00298e6f2cd2c5f0b868b",
+      "bytes": 8125876,
+      "signed": true,
+      "distributionNoticesComplete": true,
+      "publicNativeLibrariesVerified": 4,
+      "artifact": "harmony-openui-demo-0.6.0-signed.hap"
+    }
+  ],
+  "signature": {
+    "signatureVerifierExitCode": 0,
+    "embeddedProfileExactMatch": true,
+    "signerContainsExactAgcLeaf": true,
+    "currentFrozenSourceUnchanged": true,
+    "artifactsMatchBuildReceipt": true,
+    "sourceScope": "public-product-and-build-inputs",
+    "sourceInputCount": 62,
+    "verified": true,
+    "status": "verified"
+  },
+  "host": {
+    "nodeTestsPassed": 196,
+    "pythonTestsPassed": 2,
+    "source": "root-reported final host test run"
+  },
+  "native": {
+    "device": "HUAWEI nova 15 Pro",
+    "api": 26,
+    "bundle": "com.hreyulog.harmonyopenui.demo",
+    "actualModelGeneratedOnDevice": true,
+    "model": "MiniMax-M3",
+    "actualProviderRequests": 4,
+    "validationRepairRequests": 1,
+    "nativeCheckpoints": 16,
+    "resultReadOnly": true,
+    "rootReviewedChecks": [
+      {
+        "name": "All sixteen settled actual-model checkpoints render; local filtering/theme/input/reset preserve their programs and request counts",
+        "pass": true,
+        "evidenceDigests": [
+          {
+            "sha256": "d117dbfed72becfe71a3a01f2ce78b0a1db7539ad51353f66b64b0d9b98c127e",
+            "bytes": 8430
+          }
+        ]
+      },
+      {
+        "name": "Continuous Chinese input preserves one focused native input identity",
+        "pass": true,
+        "evidenceDigests": [
+          {
+            "sha256": "f5d1c805984ad467f7303d67f42b1899928ecb1a824b96ce96efa8af6ef4a30b",
+            "bytes": 107233
+          },
+          {
+            "sha256": "3d7cdfa932f714a8225e36f84bbbd36128a383ff44b2819586ca0edca5b9b8ae",
+            "bytes": 107245
+          }
+        ]
+      },
+      {
+        "name": "Blank required fields reject without a host action; aggregate Switch edits and Reset retain correct values",
+        "pass": true,
+        "evidenceDigests": [
+          {
+            "sha256": "2e2a7f8066bd86aa9c66ff3bf7371051b65a4f461a5b3cdf6d23d457212f3a4a",
+            "bytes": 10023
+          },
+          {
+            "sha256": "77b785b9c7b350949bd41c98fbaddb5c957199254b4c792c8cedcdccfd6806f5",
+            "bytes": 10282
+          },
+          {
+            "sha256": "ba87acb6cb693beb2974682ee79a6b948879558d41e60059efacb7897f42854e",
+            "bytes": 10419
+          },
+          {
+            "sha256": "f60d2d3f2869d4a5249e06fe3694031e5b632d7855fa5e35072c71a140c222f3",
+            "bytes": 10357
+          }
+        ]
+      },
+      {
+        "name": "Selection callback and final normalized Form payload retain exact business identity, submitted values and independent preferences",
+        "pass": true,
+        "evidenceDigests": [
+          {
+            "sha256": "447ad50f487b7d787ba048a7326a59bcf5c51ab0326dd20ab1727a1da1109bda",
+            "bytes": 16565
+          },
+          {
+            "sha256": "80b7d5bbc99d1abc5f9e675fa41223f88921e8a3c646a36bdc9ae168061a3a1c",
+            "bytes": 14218
+          }
+        ]
+      },
+      {
+        "name": "Five native leaves remain within the recorded host bounds",
+        "pass": true,
+        "evidenceDigests": [
+          {
+            "sha256": "41caea022e5075c305b07831593a2b5c965bc220ebae8b50b2809abdf3f6f308",
+            "bytes": 1124
+          }
+        ]
+      },
+      {
+        "name": "Recorded process 55063 is unchanged with none of the five checked fault markers",
+        "pass": true,
+        "evidenceDigests": [
+          {
+            "sha256": "61c2e5b305f9b937ce1ef83387c6aab9ee61a11f561ec5fcae0cf7ddc8348abf",
+            "bytes": 404
+          }
+        ]
+      },
+      {
+        "name": "Root visually reviewed all six selected original screenshots",
+        "pass": true,
+        "evidenceDigests": [
+          {
+            "sha256": "570d4e6a0e6a88c0f41008fc764654906f7ed6b37901723c81e04e83a0ecbf17",
+            "bytes": 217123
+          },
+          {
+            "sha256": "da632df09a5fd9045b2e101d89b154d81bb978022baca58e6ba57eb4b144a36b",
+            "bytes": 255994
+          },
+          {
+            "sha256": "08e3abece09594b02f55e70c638bf6f0e2acfe9138b7a522eb62d214bf8eb95d",
+            "bytes": 249047
+          },
+          {
+            "sha256": "b1eafcc072b1a6926fb91637fb52af92372f8814751600953c2865ff58422582",
+            "bytes": 162064
+          },
+          {
+            "sha256": "7fa40b1af53390c8d1d4b49df3770c12d1fcfc78953cbf470a23cdd4119db388",
+            "bytes": 155960
+          },
+          {
+            "sha256": "fc332249ed740effac74ece16331b731204f2c76635802ea2e2b9eb38f7e17f9",
+            "bytes": 254455
+          }
+        ]
+      }
+    ],
+    "rootReviewedReceiptSha256": "365ded70f2031b031355bdcb90dc22b8eab5f62bc5ac0aa0b9fe81be9f6677eb",
+    "captureDerivedReceipt": "native-derived.json",
+    "selectionCallbacks": 1,
+    "formCallbacks": 1,
+    "submittedValues": {
+      "planName": "周末慢游",
+      "notes": "带水和雨伞",
+      "mode": "transit",
+      "preferences": {
+        "remind": true,
+        "accessible": false
+      }
+    }
+  },
+  "replay": {
+    "modelFree": true,
+    "receipts": [
+      {
+        "path": "list-replay.json",
+        "pass": true,
+        "asserted": {
+          "pass": true,
+          "combinations": 24,
+          "passed": 24,
+          "emptyStateCorrect": 24,
+          "countCorrect": 24,
+          "visibleActionsChecked": 32,
+          "resetsPassed": 24,
+          "sourceSha256": "8aed255ad8a49264121805902061bff56068eea38abc0b81194e41043e687135",
+          "fixtureSourceSha256": "4310cd2c7c12a4d013b41c87ccf3c728bbb7b88c4761d688bc14dda7d2cc47f6",
+          "stalePayload.pass": true
+        }
+      },
+      {
+        "path": "planner-replay.json",
+        "pass": true,
+        "asserted": {
+          "pass": true,
+          "passed": 9,
+          "total": 9,
+          "checks.length": 9,
+          "externalActions": 1,
+          "editorSourceSha256": "bc06ba8d0c276eeeccbdfb1379d07378ab45837a987d598686484c39e63e1efb",
+          "resultSourceSha256": "1c413fcfcf04c622f54a62c19e7c9a7ec79b4ba6aa6c7eaa0f2aae44245c79e8",
+          "fixtureSourceSha256": "4310cd2c7c12a4d013b41c87ccf3c728bbb7b88c4761d688bc14dda7d2cc47f6",
+          "submitted": {
+            "planName": "周末慢游",
+            "notes": "带水和雨伞",
+            "mode": "transit",
+            "preferences": {
+              "remind": true,
+              "accessible": false
+            }
+          }
+        }
+      }
+    ]
+  },
+  "screenshots": [
+    {
+      "path": "docs/images/nova-v06-20261021/filter-list.jpeg",
+      "sha256": "570d4e6a0e6a88c0f41008fc764654906f7ed6b37901723c81e04e83a0ecbf17",
+      "bytes": 217123,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v06-20261021/result-cards.jpeg",
+      "sha256": "da632df09a5fd9045b2e101d89b154d81bb978022baca58e6ba57eb4b144a36b",
+      "bytes": 255994,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v06-20261021/dark-list.jpeg",
+      "sha256": "08e3abece09594b02f55e70c638bf6f0e2acfe9138b7a522eb62d214bf8eb95d",
+      "bytes": 249047,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v06-20261021/preference-form.jpeg",
+      "sha256": "b1eafcc072b1a6926fb91637fb52af92372f8814751600953c2865ff58422582",
+      "bytes": 162064,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v06-20261021/form-actions.jpeg",
+      "sha256": "7fa40b1af53390c8d1d4b49df3770c12d1fcfc78953cbf470a23cdd4119db388",
+      "bytes": 155960,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v06-20261021/model-result.jpeg",
+      "sha256": "fc332249ed740effac74ece16331b731204f2c76635802ea2e2b9eb38f7e17f9",
+      "bytes": 254455,
+      "originalDeviceCapture": true
+    }
+  ],
+  "boundaries": [
+    "Independent repository and demo; no Sofia integration.",
+    "Fictional host-supplied activities and illustrative images; no live search, booking or payment.",
+    "Native evidence is limited to the named captures on the recorded device/API; host replay is reported separately.",
+    "Host-controlled visual presentation and a bounded mapped catalog; not complete OpenUI/ArkUI parity.",
+    "Raw device state, signing configuration, credentials and binary packages remain private."
+  ],
+  "modelSourceHashes": {
+    "model-list.openui": "8aed255ad8a49264121805902061bff56068eea38abc0b81194e41043e687135",
+    "model-form.openui": "bc06ba8d0c276eeeccbdfb1379d07378ab45837a987d598686484c39e63e1efb",
+    "model-result.openui": "1c413fcfcf04c622f54a62c19e7c9a7ec79b4ba6aa6c7eaa0f2aae44245c79e8"
+  },
+  "excludedDiagnostics": [
+    {
+      "build": "build-r1",
+      "status": "diagnostic-only",
+      "scope": "retained outside public evidence; not counted as final success"
+    },
+    {
+      "build": "build-r2",
+      "status": "visually-rejected",
+      "scope": "retained outside public evidence; not counted as final success",
+      "reason": "Six fact pairs in one Row were visually overcrowded even though submitted facts were correct.",
+      "actualRegressionFixture": {
+        "path": "tests/fixtures/mapped-model-overcrowded-result.openui",
+        "sha256": "c31581f94b221f5f8d680b9f4e6df7dcefbd6bfd832579807f2ae6557edafa12",
+        "matchesRecordedR2Source": true
+      }
+    }
+  ]
+}

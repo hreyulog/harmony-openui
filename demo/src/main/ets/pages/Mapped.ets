@@ -23,6 +23,9 @@ struct Mapped {
   @State busy: boolean = false;
   @State status: string = '本地预览 · 点击“模型生成”运行实际模型';
   @State receipt: string = '';
+  @State showTools: boolean = false;
+  @State selectedTitle: string = '';
+  @State hasError: boolean = false;
   private filesDir: string = '';
   private epoch: number = 0;
   private source: string = '';
@@ -39,7 +42,7 @@ struct Mapped {
   private runtime: OpenUiMappedRuntime = new OpenUiMappedRuntime('mapped', {
     onAction: (event: OpenUiActionReceipt): void => { this.selected(event); },
     onFieldChange: (_event: OpenUiFieldChange): void => { this.edits++; this.persist(); },
-    onError: (message: string): void => { this.status = '本地交互失败：' + message; this.persist(); },
+    onError: (message: string): void => { this.hasError = true; this.status = '本地交互失败：' + message; this.persist(); },
     onRenderStatus: (): void => { this.persist(); }
   });
 
@@ -58,7 +61,7 @@ struct Mapped {
       const file = fs.openSync(this.filesDir + '/openui-mapped-state.json', fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY | fs.OpenMode.TRUNC);
       try {
         const stats: OpenUiMappedStats = this.runtime.getStats();
-        fs.writeSync(file.fd, JSON.stringify({ status: this.status, busy: this.busy, actualModel: this.actualModel,
+        fs.writeSync(file.fd, JSON.stringify({ status: this.status, busy: this.busy, theme: this.theme.mode, actualModel: this.actualModel,
           modelRequests: this.requests, candidates: this.candidates, edits: this.edits, actions: this.actions, source: this.source, lastModelSource: this.lastModelSource,
           state: JSON.parse(this.runtime.stateSnapshotJson()), stats,
           snapshot: JSON.parse(this.runtime.controller.exportSnapshot()) }));
@@ -72,16 +75,17 @@ struct Mapped {
       'timed = $duration == "all" ? filtered : @Filter(filtered, "duration", "==", $duration)\n' +
       'ordered = @Sort(timed, "rank", $sortOrder)\n' +
       'cards = @Each(ordered, "place", Card([Image(place.title, place.image), CardHeader(place.title, place.detail), ' +
-      'Button("选择" + place.title, @ToAssistant("选择" + place.title, {itemId:place.id}))]))\n' +
-      'root = Stack([heading, note, kind, duration, order, reset, count, cards, @Count(ordered) == 0 ? empty : null])\n' +
-      'heading = CardHeader("周末去哪里", "按兴趣和可用时间挑选")\n' +
+      'Button("选择" + place.title, @ToAssistant("选择" + place.title, {itemId:place.id}), "secondary")], "card", "column", "m"))\n' +
+      'root = Stack([heading, filters, count, cards, @Count(ordered) == 0 ? empty : null, note], "column", "l")\n' +
+      'heading = CardHeader("给周末一点新意", "走进自然，或在城市里慢下来")\n' +
+      'filters = Card([Stack([kind, duration], "row", "m"), order, reset], "card", "column", "s")\n' +
       'note = TextContent("虚构演示资料 · 图片为活动类型配图，非场馆实景", "small")\n' +
       'count = TextContent("找到 " + @Count(ordered) + " 个去处", "small")\n' +
       'empty = TextContent("没有匹配结果，请调整筛选")\n' + FILTERS;
   }
   private preview(): void {
     if (this.busy) { return; }
-    this.epoch++; this.actualModel = false; this.actions = []; this.receipt = ''; this.selectedPlaceId = ''; this.edits = 0;
+    this.epoch++; this.actualModel = false; this.hasError = false; this.actions = []; this.receipt = ''; this.selectedPlaceId = ''; this.selectedTitle = ''; this.edits = 0;
     this.source = this.preset(); this.runtime.replace(this.source);
     this.status = '本地预览 · 点击“模型生成”运行实际模型'; this.persist();
   }
@@ -146,7 +150,7 @@ struct Mapped {
   }
   private async generate(): Promise<void> {
     if (this.busy) { return; }
-    const generation = ++this.epoch; this.busy = true; this.receipt = ''; this.actions = []; this.edits = 0;
+    const generation = ++this.epoch; this.busy = true; this.hasError = false; this.receipt = ''; this.actions = []; this.edits = 0;
     this.runtime.controller.setReadOnly('mapped', true);
     this.status = '模型正在生成原生图文列表和筛选逻辑…'; this.candidates = []; this.persist();
     try {
@@ -159,9 +163,11 @@ struct Mapped {
         '必须复用官方数据函数而不是手写四张卡：filtered = $kind=="all" ? items : @Filter(items,"kind","==",$kind)，' +
         'timed = $duration=="all" ? filtered : @Filter(filtered,"duration","==",$duration)，ordered=@Sort(timed,"rank",$sortOrder)。' +
         'cards=@Each(ordered,"place",Card([Image(place.title,place.image),CardHeader(place.title,place.detail),' +
-        'Button("选择"+place.title,@ToAssistant("选择"+place.title,{itemId:place.id}))]))。模板必须内联，不放任何表单字段。' +
-        'root=Stack([标题,简短说明,三个筛选,重置,计数,cards,@Count(ordered)==0 ? empty:null])。' +
-        '计数用TextContent("找到 "+@Count(ordered)+" 个去处")，empty用TextContent("没有匹配结果，请调整筛选")。' +
+        'Button("选择"+place.title,@ToAssistant("选择"+place.title,{itemId:place.id}),"secondary")],"card","column","m"))。模板必须内联，不放任何表单字段。' +
+        '视觉要求：heading直接是CardHeader(简洁有吸引力的标题,一句副标题)，heading外面不要套Card。' +
+        'filters=Card([Stack([kind,duration],"row","m"),order,reset],"card","column","s")。筛选区不要额外标题或说明。' +
+        'root=Stack([heading,filters,count,cards,@Count(ordered)==0 ? empty:null,note],"column","l")。' +
+        'count=TextContent("找到 "+@Count(ordered)+" 个去处","small")，empty=TextContent("没有匹配结果，请调整筛选")，note用small字号简短注明虚构演示和配图。' +
         '提供Button("重置筛选",@Reset($kind,$duration,$sortOrder),"tertiary")，本地更新不再次请求模型。' +
         '图片逐字使用image字段，按钮传真实id，列布局。可见文字不要显示内部变量名，只输出OpenUI Lang。',
         (candidate: string): void => {
@@ -175,11 +181,11 @@ struct Mapped {
           isCurrent: (): boolean => generation === this.epoch
         });
       if (generation !== this.epoch) { return; }
-      this.source = source; this.runtime.replace(source); this.actualModel = true;
+      this.source = source; this.runtime.replace(source); this.actualModel = true; this.showTools = false;
       this.status = '模型已生成 · 筛选与重置在手机本地执行';
       this.scroller.scrollTo({ xOffset: 0, yOffset: 0 });
     } catch (error) {
-      if (generation === this.epoch) { this.status = (error as Error).message; }
+      if (generation === this.epoch) { this.hasError = true; this.status = (error as Error).message; }
     } finally {
       if (generation === this.epoch) { this.busy = false; this.runtime.controller.setReadOnly('mapped', false); this.persist(); }
     }
@@ -189,37 +195,56 @@ struct Mapped {
     const context = event.context['context'] as Record<string, Object>;
     const place = PLACES.find((item: Place): boolean => item.id === context?.['itemId']);
     if (!place) { this.status = '宿主拒绝未知的结果标识'; this.persist(); return; }
-    this.selectedPlaceId = place.id; this.actions.push(event); this.receipt = '宿主收到：' + place.title + '（' + place.id + '）';
+    this.selectedPlaceId = place.id; this.selectedTitle = place.title; this.actions.push(event); this.receipt = '宿主收到：' + place.title + '（' + place.id + '）';
     this.status = '选择已回传 · 可继续筛选；当前未调用预订或付款工具'; this.persist();
   }
   build() {
     Column({ space: 0 }) {
       Row({ space: 8 }) {
-        Text('图文筛选 · v0.5').fontSize(21).fontWeight(FontWeight.Medium).layoutWeight(1)
-        Button('返回').id('mapped-back').onClick((): void => { router.back(); })
-      }.width('100%').padding(20)
-      Row({ space: 8 }) {
-        Button('本地预览').id('mapped-preview').enabled(!this.busy).fontSize(13).layoutWeight(1)
-          .onClick((): void => { this.preview(); })
-        Button('模型生成').id('mapped-generate').enabled(!this.busy).fontSize(13).layoutWeight(1)
-          .onClick((): void => { void this.generate(); })
-      }.width('100%').padding({ left: 20, right: 20, bottom: 8 })
-      Text(this.status).id('mapped-status').fontSize(13).fontColor('#596273').width('100%')
-        .padding({ left: 20, right: 20, bottom: 8 })
-      if (this.receipt) {
-        Text(this.receipt).id('mapped-receipt').fontSize(14).fontColor('#1559C7').width('100%')
-          .padding({ left: 20, right: 20, bottom: 8 })
-        Button('完善这个计划').id('mapped-plan').fontSize(14)
-          .onClick((): void => {
-            const parameters: PlannerParameters = { placeId: this.selectedPlaceId };
-            void router.pushUrl({ url: 'pages/Planner', params: parameters });
-          })
+        Button('‹', { type: ButtonType.Normal }).id('mapped-back').width(32).height(36)
+          .fontSize(26).fontColor(this.theme.palette.text).backgroundColor(Color.Transparent)
+          .onClick((): void => { router.back(); })
+        Text('Harmony OpenUI').fontSize(14).fontWeight(FontWeight.Medium).fontColor(this.theme.palette.secondary).layoutWeight(1)
+        Button(this.showTools ? '收起' : '工具', { type: ButtonType.Normal }).id('mapped-tools')
+          .height(36).fontSize(13).fontColor(this.theme.palette.secondary).backgroundColor(Color.Transparent)
+          .onClick((): void => { this.showTools = !this.showTools; })
+      }.width('100%').padding({ left: 8, right: 16, top: 8, bottom: 8 })
+      if (this.showTools) {
+        Row({ space: 12 }) {
+          Button('本地预览', { type: ButtonType.Normal }).id('mapped-preview').enabled(!this.busy)
+            .height(40).borderRadius(10).fontSize(13).fontColor('#2563EB').backgroundColor('#EAF0FC').layoutWeight(1)
+            .onClick((): void => { this.preview(); })
+          Button('模型生成', { type: ButtonType.Normal }).id('mapped-generate').enabled(!this.busy)
+            .height(40).borderRadius(10).fontSize(13).fontColor(Color.White).backgroundColor('#2563EB').layoutWeight(1)
+            .onClick((): void => { void this.generate(); })
+        }.width('100%').padding({ left: 16, right: 16, bottom: 8 })
+        Button(this.theme.mode === 'light' ? '切换深色外观' : '切换浅色外观', { type: ButtonType.Normal })
+          .id('mapped-theme').height(36).fontSize(12).fontColor(this.theme.palette.secondary).backgroundColor(Color.Transparent)
+          .onClick((): void => { this.theme = OpenUiThemes.create(this.theme.mode === 'light' ? 'dark' : 'light'); this.persist(); })
+      }
+      if (this.busy || this.showTools || this.hasError) {
+        Text(this.status).id('mapped-status').fontSize(12).fontColor(this.theme.palette.secondary).width('100%')
+          .padding({ left: 16, right: 16, bottom: 10 })
       }
       Scroll(this.scroller) {
         Column() {
           OpenUiView({ controller: this.runtime.controller, surfaceId: 'mapped', theme: this.theme })
-        }.width('100%').padding(20).alignItems(HorizontalAlign.Start)
+        }.width('100%').padding({ left: 16, right: 16, top: 8, bottom: 24 }).alignItems(HorizontalAlign.Start)
       }.layoutWeight(1).width('100%').align(Alignment.TopStart)
-    }.width('100%').height('100%').backgroundColor('#F4F6FA')
+      if (this.receipt) {
+        Row({ space: 12 }) {
+          Column({ space: 3 }) {
+            Text('已选择').fontSize(11).fontColor(this.theme.palette.secondary)
+            Text(this.selectedTitle).fontSize(15).fontWeight(FontWeight.Medium).fontColor(this.theme.palette.text)
+          }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+          Button('完善计划', { type: ButtonType.Normal }).id('mapped-plan').height(44).borderRadius(12)
+            .fontSize(14).fontColor(Color.White).backgroundColor('#2563EB')
+            .onClick((): void => {
+              const parameters: PlannerParameters = { placeId: this.selectedPlaceId };
+              void router.pushUrl({ url: 'pages/Planner', params: parameters });
+            })
+        }.width('100%').padding(16).backgroundColor(this.theme.palette.surface)
+      }
+    }.width('100%').height('100%').backgroundColor(this.theme.palette.canvas)
   }
 }

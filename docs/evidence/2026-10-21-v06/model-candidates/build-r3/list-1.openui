@@ -1,0 +1,18 @@
+$kind = "all"
+$duration = "all"
+$sortOrder = "asc"
+items = [{"rank":1,"id":"lake-walk","title":"湖畔慢走","kind":"park","duration":"short","detail":"户外 · 约 1 小时 · 适合轻松散步","image":"https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop"},{"rank":2,"id":"city-museum","title":"城市展馆","kind":"museum","duration":"long","detail":"室内 · 约 2 小时 · 看一场主题展览","image":"https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=75&fit=crop"},{"rank":3,"id":"corner-books","title":"街角书店","kind":"bookstore","duration":"short","detail":"室内 · 约 1 小时 · 阅读与休息","image":"https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop"},{"rank":4,"id":"forest-trail","title":"林间步道","kind":"park","duration":"long","detail":"户外 · 约 2 小时 · 适合步行探索","image":"https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"}]
+heading = CardHeader("周末去哪儿散步？", "挑一处安静的小憩之地")
+kind = FormControl("类型", Select("kind", [SelectItem("all", "全部"), SelectItem("park", "公园步道"), SelectItem("museum", "展馆"), SelectItem("bookstore", "书店")], "选择类型", null, $kind))
+duration = FormControl("时长", Select("duration", [SelectItem("all", "不限时长"), SelectItem("short", "约 1 小时"), SelectItem("long", "约 2 小时")], "选择时长", null, $duration))
+order = FormControl("排序", Select("sortOrder", [SelectItem("asc", "推荐顺序"), SelectItem("desc", "反向查看")], "选择排序", null, $sortOrder))
+reset = Button("重置筛选", @Reset($kind, $duration, $sortOrder), "tertiary")
+filters = Card([Stack([kind, duration], "row", "m"), order, reset], "card", "column", "s")
+filtered = $kind == "all" ? items : @Filter(items, "kind", "==", $kind)
+timed = $duration == "all" ? filtered : @Filter(filtered, "duration", "==", $duration)
+ordered = @Sort(timed, "rank", $sortOrder)
+count = TextContent("找到 " + @Count(ordered) + " 个去处", "small")
+cards = @Each(ordered, "place", Card([Image(place.title, place.image), CardHeader(place.title, place.detail), Button("选择" + place.title, @ToAssistant("选择" + place.title, {itemId:place.id}), "secondary")], "card", "column", "m"))
+empty = TextContent("没有匹配结果，请调整筛选")
+note = TextContent("内容为虚构演示，配图非场馆实景，不含价格与营业信息", "small")
+root = Stack([heading, filters, count, cards, @Count(ordered) == 0 ? empty : null, note], "column", "l")

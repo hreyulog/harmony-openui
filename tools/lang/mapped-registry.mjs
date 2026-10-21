@@ -53,7 +53,7 @@ const switchGroup = define('SwitchGroup', 'Independent switches stored as a bool
 const formControl = define('FormControl', 'A visible label, supported input and optional hint.', {
   label: z.string(), input: z.union([input.ref, textArea.ref, select.ref, checkBoxGroup.ref, radioGroup.ref]), hint: z.string().optional()
 });
-const button = define('Button', 'An action button. Set and Reset update local state; ToAssistant and OpenUrl return intent to the host. A primary ToAssistant inside a Form validates the live values before returning formState.', {
+const button = define('Button', 'An action button. Primary is the main filled action, secondary is a quieter alternative, and tertiary is a low-emphasis text action. Set and Reset update local state; ToAssistant and OpenUrl return intent to the host. A primary ToAssistant inside a Form validates the live values before returning formState.', {
   label: z.string(), action: action().optional(), variant: z.enum(['primary', 'secondary', 'tertiary']).optional(),
   type: z.enum(['normal', 'destructive']).optional(), size: z.enum(['extra-small', 'small', 'medium', 'large']).optional()
 });
@@ -68,11 +68,11 @@ const definitions = [
   define('Card', 'A native card composed from ordinary image, text and button children. No domain-specific business logic.', {
     children: z.array(z.any()), variant: z.enum(['card', 'clear']).optional(), ...flex
   }),
-  define('CardHeader', 'A card title and optional short subtitle.', { title: z.string().optional(), subtitle: z.string().optional() }),
-  define('TextContent', 'Plain native text. Markdown is not supported in this profile.', {
+  define('CardHeader', 'A section or card heading with an optional short supporting subtitle. Native typography keeps the title visually distinct from the caption.', { title: z.string().optional(), subtitle: z.string().optional() }),
+  define('TextContent', 'Plain native text. Use small for supporting metadata, default for body content, and large-heavy for a short important value. The host theme owns typography. Markdown is not supported in this profile.', {
     text: z.string(), size: z.enum(['small', 'default', 'large', 'small-heavy', 'large-heavy']).optional()
   }),
-  define('Image', 'A native image. Use only an exact supplied HTTPS URL and meaningful alternative text.', { alt: z.string(), src: z.string().optional() }),
+  define('Image', 'A native photograph with host-controlled mobile geometry. Use only an exact supplied HTTPS URL and meaningful alternative text.', { alt: z.string(), src: z.string().optional() }),
   button, select, selectItem, formControl, input, textArea, checkBoxGroup, checkBoxItem, buttons, form,
   radioItem, radioGroup, switchItem, switchGroup
 ];
@@ -139,21 +139,22 @@ export const mappedRegistry = [
     const children = [];
     if (p.title) { const key = 's_' + id + '_title'; c.add(text(key, p.title, 'h2')); children.push(key); }
     if (p.subtitle) { const key = 's_' + id + '_subtitle'; c.add(text(key, p.subtitle, 'caption')); children.push(key); }
-    return { id, component: 'Column', children };
+    return { id, component: 'Column', children, styles: { gap: '8px' } };
   } },
   { name: 'TextContent', native: ['Text'], source: 'TextContent/schema.ts', map(id, p) {
     const large = p.size?.startsWith('large'); const small = p.size?.startsWith('small');
-    const styles = p.size ? { 'font-size': large ? '40px' : small ? '26px' : '32px', ...(p.size.endsWith('heavy') ? { 'font-weight': '600' } : {}) } : undefined;
+    const styles = p.size?.endsWith('heavy') ? { 'font-weight': '600' } : undefined;
     return text(id, p.text, large ? 'h3' : small ? 'caption' : 'body', styles);
   } },
   { name: 'Image', native: ['Image'], source: 'Image/schema.ts', map(id, p) {
     if (typeof p.src !== 'string' || !/^https:\/\/[A-Za-z0-9][^\s<>]*$/.test(p.src) || p.src.length > 2048) throw Error('OPENUI_MAPPED_IMAGE_SOURCE');
     if (typeof p.alt !== 'string' || p.alt.length > 500) throw Error('OPENUI_MAPPED_IMAGE_ALT');
-    return { id, component: 'Image', source: p.src, alt: p.alt, aspectRatio: 2.5 };
+    return { id, component: 'Image', source: p.src, alt: p.alt };
   } },
   { name: 'Button', native: ['Button', 'Text'], source: 'Button/schema.ts', map(id, p, c) {
+    if (p.variant != null && !['primary', 'secondary', 'tertiary'].includes(p.variant)) throw Error('OPENUI_MAPPED_BUTTON_VARIANT');
     const child = 's_' + id + '_label'; c.add(text(child, p.label));
-    return { id, component: 'Button', child, variant: p.variant === 'tertiary' ? 'borderless' : 'primary', action: c.action(id, p.action, p.label, { variant: p.variant ?? 'primary' }) };
+    return { id, component: 'Button', child, variant: p.variant === 'tertiary' ? 'borderless' : p.variant ?? 'primary', action: c.action(id, p.action, p.label, { variant: p.variant ?? 'primary' }) };
   } },
   { name: 'Select', native: ['OpenUiSelect'], source: 'Select/schema.ts', map(id, p, c) {
     const name = fieldName(p.name), required = requiredRule(p.rules);
@@ -186,7 +187,7 @@ export const mappedRegistry = [
     const name = fieldName(p.name), required = requiredRule(p.rules), label = fieldLabel(name, '', c);
     if (!Array.isArray(p.items) || p.items.length < 1 || p.items.length > 30 || p.items.some(item => item?.typeName !== 'CheckBoxItem')) throw Error('OPENUI_MAPPED_CHECKBOX_ITEMS');
     const group = c.checkboxGroup(id, name, p.value, p.items.map(item => ({ ...item.props, name: fieldName(item.props.name) })), { required });
-    return { id, component: 'Column', children: groupChildren(id, group, label, required, c, 'OpenUiCheckbox') };
+    return { id, component: 'Column', children: groupChildren(id, group, label, required, c, 'OpenUiCheckbox'), styles: { gap: '8px' } };
   } },
   { name: 'SwitchItem', native: [], source: 'SwitchGroup/schema.ts', dataOnly: true },
   { name: 'SwitchGroup', native: ['Column', 'Text', 'Card', 'OpenUiToggle'], source: 'SwitchGroup/schema.ts', map(id, p, c) {
@@ -200,8 +201,8 @@ export const mappedRegistry = [
     });
     const group = c.checkboxGroup(id, name, p.value, items);
     const children = groupChildren(id, group, c.label, false, c, 'OpenUiToggle');
-    if (p.variant === 'card') { const child = 's_' + id + '_content'; c.add({ id: child, component: 'Column', children }); return { id, component: 'Card', child }; }
-    return { id, component: 'Column', children };
+    if (p.variant === 'card') { const child = 's_' + id + '_content'; c.add({ id: child, component: 'Column', children, styles: { gap: '8px' } }); return { id, component: 'Card', child }; }
+    return { id, component: 'Column', children, styles: { gap: '8px' } };
   } },
   { name: 'Buttons', native: ['Column', 'Row'], source: 'Buttons/schema.ts', map(id, p, c) {
     if (!Array.isArray(p.buttons) || p.buttons.length < 1 || p.buttons.length > 10 || p.buttons.some(item => item?.typeName !== 'Button') ||
@@ -220,7 +221,7 @@ export const mappedRegistry = [
     if (typeof p.label !== 'string' || !p.label || p.label.length > 500) throw Error('OPENUI_MAPPED_FIELD_LABEL');
     const child = c.visit(p.input, 'input', p.label); const children = child ? [child] : [];
     if (p.hint) { const key = 's_' + id + '_hint'; c.add(text(key, p.hint, 'caption')); children.push(key); }
-    return { id, component: 'Column', children };
+    return { id, component: 'Column', children, styles: { gap: '8px' } };
   } }
 ];
 export const mappedLibrary = createLibrary({ components: definitions, root: 'Stack' });
@@ -233,7 +234,7 @@ limitations: ['Bounded official component signatures, not full react-ui or ArkUI
   'Each and nested computed child arrays are display/action-only: fields and forms are rejected because keyed editable lists are not implemented.',
   'Only Each, Filter, Sort and Count computation functions are supported. Data arrays use ordinary declarations, not $state.',
   'Computed-list bounds: 200 entries per literal array; one Each expansion level; nested UI arrays depth 8 and 1000 total flatten visits; 200 native IR nodes. Programs remain subject to AST/source/depth budgets.',
-  'Card and SwitchGroup variant sunk and advanced form rules are not in this profile.', 'Image geometry, control sizes, button variants and destructive tone follow the native host theme.'] };
+  'Card and SwitchGroup variant sunk and advanced form rules are not in this profile.', 'The host theme owns image geometry, typography, control sizes and destructive tone. Primary, secondary and tertiary button emphasis is retained.'] };
 export const mappedPromptOptions = {
   preamble: 'Generate a native HarmonyOS interface using the bounded official OpenUI component mapping profile. Use the user language.',
   toolCalls: false, bindings: true, builtinFunctions: false,
@@ -244,6 +245,9 @@ export const mappedPromptOptions = {
     'SelectItem uses the official order SelectItem(value, label). Image uses the official order Image(alt, src).',
     'Card and Stack have different positional arguments. Card(children, variant, direction, gap, align, justify, wrap) has variant SECOND; Stack(children, direction, gap, align, justify, wrap) has direction SECOND. For a vertical card with small spacing write Card([...], "card", "column", "s"). Never write Card([...], "column", "s"). Use "card" or "clear" for Card.variant; omitted optional positions may use null.',
     'Prefer Card(children) and Stack(children) with the native default layout. Supply optional positional arguments only when necessary; do not emit every default position. Card takes at most seven arguments total, and Stack at most six. Do not add an extra alignment or justification argument.',
+    'Build a clear visual hierarchy with the existing components: Card groups related content, CardHeader provides one short title and supporting subtitle, TextContent small is a caption or field label, default is body content, and large-heavy highlights one important value. Keep labels immediately before their values. Avoid repeating the same heading or explanation, and avoid Card inside Card when one grouping is enough.',
+    'Use one primary action for the main next step in a card or section, secondary for a quieter alternative, and tertiary for reset or other low-emphasis actions. Native themes retain these three priorities; do not imitate buttons with text decorations.',
+    'Image is a normal full-width photograph with a native host aspect ratio. Supply the exact image URL and a useful description; do not invent image dimensions, inline styles, CSS, emoji badges or decorative placeholders. Use ordinary Card and Stack composition so the host can provide consistent spacing and typography.',
     'For reusable forms use Form(name, Buttons([Button("继续", @ToAssistant("提交资料", {intent:"supplied intent"}))], "column"), [FormControl(label, input), ...]). The host returns live formState; do not put guessed field values into action.context and do not use @Submit.',
     'Input(name, placeholder, "text", rules, value) and TextArea(name, placeholder, 3, rules, value) reuse native controls. Only type=text and three-row TextArea are supported. Use rules={required:true} only where necessary; no other rule keys are supported.',
     'CheckBoxGroup has the exact official spelling and signature CheckBoxGroup(name, [CheckBoxItem(label, description, name, defaultChecked), ...], rules, value). Its value is a record such as {quiet:false,accessible:false}, not an array or one boolean. Declare a record $preferences for reactive group state or omit value for local Form state. A required group needs any one item checked, not all items.',

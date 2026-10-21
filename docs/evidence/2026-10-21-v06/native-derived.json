@@ -1,0 +1,268 @@
+{
+  "format": "harmony-openui/native-derived@1",
+  "createdAt": "2026-10-21T08:20:45.829Z",
+  "scope": "Read-only assertions derived from recorded Nova r3 captures. No new device/model execution.",
+  "total": 16,
+  "passed": 16,
+  "pass": true,
+  "checks": [
+    {
+      "name": "actual list starts with all four ranked places and no host action",
+      "pass": true,
+      "state": {
+        "$kind": "all",
+        "$duration": "all",
+        "$sortOrder": "asc"
+      },
+      "itemIds": [
+        "lake-walk",
+        "city-museum",
+        "corner-books",
+        "forest-trail"
+      ],
+      "modelRequests": 1
+    },
+    {
+      "name": "zero-match native capture shows no image and the zero count and empty message",
+      "pass": true,
+      "state": {
+        "$kind": "museum",
+        "$duration": "short",
+        "$sortOrder": "asc"
+      },
+      "itemIds": [],
+      "count": 0,
+      "emptyMessageVisible": true
+    },
+    {
+      "name": "native Reset restores all three list defaults and four initial results without an action",
+      "pass": true,
+      "state": {
+        "$kind": "all",
+        "$duration": "all",
+        "$sortOrder": "asc"
+      },
+      "itemIds": [
+        "lake-walk",
+        "city-museum",
+        "corner-books",
+        "forest-trail"
+      ],
+      "externalActions": 0
+    },
+    {
+      "name": "native reverse sort follows descending host rank",
+      "pass": true,
+      "state": {
+        "$kind": "all",
+        "$duration": "all",
+        "$sortOrder": "desc"
+      },
+      "itemIds": [
+        "forest-trail",
+        "corner-books",
+        "city-museum",
+        "lake-walk"
+      ]
+    },
+    {
+      "name": "dark theme capture preserves reverse-sort state and current program",
+      "pass": true,
+      "theme": "dark",
+      "state": {
+        "$kind": "all",
+        "$duration": "all",
+        "$sortOrder": "desc"
+      },
+      "itemIds": [
+        "forest-trail",
+        "corner-books",
+        "city-museum",
+        "lake-walk"
+      ],
+      "sameProgram": true
+    },
+    {
+      "name": "native selected result emits exactly one forest-trail business intent",
+      "pass": true,
+      "externalActions": 1,
+      "itemId": "forest-trail",
+      "state": {
+        "$kind": "all",
+        "$duration": "all",
+        "$sortOrder": "desc"
+      }
+    },
+    {
+      "name": "actual plan editor starts with independent switches and empty required fields",
+      "pass": true,
+      "state": {
+        "$planName": "",
+        "$notes": "",
+        "$mode": "",
+        "$preferences": {
+          "remind": false,
+          "accessible": false
+        }
+      },
+      "stage": 1,
+      "placeId": "forest-trail"
+    },
+    {
+      "name": "native blank submission preserves two required errors and emits no action",
+      "pass": true,
+      "errorCount": 2,
+      "errorFields": [
+        "planName",
+        "mode"
+      ],
+      "externalActions": 0
+    },
+    {
+      "name": "native switches retain both selected values and clearing one preserves the other",
+      "pass": true,
+      "both": {
+        "remind": true,
+        "accessible": true
+      },
+      "accessibleOnly": {
+        "remind": false,
+        "accessible": true
+      },
+      "externalActions": 0
+    },
+    {
+      "name": "native form Reset clears all four defaults and inline errors without an action",
+      "pass": true,
+      "state": {
+        "$planName": "",
+        "$notes": "",
+        "$mode": "",
+        "$preferences": {
+          "remind": false,
+          "accessible": false
+        }
+      },
+      "errorCount": 0,
+      "externalActions": 0
+    },
+    {
+      "name": "native text entry retains one focused input identity while state grows from 周末 to 周末慢游",
+      "pass": true,
+      "shortText": "周末",
+      "fullText": "周末慢游",
+      "nativeId": "openui_mb_c",
+      "hashcode": "866:1158",
+      "focused": true,
+      "sameIdentity": true
+    },
+    {
+      "name": "native filled-top captures the selected transit choice with one remind preference",
+      "pass": true,
+      "state": {
+        "$planName": "周末慢游",
+        "$notes": "",
+        "$mode": "transit",
+        "$preferences": {
+          "remind": true,
+          "accessible": false
+        }
+      },
+      "radioValue": "transit",
+      "errorCount": 0
+    },
+    {
+      "name": "native filled form holds exact submitted text and preferences before dispatch",
+      "pass": true,
+      "state": {
+        "$planName": "周末慢游",
+        "$notes": "带水和雨伞",
+        "$mode": "transit",
+        "$preferences": {
+          "remind": true,
+          "accessible": false
+        }
+      },
+      "errorCount": 0,
+      "externalActions": 0
+    },
+    {
+      "name": "native final result is read-only and contains one exact submitted action",
+      "pass": true,
+      "readOnly": true,
+      "externalActions": 1,
+      "submitted": {
+        "planName": "周末慢游",
+        "notes": "带水和雨伞",
+        "mode": "transit",
+        "preferences": {
+          "remind": true,
+          "accessible": false
+        }
+      },
+      "itemId": "forest-trail"
+    },
+    {
+      "name": "actual request history records four total requests and one result repair",
+      "pass": true,
+      "listRequests": 1,
+      "plannerRequests": 3,
+      "totalRequests": 4,
+      "repairRequests": 1,
+      "plannerCandidates": 3
+    },
+    {
+      "name": "actual host validator rejects the first result candidate with its recorded submitted facts",
+      "pass": true,
+      "candidateIndex": 1,
+      "sourceSha256": "a735a295edcaef26f3333383b5d69172633e0b4a5f79911f87a0ccd8d61b8faa",
+      "rejectedByActualHost": true,
+      "reason": "UI_RESULT_FIELDS: 出发提醒必须逐字显示“已选”",
+      "structural": {
+        "rows": [
+          {
+            "children": 2,
+            "childTexts": [
+              "出发提醒：",
+              "无障碍路线："
+            ]
+          },
+          {
+            "children": 2,
+            "childTexts": [
+              "已选",
+              "未选"
+            ]
+          }
+        ],
+        "componentCount": 31,
+        "visibleTextTail": [
+          "出发提醒：",
+          "无障碍路线：",
+          "已选",
+          "未选"
+        ]
+      }
+    }
+  ],
+  "inputSha256": {
+    "mapped-r3-model/mapped.private.json": "1feb27383a62cacdc57a6c397a06995d45d0c5cac673bce790f5ff5089619245",
+    "planner-r3-model/planner.private.json": "7fee27781f944f408dba798515fc54f400b2e260280c8ec7d05c4ded589a56e5",
+    "planner-r3-result/planner.private.json": "80b7d5bbc99d1abc5f9e675fa41223f88921e8a3c646a36bdc9ae168061a3a1c",
+    "mapped-r3-empty/mapped.private.json": "9bfd3ee671473df3a26cca11101b0f24991743e6d97e23096e5354f879142f2f",
+    "mapped-r3-reset/mapped.private.json": "677ea24060b6c5ac7f8cdc40c860d926debf4855057d9d25d3305dedca5d236a",
+    "mapped-r3-reverse/mapped.private.json": "8e228eeff2becfa22f820ce7dc3efcdcb7e4b0667dbe29e9cd5971072b9dbb73",
+    "mapped-r3-dark/mapped.private.json": "8b7582cf967589c1febcf81b031002a9a11ba74d27e3181929852532ed4b9c5a",
+    "mapped-r3-selected/mapped.private.json": "447ad50f487b7d787ba048a7326a59bcf5c51ab0326dd20ab1727a1da1109bda",
+    "planner-r3-required/planner.private.json": "2e2a7f8066bd86aa9c66ff3bf7371051b65a4f461a5b3cdf6d23d457212f3a4a",
+    "planner-r3-both/planner.private.json": "77b785b9c7b350949bd41c98fbaddb5c957199254b4c792c8cedcdccfd6806f5",
+    "planner-r3-accessible-only/planner.private.json": "ba87acb6cb693beb2974682ee79a6b948879558d41e60059efacb7897f42854e",
+    "planner-r3-reset/planner.private.json": "f60d2d3f2869d4a5249e06fe3694031e5b632d7855fa5e35072c71a140c222f3",
+    "planner-r3-keyboard-short/planner.private.json": "3b2e640c008f19386244a22eab39f61cfb51ee0d5f4d123b111ae91949f5f50c",
+    "planner-r3-keyboard-full/planner.private.json": "488678d1f5ec4f8a7c5ccb73e4fbd80322c15ca771ec29641cf776c019c8e4ae",
+    "planner-r3-keyboard-short/layout.private.json": "f5d1c805984ad467f7303d67f42b1899928ecb1a824b96ce96efa8af6ef4a30b",
+    "planner-r3-keyboard-full/layout.private.json": "3d7cdfa932f714a8225e36f84bbbd36128a383ff44b2819586ca0edca5b9b8ae",
+    "planner-r3-filled-top/planner.private.json": "1a04eb26861157182e2521c35bc43ad8987312dcd20da944c414c17be5d5bfa7",
+    "planner-r3-filled/planner.private.json": "90034e6c66df794f9e27c6a9b1899cb91f05ffaa41417e61b941a1f3fadf0d56"
+  }
+}

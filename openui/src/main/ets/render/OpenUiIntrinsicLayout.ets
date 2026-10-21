@@ -75,7 +75,7 @@ export struct OpenUiIntrinsicLayout {
           Text(this.selected ? '✓' : '○').fontSize(20)
             .fontColor(this.theme.palette.accent)
         }
-      }.width('100%').padding(this.theme.dimensions.inset)
+      }.width('100%').padding(Math.max(16, this.theme.dimensions.inset))
         .constraintSize({ minHeight: this.theme.dimensions.targetHeight })
         .borderRadius(this.theme.dimensions.radius)
         .backgroundColor(this.selected ? this.theme.palette.accentContainer : this.theme.palette.surface)
@@ -99,7 +99,7 @@ export struct OpenUiIntrinsicLayout {
               .fontColor(this.theme.palette.text).wordBreak(WordBreak.BREAK_WORD)
           }.width('100%').alignItems(VerticalAlign.Top)
         }, (fact: OpenUiFactValue, index: number): string => index.toString() + ':' + fact.label + ':' + fact.value)
-      }.width('100%').alignItems(HorizontalAlign.Start).padding(this.theme.dimensions.inset)
+      }.width('100%').alignItems(HorizontalAlign.Start).padding(Math.max(16, this.theme.dimensions.inset))
         .backgroundColor(this.theme.palette.group).borderRadius(this.theme.dimensions.radius)
     } else if (this.kind === 'OpenUiStatus') {
       Row({ space: 8 }) {

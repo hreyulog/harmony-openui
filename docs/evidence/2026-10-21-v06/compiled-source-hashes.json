@@ -1,0 +1,382 @@
+{
+  "sourceCommitBase": "feac85e73d177a87920fa743a40caaa15e1d8264",
+  "frozenAt": "2026-10-21T08:06:59.823307+00:00",
+  "sourceScope": "public-product-and-build-inputs",
+  "sourceInputCount": 62,
+  "hashSource": "current public repository bytes matched to the frozen source manifest",
+  "gitNormalization": "CRLF to LF on those same public bytes",
+  "files": [
+    {
+      "path": "AppScope/app.json5",
+      "bytes": 217,
+      "sha256": "61cea6b086cdae7cde4c76299ea4e9c1cc926a5d3a4e3aba1a18cc8b2a22b953",
+      "gitNormalizedSha256": "61cea6b086cdae7cde4c76299ea4e9c1cc926a5d3a4e3aba1a18cc8b2a22b953"
+    },
+    {
+      "path": "AppScope/resources/base/element/string.json",
+      "bytes": 76,
+      "sha256": "b59ee71be27fe21b715fa30ad3b6b97f85edd313abc2378040c3c05e9e0816f0",
+      "gitNormalizedSha256": "b59ee71be27fe21b715fa30ad3b6b97f85edd313abc2378040c3c05e9e0816f0"
+    },
+    {
+      "path": "AppScope/resources/base/media/app_icon.svg",
+      "bytes": 518,
+      "sha256": "6c6800fd280331de4a76a6fe986347d4be69fc450d9da30db10cc8e2e1b95b58",
+      "gitNormalizedSha256": "6c6800fd280331de4a76a6fe986347d4be69fc450d9da30db10cc8e2e1b95b58"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "gitNormalizedSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "NOTICE",
+      "bytes": 751,
+      "sha256": "2c25ef6319c03b16633af4cb1d34b265b30bb6cf15fe58b1a49889a7478c7a57",
+      "gitNormalizedSha256": "2c25ef6319c03b16633af4cb1d34b265b30bb6cf15fe58b1a49889a7478c7a57"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES",
+      "bytes": 4697,
+      "sha256": "57af01931623e411b2b1bb5655b1ad13b73138c02e0e9b69657f05114dbaab23",
+      "gitNormalizedSha256": "57af01931623e411b2b1bb5655b1ad13b73138c02e0e9b69657f05114dbaab23"
+    },
+    {
+      "path": "build-profile.json5",
+      "bytes": 762,
+      "sha256": "fb7869eaa03219e04cbb4c63c76ccb7dcc322a25f3cedf4ac4702aab8e7c19f4",
+      "gitNormalizedSha256": "fb7869eaa03219e04cbb4c63c76ccb7dcc322a25f3cedf4ac4702aab8e7c19f4"
+    },
+    {
+      "path": "demo/build-profile.json5",
+      "bytes": 88,
+      "sha256": "ab6a89261d46045602e8387d49dd8a9bbca8390247c95116eb5ba84cdac7601b",
+      "gitNormalizedSha256": "ab6a89261d46045602e8387d49dd8a9bbca8390247c95116eb5ba84cdac7601b"
+    },
+    {
+      "path": "demo/hvigorfile.ts",
+      "bytes": 147,
+      "sha256": "2175281ab7e8b7bd70a7666c761f9828300340ec0b1280ae1f39683a0e173416",
+      "gitNormalizedSha256": "2175281ab7e8b7bd70a7666c761f9828300340ec0b1280ae1f39683a0e173416"
+    },
+    {
+      "path": "demo/oh-package.json5",
+      "bytes": 233,
+      "sha256": "0614ca1911ec846591ba02fc1d2a0cc3795931d36a828bbbff1dae4c74513221",
+      "gitNormalizedSha256": "0614ca1911ec846591ba02fc1d2a0cc3795931d36a828bbbff1dae4c74513221"
+    },
+    {
+      "path": "demo/src/main/ets/entryability/EntryAbility.ets",
+      "bytes": 271,
+      "sha256": "1b2c81356ea39e623e7a42a199460f63d04b0d051d1d99df610a4577019a2c5c",
+      "gitNormalizedSha256": "1b2c81356ea39e623e7a42a199460f63d04b0d051d1d99df610a4577019a2c5c"
+    },
+    {
+      "path": "demo/src/main/ets/model/DemoModel.ets",
+      "bytes": 4715,
+      "sha256": "13c8a5a01a8457298ad8248ac5521acdf244a86c9652fb5a7b3a01b1f5d34c9a",
+      "gitNormalizedSha256": "2b8c9c791afb63bf3f512e7bf70a8ce66577760c953afcb878ec4079be0e0546"
+    },
+    {
+      "path": "demo/src/main/ets/model/DemoPlaces.ets",
+      "bytes": 1338,
+      "sha256": "4310cd2c7c12a4d013b41c87ccf3c728bbb7b88c4761d688bc14dda7d2cc47f6",
+      "gitNormalizedSha256": "4310cd2c7c12a4d013b41c87ccf3c728bbb7b88c4761d688bc14dda7d2cc47f6"
+    },
+    {
+      "path": "demo/src/main/ets/pages/Forms.ets",
+      "bytes": 14055,
+      "sha256": "0d33aa536b2604386590c12a091ff14646c45a9c46ba8a59eb8c89f79c7f7084",
+      "gitNormalizedSha256": "0d33aa536b2604386590c12a091ff14646c45a9c46ba8a59eb8c89f79c7f7084"
+    },
+    {
+      "path": "demo/src/main/ets/pages/Index.ets",
+      "bytes": 13013,
+      "sha256": "899d3aa5469320d9827d886a6f93ac66eab929ab40ddf630f1f1fe9cbc585d9f",
+      "gitNormalizedSha256": "899d3aa5469320d9827d886a6f93ac66eab929ab40ddf630f1f1fe9cbc585d9f"
+    },
+    {
+      "path": "demo/src/main/ets/pages/Isolation.ets",
+      "bytes": 5383,
+      "sha256": "f464ae0e0f27ff06dd650652b3299eefe3267d07d897453a497116c4e8a1f330",
+      "gitNormalizedSha256": "f464ae0e0f27ff06dd650652b3299eefe3267d07d897453a497116c4e8a1f330"
+    },
+    {
+      "path": "demo/src/main/ets/pages/Mapped.ets",
+      "bytes": 17916,
+      "sha256": "eab7b4513a0b14a7586dd55705539cadd35a60fa3d9284669f51dfd42fc658d1",
+      "gitNormalizedSha256": "eab7b4513a0b14a7586dd55705539cadd35a60fa3d9284669f51dfd42fc658d1"
+    },
+    {
+      "path": "demo/src/main/ets/pages/Planner.ets",
+      "bytes": 20520,
+      "sha256": "a70227d65943ba9364a5f6045230816e5621e6d41e2ef6ee73f0f803fa6e30e3",
+      "gitNormalizedSha256": "28a26df35aeed3e5e53486c74a4ce50d402af57046062ed685da41ed2e29e5d2"
+    },
+    {
+      "path": "demo/src/main/module.json5",
+      "bytes": 1019,
+      "sha256": "52c0d8ef05b0bf6c734c8359f647e7df027db9e02c80ffb5d358bad907affe0b",
+      "gitNormalizedSha256": "83ab1097e03128fa265cde1177a62f36789e75d7b8dce4ceae23c54f96aeaf20"
+    },
+    {
+      "path": "demo/src/main/resources/base/element/color.json",
+      "bytes": 83,
+      "sha256": "21e9459b6e0ea4d443cb585571b3d43087a1f9938d1c726449fe2954c9156af2",
+      "gitNormalizedSha256": "21e9459b6e0ea4d443cb585571b3d43087a1f9938d1c726449fe2954c9156af2"
+    },
+    {
+      "path": "demo/src/main/resources/base/element/string.json",
+      "bytes": 248,
+      "sha256": "350854b9711153de19c0074eddca10194d9adfdc38702414d6eca762fabcf764",
+      "gitNormalizedSha256": "350854b9711153de19c0074eddca10194d9adfdc38702414d6eca762fabcf764"
+    },
+    {
+      "path": "demo/src/main/resources/base/profile/main_pages.json",
+      "bytes": 96,
+      "sha256": "203000897c2b0a0ae1607837e985fad9a2094a4723f1b69cb378c35ce2004aea",
+      "gitNormalizedSha256": "203000897c2b0a0ae1607837e985fad9a2094a4723f1b69cb378c35ce2004aea"
+    },
+    {
+      "path": "hvigor/hvigor-config.json5",
+      "bytes": 94,
+      "sha256": "151b4cf50d0aaa8ef9d7e71f1dc92988d6da0e5c7188f51f4d7891561eccf413",
+      "gitNormalizedSha256": "151b4cf50d0aaa8ef9d7e71f1dc92988d6da0e5c7188f51f4d7891561eccf413"
+    },
+    {
+      "path": "hvigorfile.ts",
+      "bytes": 147,
+      "sha256": "84ab53d0270f13e44c9f0916d5073c9d0c09c46ca25bdc9ad6ba00c053721918",
+      "gitNormalizedSha256": "84ab53d0270f13e44c9f0916d5073c9d0c09c46ca25bdc9ad6ba00c053721918"
+    },
+    {
+      "path": "oh-package.json5",
+      "bytes": 255,
+      "sha256": "c733ffa2d0ca8fb9d1e18b2538c5134c907f51b2a16ae35e741f9aa13ba063d9",
+      "gitNormalizedSha256": "c733ffa2d0ca8fb9d1e18b2538c5134c907f51b2a16ae35e741f9aa13ba063d9"
+    },
+    {
+      "path": "openui/Index.ets",
+      "bytes": 951,
+      "sha256": "208f0834cb71fad4f21f52ac8a97ae2a8626dd5ae0df3a933c4b6a178fea6d32",
+      "gitNormalizedSha256": "208f0834cb71fad4f21f52ac8a97ae2a8626dd5ae0df3a933c4b6a178fea6d32"
+    },
+    {
+      "path": "openui/build-profile.json5",
+      "bytes": 550,
+      "sha256": "9b6412aef506e58f1c3b8d43e1dde378c7b3a255e9a3ab8b3b302c119627f8d9",
+      "gitNormalizedSha256": "2eec2d8acdc565c46b994e8297c6ca6b1ae4d4b59bf3fb84700428878c3596ce"
+    },
+    {
+      "path": "openui/hvigorfile.ts",
+      "bytes": 147,
+      "sha256": "bcb105f0bb161d1cbf571aceb909ce7d5907c573b08f0d05fa4ca1d53934ca2e",
+      "gitNormalizedSha256": "bcb105f0bb161d1cbf571aceb909ce7d5907c573b08f0d05fa4ca1d53934ca2e"
+    },
+    {
+      "path": "openui/oh-package.json5",
+      "bytes": 358,
+      "sha256": "638e9353f33ebd4b887a8c7c347544c9da75be1ad589d3897f456398021c1468",
+      "gitNormalizedSha256": "638e9353f33ebd4b887a8c7c347544c9da75be1ad589d3897f456398021c1468"
+    },
+    {
+      "path": "openui/src/main/ets/core/OpenUiCatalog.ets",
+      "bytes": 17455,
+      "sha256": "d07b6c75440666f5a69626c4e20175b31cc086a63f0aaaae72648fa62bed515e",
+      "gitNormalizedSha256": "d07b6c75440666f5a69626c4e20175b31cc086a63f0aaaae72648fa62bed515e"
+    },
+    {
+      "path": "openui/src/main/ets/core/OpenUiController.ets",
+      "bytes": 27118,
+      "sha256": "22573e717aac3503d6deae163d4edd9b94bb72f6011f2335cd9c6acccb22711d",
+      "gitNormalizedSha256": "22573e717aac3503d6deae163d4edd9b94bb72f6011f2335cd9c6acccb22711d"
+    },
+    {
+      "path": "openui/src/main/ets/core/OpenUiTypes.ets",
+      "bytes": 3145,
+      "sha256": "1bb3a8241ab6e12aa9bc6d5282deaba1c7220ea0126d51e352d82dd40cbc5457",
+      "gitNormalizedSha256": "1bb3a8241ab6e12aa9bc6d5282deaba1c7220ea0126d51e352d82dd40cbc5457"
+    },
+    {
+      "path": "openui/src/main/ets/lang/OpenUiLanguage.ets",
+      "bytes": 2617,
+      "sha256": "a34590ce9b789369a4944355e0cb57c6737c6fa11558646079c9a859fc451e75",
+      "gitNormalizedSha256": "a34590ce9b789369a4944355e0cb57c6737c6fa11558646079c9a859fc451e75"
+    },
+    {
+      "path": "openui/src/main/ets/lang/OpenUiMappedRuntime.ets",
+      "bytes": 8150,
+      "sha256": "21ed43d0f6982ce9e3974155158eef1327b830e9e46626f3c251dec21efa6888",
+      "gitNormalizedSha256": "21ed43d0f6982ce9e3974155158eef1327b830e9e46626f3c251dec21efa6888"
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiControlModel.ets",
+      "bytes": 2996,
+      "sha256": "1e6c1951781faacb70f579902ef4f6f821dee887f340f6131905862d01058dcc",
+      "gitNormalizedSha256": "1e6c1951781faacb70f579902ef4f6f821dee887f340f6131905862d01058dcc"
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiControlsLayout.ets",
+      "bytes": 17161,
+      "sha256": "6bc65cd23588a3345140e5d51ed81b657a2a28859b6331ef2507f2d6040ba213",
+      "gitNormalizedSha256": "6bc65cd23588a3345140e5d51ed81b657a2a28859b6331ef2507f2d6040ba213"
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiIntrinsicLayout.ets",
+      "bytes": 7722,
+      "sha256": "7a09c04d50d5fc2bb86ed33a9a9e794f201c5ea9c33f0a308bf190cdfcbecced",
+      "gitNormalizedSha256": "7a09c04d50d5fc2bb86ed33a9a9e794f201c5ea9c33f0a308bf190cdfcbecced"
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiNative.ets",
+      "bytes": 23780,
+      "sha256": "849e9cf0703dc1125a81888b922712c132322e4b4178065bc1cd1a28ba8893b5",
+      "gitNormalizedSha256": "849e9cf0703dc1125a81888b922712c132322e4b4178065bc1cd1a28ba8893b5"
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiNativeIds.ets",
+      "bytes": 3631,
+      "sha256": "69150d1f7cc8fdbe02701afce717490630ff1626b9113c3e8ecfa28a8074a074",
+      "gitNormalizedSha256": "69150d1f7cc8fdbe02701afce717490630ff1626b9113c3e8ecfa28a8074a074"
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiProjection.ets",
+      "bytes": 11910,
+      "sha256": "6f6d306a88e6ea2c7a19dfdcfdda2302812dba0519d6e502c4ce547f32bea869",
+      "gitNormalizedSha256": "6f6d306a88e6ea2c7a19dfdcfdda2302812dba0519d6e502c4ce547f32bea869"
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiRenderDiagnostics.ets",
+      "bytes": 327,
+      "sha256": "0647d1dbbef58f211d2daae5b917440961dbc9f3021934c158846931aef75b45",
+      "gitNormalizedSha256": "0647d1dbbef58f211d2daae5b917440961dbc9f3021934c158846931aef75b45"
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiTheme.ets",
+      "bytes": 1882,
+      "sha256": "23ad310c87b3ac2f3771aff6a50eeef92b154edbc12e5746764131c2a98848c9",
+      "gitNormalizedSha256": "23ad310c87b3ac2f3771aff6a50eeef92b154edbc12e5746764131c2a98848c9"
+    },
+    {
+      "path": "openui/src/main/ets/render/OpenUiView.ets",
+      "bytes": 10565,
+      "sha256": "deef8117ae2892faa86e36a4b279faccf76d53a24f1165c92b6d6d18c0262c55",
+      "gitNormalizedSha256": "deef8117ae2892faa86e36a4b279faccf76d53a24f1165c92b6d6d18c0262c55"
+    },
+    {
+      "path": "openui/src/main/module.json5",
+      "bytes": 110,
+      "sha256": "3bc499b55d6254369e9e0c4f10abb942851b05329d13ded0e5d061403bb448e8",
+      "gitNormalizedSha256": "3bc499b55d6254369e9e0c4f10abb942851b05329d13ded0e5d061403bb448e8"
+    },
+    {
+      "path": "package.json",
+      "bytes": 403,
+      "sha256": "676764771af5d10a57e9203b9d384198b62d4ea6cd2e68c85c82074e0622ae98",
+      "gitNormalizedSha256": "676764771af5d10a57e9203b9d384198b62d4ea6cd2e68c85c82074e0622ae98"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 9475,
+      "sha256": "a2acb2f4885ba2c04daccc1e61edb80f6c52b5b60ecf3540691f93623a0dbc38",
+      "gitNormalizedSha256": "a2acb2f4885ba2c04daccc1e61edb80f6c52b5b60ecf3540691f93623a0dbc38"
+    },
+    {
+      "path": "schemas/native-ir.schema.json",
+      "bytes": 37083,
+      "sha256": "0c0b667392af82e62e430db95f470b6ba9f6d2932b95c6b6422c09f43e006b55",
+      "gitNormalizedSha256": "086a3f9be7d7b21a643b49efcd832cba49464f0b1ebefc96fa2564b3112588ca"
+    },
+    {
+      "path": "schemas/openui-lang-v0.1.json",
+      "bytes": 26887,
+      "sha256": "2eb2cf165a5620bbb1a586dd9b69f9eecad21fcd4d92bb13d92a26fc1f0ff550",
+      "gitNormalizedSha256": "2eb2cf165a5620bbb1a586dd9b69f9eecad21fcd4d92bb13d92a26fc1f0ff550"
+    },
+    {
+      "path": "schemas/openui-mapped-support-v1.json",
+      "bytes": 5087,
+      "sha256": "0f5793d4c9db0a05b8b6375d2688c7f523653f35fc980423d7e1057bd9ea5c80",
+      "gitNormalizedSha256": "0f5793d4c9db0a05b8b6375d2688c7f523653f35fc980423d7e1057bd9ea5c80"
+    },
+    {
+      "path": "schemas/openui-mapped-v1.json",
+      "bytes": 17376,
+      "sha256": "cc0d76105d7f1b90702392e26bdd6902d64171dcef00026316055ab426284b7d",
+      "gitNormalizedSha256": "cc0d76105d7f1b90702392e26bdd6902d64171dcef00026316055ab426284b7d"
+    },
+    {
+      "path": "third_party/agenui/COPYING.LGPL-2.1",
+      "bytes": 26532,
+      "sha256": "5bbcbb737e60fe9deba08ecbd00920cfcc3403ba2e534c64fdeea49d6bb87509",
+      "gitNormalizedSha256": "5bbcbb737e60fe9deba08ecbd00920cfcc3403ba2e534c64fdeea49d6bb87509"
+    },
+    {
+      "path": "third_party/agenui/NOTICE",
+      "bytes": 6570,
+      "sha256": "134d0c82eea9361d2c292abcddadac1aebfd9b93c427a13fbf3636c4773bbf74",
+      "gitNormalizedSha256": "134d0c82eea9361d2c292abcddadac1aebfd9b93c427a13fbf3636c4773bbf74"
+    },
+    {
+      "path": "tools/build-lang.mjs",
+      "bytes": 4501,
+      "sha256": "c64ccbca2e37bd38fd245d7ce17d7e376bf600ed6d90a34734cae5d0694f0042",
+      "gitNormalizedSha256": "c64ccbca2e37bd38fd245d7ce17d7e376bf600ed6d90a34734cae5d0694f0042"
+    },
+    {
+      "path": "tools/build.py",
+      "bytes": 14805,
+      "sha256": "4814bb0801f33b70c79367c15e5322bec9cc0f6dec47899f6717a62334d53832",
+      "gitNormalizedSha256": "3ff410b1c155eb127a5a8fef60f2df3b941f9809a2ee12a3dfca01e36306a047"
+    },
+    {
+      "path": "tools/build_common.py",
+      "bytes": 3824,
+      "sha256": "c5dd6194bc1eb29c339e502f89e308391e1460e74d316838b9515445a36f751d",
+      "gitNormalizedSha256": "c5dd6194bc1eb29c339e502f89e308391e1460e74d316838b9515445a36f751d"
+    },
+    {
+      "path": "tools/dependency-lock.json",
+      "bytes": 634,
+      "sha256": "d815d96bf565e3e7b1a7b33ab8efeeb9cdb842b6cf34f5531a4e6c6f62530b29",
+      "gitNormalizedSha256": "d815d96bf565e3e7b1a7b33ab8efeeb9cdb842b6cf34f5531a4e6c6f62530b29"
+    },
+    {
+      "path": "tools/lang/library.mjs",
+      "bytes": 9752,
+      "sha256": "bcd448c2430afcdc7812cf93c1643307b3a03bb04157507fdca02e6b13d478bf",
+      "gitNormalizedSha256": "bcd448c2430afcdc7812cf93c1643307b3a03bb04157507fdca02e6b13d478bf"
+    },
+    {
+      "path": "tools/lang/mapped-registry.mjs",
+      "bytes": 28273,
+      "sha256": "c7433388bccf6604f55a10ee8724062811203bcf6a27580f5b5bde8b88c7210c",
+      "gitNormalizedSha256": "c7433388bccf6604f55a10ee8724062811203bcf6a27580f5b5bde8b88c7210c"
+    },
+    {
+      "path": "tools/lang/mapped-runtime-entry.mjs",
+      "bytes": 24265,
+      "sha256": "7c56ea08b74b1a07585d6099f45f59aaa6657d477b087889a251c7aeb568caf5",
+      "gitNormalizedSha256": "7c56ea08b74b1a07585d6099f45f59aaa6657d477b087889a251c7aeb568caf5"
+    },
+    {
+      "path": "tools/lang/runtime-entry.mjs",
+      "bytes": 6294,
+      "sha256": "6e8e158a8bf4e40c6d69fdcf98066ba88ae962bba1bdc1f8a67377d121c2ef9e",
+      "gitNormalizedSha256": "6e8e158a8bf4e40c6d69fdcf98066ba88ae962bba1bdc1f8a67377d121c2ef9e"
+    },
+    {
+      "path": "tools/prepare-deps.py",
+      "bytes": 848,
+      "sha256": "59d96f8de49ce7b1b6cb991d7b13952d5d064b838c241438ae2472dc0fe34ff0",
+      "gitNormalizedSha256": "59d96f8de49ce7b1b6cb991d7b13952d5d064b838c241438ae2472dc0fe34ff0"
+    },
+    {
+      "path": "tools/signing-config.example.json",
+      "bytes": 503,
+      "sha256": "7d95a231426295f9b281a75a79aec308f629d5ea22ba1bc2085393987e94fe37",
+      "gitNormalizedSha256": "7d95a231426295f9b281a75a79aec308f629d5ea22ba1bc2085393987e94fe37"
+    }
+  ]
+}
