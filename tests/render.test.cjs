@@ -12,7 +12,7 @@ function fixture(){
  const controls=read('render/OpenUiControlsLayout');
  const pickerMethods=controls.slice(controls.indexOf('  aboutToAppear():'),controls.indexOf('  onMeasureSize('));
  const accessibilityMethods=controls.slice(controls.indexOf('  private radioAccessibilityText('),controls.indexOf('  @Builder',controls.indexOf('  private radioAccessibilityText(')));
- const controlsClass='class ControlsFixture {kind:string="";label:string="";stringValue:string="";numberValue:number=0;boolValue:boolean=false;controlState:string="";nativeValue:OpenUiFieldValue="";liveStringValue:string="";liveNumberValue:number=0;liveBoolValue:boolean=false;selectedDate:Date=new Date();selectedTime:Date=new Date(2000,0,1);dialogVisible:boolean=false;onModalReady:(close:()=>void)=>void=()=>{};onString:(value:string)=>void=()=>{};onNumber:(value:number)=>void=()=>{};onBoolean:(value:boolean)=>void=()=>{};'+pickerMethods+accessibilityMethods+'}';
+ const controlsClass='class ControlsFixture {kind:string="";label:string="";disabled:boolean=false;options:OpenUiSelectOption[]=[];stringValue:string="";numberValue:number=0;boolValue:boolean=false;controlState:string="";nativeValue:OpenUiFieldValue="";liveStringValue:string="";liveNumberValue:number=0;liveBoolValue:boolean=false;selectedDate:Date=new Date();selectedTime:Date=new Date(2000,0,1);dialogVisible:boolean=false;onModalReady:(close:()=>void)=>void=()=>{};onString:(value:string)=>void=()=>{};onNumber:(value:number)=>void=()=>{};onBoolean:(value:boolean)=>void=()=>{};'+pickerMethods+accessibilityMethods+'}';
  const view=read('render/OpenUiView');
  const methods=view.slice(view.indexOf('  aboutToAppear():'),view.indexOf('  build() {'));
  const fakeView='class ViewFixture { controller: OpenUiController = new OpenUiController(); surfaceId:string="s"; theme:OpenUiTheme=OpenUiThemes.create(); nativeInstance:number=0;visibleEpoch:number=0;errorLabel:string="";observerId:number=-1;epoch:number=0;contentWidth:number=0;outerWidth:number=0;eventSerial:number=0;refreshTimer:number=-1;lifetime:string="fixture";fingerprint:string="";mountedSurface:string="";manager:SurfaceManager|undefined;nativeSession:OpenUiNativeSession|undefined;details:Map<string,boolean>=new Map();getUIContext():UIContext {return {window:this.lifetime} as UIContext;}'+methods+'}';
@@ -60,6 +60,60 @@ function mount(view,outerWidth=348){view.aboutToAppear();view.viewportChanged({w
 function seed(Controller,id='s',onAction=()=>{}){
  const c=new Controller({onAction});c.apply({kind:'create',surfaceId:id});c.apply({kind:'components',surfaceId:id,components:[{id:'root',component:'Column',children:['option','facts','details']},{id:'option',component:'OpenUiOption',title:{path:'/label'},meta:{path:'/price'},action:{event:{name:'pick',context:{value:{path:'/key'}}}}},{id:'facts',component:'OpenUiFacts',facts:[{label:'Amount',value:{path:'/price'}}]},{id:'details',component:'OpenUiDetails',title:'More',text:'Source details'}]});c.apply({kind:'data',surfaceId:id,valueJson:JSON.stringify({label:'Observed choice',price:42,key:'a'})});return c;
 }
+function radioHandler(control,option,event){
+ const source=fs.readFileSync(root+'render/OpenUiControlsLayout.ets','utf8');
+ const section=source.slice(source.indexOf("this.kind === 'OpenUiRadioGroup'"),source.indexOf("this.kind === 'OpenUiSlider'",source.indexOf("this.kind === 'OpenUiRadioGroup'")));
+ const marker='.'+event+'(',start=section.indexOf(marker);assert.ok(start>=0,'the actual Radio option row/native control must wire '+event);
+ const begin=start+marker.length;let end=begin,depth=1;
+ for(;end<section.length;end++){if(section[end]==='(')depth++;else if(section[end]===')'&&--depth===0)break;}
+ assert.equal(depth,0,'event handler is a complete callback');
+ const factory=vm.runInNewContext(stripTypeScriptTypes('function bind(option:OpenUiSelectOption){return '+section.slice(begin,end)+';}\nbind'));
+ return factory.call(control,option);
+}
+function radioFixture(){
+ const s=fixture(),changes=[],options=[{label:'不限',value:'any'},{label:'二等座',value:'secondClass'}];
+ const c=new s.Controller({onFieldChange:event=>changes.push(event)});
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'components',surfaceId:'s',components:[{id:'root',component:'OpenUiRadioGroup',field:'seat',label:'席别',value:'any',options}]});
+ const view=new s.View();view.controller=c;mount(view);
+ const native=s.hybridViews.get(view.nativeSession.ids.nativeId('root')),control=new s.Controls();
+ Object.assign(control,{kind:'OpenUiRadioGroup',label:'席别',stringValue:'any',options});
+ let deliveries=0;control.onString=value=>{deliveries++;native.edit(value);};control.aboutToAppear();
+ return {...s,c,view,native,control,changes,options,deliveries:()=>deliveries,
+  row:radioHandler(control,options[1],'onClick'),circle:radioHandler(control,options[1],'onChange')};
+}
+
+test('radio row and native circle callbacks update the real controller once in either event order',()=>{
+ for(const order of ['row-first','circle-first']){
+  const s=radioFixture();
+  if(order==='row-first'){s.row();s.circle(true);}else{s.circle(true);s.row();}
+  assert.equal(s.deliveries(),1,'one physical click must not deliver two edits through the native bridge');
+  assert.equal(s.changes.length,1);assert.equal(s.changes[0].sourceComponentId,'root');assert.equal(s.changes[0].field,'seat');
+  assert.equal(JSON.parse(s.c.getSurface('s').fieldValuesJson).root,'secondClass');
+  assert.equal(s.control.liveStringValue,'secondClass');assert.equal(s.managers.length,1);
+  s.row();s.circle(true);s.circle(false);assert.equal(s.deliveries(),1,'selected rows and unchecked notifications are idempotent');
+  s.view.aboutToDisappear();
+ }
+});
+
+test('radio row keeps native keyboard selection and rejects disabled or retired option callbacks',()=>{
+ const s=radioFixture();s.control.disabled=true;s.row();s.circle(true);assert.equal(s.deliveries(),0);
+ s.control.disabled=false;s.control.options=[s.options[0]];s.row();s.circle(true);assert.equal(s.deliveries(),0,'a queued callback for a removed option cannot edit');
+ s.control.options=s.options;s.circle(true);assert.equal(s.deliveries(),1,'the native Radio keyboard/onChange path is retained');
+ assert.equal(JSON.parse(s.c.getSurface('s').fieldValuesJson).root,'secondClass');s.view.aboutToDisappear();
+});
+
+test('radio row stale callbacks cannot edit a readonly or unmounted native surface',()=>{
+ for(const end of ['readonly','unmounted']){
+  const s=radioFixture(),before=s.c.getSurface('s').fieldValuesJson;
+  if(end==='readonly')s.c.setReadOnly('s',true);else s.view.aboutToDisappear();
+  // A queued old callback may arrive before its disabled prop refreshes. The
+  // real native owner/controller must reject it even with this stale UI flag.
+  s.control.disabled=false;s.row();s.circle(true);
+  assert.equal(s.changes.length,0);assert.equal(s.c.getSurface('s').fieldValuesJson,before);
+  assert.equal(s.c.getSurface('s').components.find(node=>node.id==='root').value,'any');
+  s.view.aboutToDisappear();
+ }
+});
 test('projection resolves live data, applies accessible defaults and never mutates model state',()=>{
  const s=fixture(),c=seed(s.Controller),surface=c.getSurface('s'),before=JSON.stringify(surface);const nodes=s.Projection.components(surface,s.Themes.create());
  assert.equal(nodes.find(n=>n.id==='option').title,'Observed choice');assert.equal(nodes.find(n=>n.id==='option').meta,'42');assert.equal(nodes.find(n=>n.id==='option').action.event.context.value,'a');assert.equal(nodes.find(n=>n.id==='facts').facts[0].value,'42');assert.equal(JSON.stringify(surface),before);

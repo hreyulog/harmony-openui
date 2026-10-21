@@ -109,6 +109,13 @@ export struct OpenUiControlsLayout {
   private radioAccessibilityText(option: OpenUiSelectOption): string {
     return this.label + '，' + option.label + (option.description ? '，' + option.description : '');
   }
+  private selectRadio(value: string): void {
+    if (this.disabled || this.liveStringValue === value ||
+      !this.options.some((option: OpenUiSelectOption): boolean => option.value === value)) { return; }
+    // Both the row click and the native Radio change may describe one tap.
+    // Update the local controlled value before forwarding the existing edit.
+    this.changedString(value);
+  }
   @Builder
   private heading() {
     if (this.label) {
@@ -188,7 +195,7 @@ export struct OpenUiControlsLayout {
             Radio({ value: option.value, group: this.nodeId }).id(this.nodeId + '-' + option.value)
               .checked(this.liveStringValue === option.value).enabled(!this.disabled)
               .accessibilityText(this.radioAccessibilityText(option))
-              .onChange((checked: boolean): void => { if (checked) { this.changedString(option.value); } })
+              .onChange((checked: boolean): void => { if (checked) { this.selectRadio(option.value); } })
             Column({ space: 4 }) {
               Text(option.label).width('100%').fontSize(this.theme.dimensions.body).fontColor(this.theme.palette.text)
                 .wordBreak(WordBreak.BREAK_WORD)
@@ -201,6 +208,7 @@ export struct OpenUiControlsLayout {
           }.width('100%').alignItems(VerticalAlign.Top).padding(12).constraintSize({ minHeight: 48 })
             .backgroundColor(this.liveStringValue === option.value ? this.theme.palette.accentContainer : this.theme.palette.group)
             .borderRadius(12).border({ width: 1, color: this.liveStringValue === option.value ? this.theme.palette.accent : this.theme.palette.divider })
+            .enabled(!this.disabled).onClick((): void => { this.selectRadio(option.value); })
         }, (option: OpenUiSelectOption): string => option.value)
       } else if (this.kind === 'OpenUiSlider') {
         this.heading()
