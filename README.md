@@ -8,7 +8,18 @@
 
 一个独立的社区适配库：复用 OpenUI 官方解析器，以 AGenUI 为原生渲染后端，让模型输出的组件声明显示为鸿蒙界面，再把用户操作交回宿主应用。适合聊天里的方案选择、资料填写、多步骤表单和结果页面。无需 WebView，也不在设备上编译或执行模型生成的 ArkTS。
 
-这是社区项目，非 OpenUI 或华为官方 SDK。v0.4 在通用映射层中加入输入、多选组和实时表单提交，复用 OpenUI 官方状态、表达式引擎及既有原生控件，仍未完整实现 OpenUI Lang 或整个 ArkUI 组件体系。
+这是社区项目，非 OpenUI 或华为官方 SDK。v0.5 在通用映射层中补充单选、开关及有界数据列表，复用 OpenUI 官方状态、表达式引擎及既有原生控件，仍未完整实现 OpenUI Lang 或整个 ArkUI 组件体系。
+
+**v0.5：数据驱动图文列表、原生单选与偏好开关。** 映射目录增至 **19 类**，继续复用相同的 22 类原生 IR。列表直接使用官方 `Each / Filter / Sort / Count`，模型不用逐条手写筛选条件。[映射架构](docs/mapping.md) · [OpenUI / ArkUI 缺口对照](docs/gaps-v05.md)
+
+已在 Nova 上跑通 **真实模型列表 → 筛选排序并选择 → 原生单选与独立开关 → 模型只读结果**。最终候选共 3 次模型请求，无修正请求；本地交互不请求模型。实际列表另通过全部 24 种筛选与排序组合回放，最终“公共交通 / 提醒已选 / 无障碍未选”与提交一致。186 项 Node、2 项 Python 检查通过。[v0.5 验证](docs/verification-v05.md) · [实际程序和回执](docs/evidence/2026-10-21-v05/acceptance.json)
+
+| 反向排序后的图文列表 | 单选、开关与说明 | 中文必填校验 | 保留实际选择的模型结果 |
+| --- | --- | --- | --- |
+| <img src="docs/images/nova-v05-20261021/reverse-results.jpeg" width="210" alt="反向排序后的林间步道和书店"> | <img src="docs/images/nova-v05-20261021/choice-form.jpeg" width="210" alt="提醒开启、无障碍关闭和公共交通单选"> | <img src="docs/images/nova-v05-20261021/form-required.jpeg" width="210" alt="计划名和单选组的中文必填提示"> | <img src="docs/images/nova-v05-20261021/model-result.jpeg" width="210" alt="准确保留名称备注出行方式和两项偏好的结果"> |
+
+<details>
+<summary>v0.4 历史真机证据：输入、多选与实时表单</summary>
 
 **v0.4：模型生成图文列表 → 本地筛选与选择 → 原生表单 → 模型生成结果。** 通用映射目录现有 15 类组件，新增输入、多选记录与具名表单；复用既有 ArkUI 控件、官方状态和表达式引擎。[映射架构](docs/mapping.md)
 
@@ -17,6 +28,8 @@
 | 筛选后的图文结果 | 中文必填校验 | 原生输入与多选 | 模型整理结果 |
 | --- | --- | --- | --- |
 | <img src="docs/images/nova-v04-20261020/filtered-forest.jpeg" width="210" alt="本地筛选后的林间步道"> | <img src="docs/images/nova-v04-20261020/form-required.jpeg" width="210" alt="空提交显示中文必填提示"> | <img src="docs/images/nova-v04-20261020/form-filled.jpeg" width="210" alt="填写名称备注并选中两件物品"> | <img src="docs/images/nova-v04-20261020/model-result.jpeg" width="210" alt="模型生成准确保留提交值的只读结果"> |
+
+</details>
 
 <details>
 <summary>v0.3 历史真机证据：图文筛选、重置与选择</summary>
@@ -80,7 +93,14 @@ flowchart LR
 
 映射入口支持本地状态、输入与选择绑定、具名表单、条件组件和 Set／Reset；Query／Mutation 仍未接入。现有表单入口与新映射入口使用不同组件签名，必须分别使用对应的系统提示词。具体范围见[映射说明](docs/mapping.md)。
 
-## v0.4 新增什么
+## v0.5 新增什么
+
+- 新增 RadioItem、RadioGroup、SwitchItem、SwitchGroup，复用现成原生控件和状态桥。
+- 开放四类官方数据计算；排序后旧按钮事件与新的条目上下文隔离。
+- 单选说明保留为原生文字和基础无障碍标签。SwitchGroup 遵循上游独立容器语义，不冒充 FormControl 输入。
+- 结果先由宿主规范化为明确中文事实，再交给模型排版；真实错误模型输出保留为回归样例。
+
+## v0.4 保留的表单能力
 
 - 新增 `Input`、`TextArea`、`CheckBoxItem`、`CheckBoxGroup`、`Buttons`、`Form` 六类映射，共 15 类。
 - 文本与多行输入复用已有 ArkUI 控件；多选记录由官方 store 保存，适配成已有原生 Checkbox。
@@ -204,7 +224,7 @@ python tools/build.py --target all --unsigned --work-dir D:/openui-build/demo-01
 
 ## 示例与验证边界
 
-v0.4 的映射示例由“图文筛选”进入“完善计划”：列表、编辑卡片和最终结果分别由模型生成。筛选和输入在本地更新，提交携带当前具名表单的原始值。示例宿主在显示列表前检查全部 12 种筛选组合；模型程序不满足约定时，最多请求模型修正一次，不手动改写生成程序。SDK 不包含这些示例数据或模型请求。
+v0.5 的映射示例由“图文筛选与排序”进入“完善计划”：列表、编辑卡片和最终结果分别由模型生成。筛选和输入在本地更新，提交分别携带当前具名表单的原始值与独立开关的业务 context。示例宿主在显示列表前检查全部 24 种筛选排序组合，并把提交值转换为明确的显示事实交给结果模型。模型程序不满足约定时，最多请求模型修正一次，不手动改写生成程序。SDK 不包含这些示例数据或模型请求。
 
 示例使用明确标注的虚构资料检查交互；不是实际订票查询。模型接口支持 OpenAI-compatible 与 Anthropic-compatible HTTPS 请求，API Key 在配置界面输入后仅存在内存。可选的开发者私有配置也必须留在应用私有目录，不能打进包。
 
@@ -224,7 +244,7 @@ Host 测试检验解析、状态与回调契约；HAR / HAP 构建检验 ArkTS �
 - 兼容 A2UI 的受限子集，不宣称完整协议兼容。
 - SDK 与示例独立开发，尚未集成到 Sofia。
 
-文档：[v0.4 真机验证](docs/verification-v04.md) · [映射层](docs/mapping.md) · [架构](docs/architecture.md) · [协议与状态](docs/protocol.md) · [渲染与主题](docs/rendering.md) · [构建](docs/building.md) · [验证记录](docs/verification.md)
+文档：[v0.5 真机验证](docs/verification-v05.md) · [缺口对照](docs/gaps-v05.md) · [映射层](docs/mapping.md) · [架构](docs/architecture.md) · [协议与状态](docs/protocol.md) · [渲染与主题](docs/rendering.md) · [构建](docs/building.md) · [验证记录](docs/verification.md)
 
 依据：[OpenUI 官方架构](https://www.openui.com/docs/openui-lang/architecture) · [组件目录](https://www.openui.com/docs/openui-lang/defining-components) · [ArkUI](https://developer.huawei.com/consumer/cn/arkui/) · [AGenUI](https://github.com/AGenUI/AGenUI)
 

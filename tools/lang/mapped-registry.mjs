@@ -38,8 +38,20 @@ const select = define('Select', 'A native select. Bind value to a declared $stat
   rules, value: binding,
   size: z.enum(['small', 'medium', 'large']).optional()
 });
+const radioItem = define('RadioItem', 'One radio choice. description is required by the upstream signature; use an empty string if unnecessary. value is the stable business key.', {
+  label: z.string(), description: z.string(), value: z.string()
+});
+const radioGroup = define('RadioGroup', 'A native radio group with optional defaultValue and reactive value binding. A supplied current value wins over the default. Use FormControl for a visible group label.', {
+  name: z.string(), items: z.array(radioItem.ref), defaultValue: z.string().optional(), rules, value: binding
+});
+const switchItem = define('SwitchItem', 'One named switch. Supply a human-readable label when possible; an omitted or empty label falls back to its stable name in this native profile.', {
+  label: z.string().optional(), description: z.string().optional(), name: z.string(), defaultChecked: z.boolean().optional()
+});
+const switchGroup = define('SwitchGroup', 'Independent switches stored as a boolean record, using the same aggregate semantics as CheckBoxGroup. There is no rules argument. Only clear and card variants are supported natively.', {
+  name: z.string(), items: z.array(switchItem.ref), variant: z.enum(['clear', 'card', 'sunk']).optional(), value: aggregateBinding
+});
 const formControl = define('FormControl', 'A visible label, supported input and optional hint.', {
-  label: z.string(), input: z.union([input.ref, textArea.ref, select.ref, checkBoxGroup.ref]), hint: z.string().optional()
+  label: z.string(), input: z.union([input.ref, textArea.ref, select.ref, checkBoxGroup.ref, radioGroup.ref]), hint: z.string().optional()
 });
 const button = define('Button', 'An action button. Set and Reset update local state; ToAssistant and OpenUrl return intent to the host. A primary ToAssistant inside a Form validates the live values before returning formState.', {
   label: z.string(), action: action().optional(), variant: z.enum(['primary', 'secondary', 'tertiary']).optional(),
@@ -61,7 +73,8 @@ const definitions = [
     text: z.string(), size: z.enum(['small', 'default', 'large', 'small-heavy', 'large-heavy']).optional()
   }),
   define('Image', 'A native image. Use only an exact supplied HTTPS URL and meaningful alternative text.', { alt: z.string(), src: z.string().optional() }),
-  button, select, selectItem, formControl, input, textArea, checkBoxGroup, checkBoxItem, buttons, form
+  button, select, selectItem, formControl, input, textArea, checkBoxGroup, checkBoxItem, buttons, form,
+  radioItem, radioGroup, switchItem, switchGroup
 ];
 
 const gapPx = { none: '0px', xs: '8px', s: '16px', m: '24px', l: '32px', xl: '40px', '2xl': '48px' };
@@ -103,6 +116,15 @@ function inputMap(id, p, c, multiline) {
     variant: multiline ? 'textarea' : 'text', inputType: 'text', value: c.field(id, name, p.value, { kind: 'text', required }),
     ...(p.placeholder == null ? {} : { placeholder: p.placeholder }), ...(required === undefined ? {} : { required }) };
 }
+function groupChildren(id, group, label, required, c, leafKind) {
+  const children = [];
+  if (label) { const key = 's_' + id + '_label'; c.add(text(key, label + (required ? ' *' : ''), 'body')); children.push(key); }
+  for (const item of group.items) {
+    c.add({ id: item.id, component: leafKind, field: item.field, label: item.label, value: item.value }); children.push(item.id);
+    if (item.description) { const key = 's_' + item.id + '_hint'; c.add(text(key, item.description, 'caption')); children.push(key); }
+  }
+  return children;
+}
 
 // One registry owns catalog metadata AND executable projection. A new mapping
 // is added here, then its schema, prompt and support manifest are regenerated.
@@ -143,6 +165,20 @@ export const mappedRegistry = [
     return { id, component: 'OpenUiSelect', field: name, label: fieldLabel(name, p.placeholder, c),
       value, options, ...(required === undefined ? {} : { required }) };
   } },
+  { name: 'RadioItem', native: [], source: 'RadioGroup/schema.ts', dataOnly: true },
+  { name: 'RadioGroup', native: ['OpenUiRadioGroup'], source: 'RadioGroup/index.tsx', map(id, p, c) {
+    const name = fieldName(p.name), required = requiredRule(p.rules);
+    if (!Array.isArray(p.items) || p.items.length < 1 || p.items.length > 100 || p.items.some(item => item?.typeName !== 'RadioItem')) throw Error('OPENUI_MAPPED_RADIO_ITEMS');
+    if (p.defaultValue != null && typeof p.defaultValue !== 'string') throw Error('OPENUI_MAPPED_RADIO_DEFAULT');
+    const options = p.items.map(item => {
+      const option = item.props;
+      if (typeof option.description !== 'string' || option.description.length > 8192) throw Error('OPENUI_MAPPED_RADIO_DESCRIPTION');
+      return { label: option.label, value: option.value, description: option.description };
+    });
+    const value = c.field(id, name, p.value, { kind: 'select', options, required, defaultValue: p.defaultValue });
+    return { id, component: 'OpenUiRadioGroup', field: name, label: fieldLabel(name, '', c), value, options,
+      ...(required === undefined ? {} : { required }) };
+  } },
   { name: 'Input', native: ['OpenUiInput'], source: 'Input/schema.ts', map(id, p, c) { return inputMap(id, p, c, false); } },
   { name: 'TextArea', native: ['OpenUiInput'], source: 'TextArea/schema.ts', map(id, p, c) { return inputMap(id, p, c, true); } },
   { name: 'CheckBoxItem', native: [], source: 'CheckBoxGroup/schema.ts', dataOnly: true },
@@ -150,12 +186,21 @@ export const mappedRegistry = [
     const name = fieldName(p.name), required = requiredRule(p.rules), label = fieldLabel(name, '', c);
     if (!Array.isArray(p.items) || p.items.length < 1 || p.items.length > 30 || p.items.some(item => item?.typeName !== 'CheckBoxItem')) throw Error('OPENUI_MAPPED_CHECKBOX_ITEMS');
     const group = c.checkboxGroup(id, name, p.value, p.items.map(item => ({ ...item.props, name: fieldName(item.props.name) })), { required });
-    const labelId = 's_' + id + '_label'; c.add(text(labelId, label + (required ? ' *' : ''), 'body'));
-    const children = [labelId];
-    for (const item of group.items) {
-      c.add({ id: item.id, component: 'OpenUiCheckbox', field: item.field, label: item.label, value: item.value }); children.push(item.id);
-      if (item.description) { const descriptionId = 's_' + item.id + '_hint'; c.add(text(descriptionId, item.description, 'caption')); children.push(descriptionId); }
-    }
+    return { id, component: 'Column', children: groupChildren(id, group, label, required, c, 'OpenUiCheckbox') };
+  } },
+  { name: 'SwitchItem', native: [], source: 'SwitchGroup/schema.ts', dataOnly: true },
+  { name: 'SwitchGroup', native: ['Column', 'Text', 'Card', 'OpenUiToggle'], source: 'SwitchGroup/schema.ts', map(id, p, c) {
+    const name = fieldName(p.name);
+    if (p.variant != null && !['clear', 'card'].includes(p.variant)) throw Error('OPENUI_MAPPED_SWITCH_VARIANT');
+    if (!Array.isArray(p.items) || p.items.length < 1 || p.items.length > 30 || p.items.some(item => item?.typeName !== 'SwitchItem')) throw Error('OPENUI_MAPPED_SWITCH_ITEMS');
+    const items = p.items.map(item => {
+      const option = item.props, itemName = fieldName(option.name);
+      return { name: itemName, label: option.label || itemName, description: option.description ?? '',
+        ...(option.defaultChecked == null ? {} : { defaultChecked: option.defaultChecked }) };
+    });
+    const group = c.checkboxGroup(id, name, p.value, items);
+    const children = groupChildren(id, group, c.label, false, c, 'OpenUiToggle');
+    if (p.variant === 'card') { const child = 's_' + id + '_content'; c.add({ id: child, component: 'Column', children }); return { id, component: 'Card', child }; }
     return { id, component: 'Column', children };
   } },
   { name: 'Buttons', native: ['Column', 'Row'], source: 'Buttons/schema.ts', map(id, p, c) {
@@ -171,7 +216,7 @@ export const mappedRegistry = [
     return { id, component: 'OpenUiForm', name, children };
   } },
   { name: 'SelectItem', native: [], source: 'Select/schema.ts', dataOnly: true },
-  { name: 'FormControl', native: ['Column', 'Text', 'OpenUiSelect', 'OpenUiInput', 'OpenUiCheckbox'], source: 'FormControl/schema.ts', map(id, p, c) {
+  { name: 'FormControl', native: ['Column', 'Text', 'OpenUiSelect', 'OpenUiInput', 'OpenUiCheckbox', 'OpenUiRadioGroup'], source: 'FormControl/schema.ts', map(id, p, c) {
     if (typeof p.label !== 'string' || !p.label || p.label.length > 500) throw Error('OPENUI_MAPPED_FIELD_LABEL');
     const child = c.visit(p.input, 'input', p.label); const children = child ? [child] : [];
     if (p.hint) { const key = 's_' + id + '_hint'; c.add(text(key, p.hint, 'caption')); children.push(key); }
@@ -181,11 +226,14 @@ export const mappedRegistry = [
 export const mappedLibrary = createLibrary({ components: definitions, root: 'Stack' });
 export const mappedSupport = { ...mappedReference, components: mappedRegistry.map(({ name, native, source, dataOnly }) => ({
   name, native, source: 'packages/react-ui/src/genui-lib/' + source, ...(dataOnly ? { dataOnly: true } : {})
-})), capabilities: ['$state', 'conditional-expression', 'select-binding', 'input-binding', 'checkbox-record-binding', 'form-live-state', 'form-required-validation', '@Set', '@Reset', '@ToAssistant-context', '@OpenUrl'],
+})), capabilities: ['$state', 'conditional-expression', 'select-binding', 'input-binding', 'checkbox-record-binding', 'radio-binding', 'switch-record-binding', 'form-live-state', 'form-required-validation', '@Each-display-only', '@Filter', '@Sort', '@Count', '@Set', '@Reset', '@ToAssistant-context', '@OpenUrl'],
 limitations: ['Bounded official component signatures, not full react-ui or ArkUI parity.', 'No Query/Mutation, HTML, Markdown, wrapping, custom code or network execution.',
   'State declarations are unique literal defaults. Checkbox groups bind a record of declared item names to boolean values. Derived state declarations are not supported; put expressions inline.',
   'Input supports type=text only. TextArea supports the native three-row geometry only. Form validation supports required only; no blur rules or advanced validation.',
-  'Card variant sunk and advanced form rules are not in this profile.', 'Image geometry, control sizes, button variants and destructive tone follow the native host theme.'] };
+  'Each and nested computed child arrays are display/action-only: fields and forms are rejected because keyed editable lists are not implemented.',
+  'Only Each, Filter, Sort and Count computation functions are supported. Data arrays use ordinary declarations, not $state.',
+  'Computed-list bounds: 200 entries per literal array; one Each expansion level; nested UI arrays depth 8 and 1000 total flatten visits; 200 native IR nodes. Programs remain subject to AST/source/depth budgets.',
+  'Card and SwitchGroup variant sunk and advanced form rules are not in this profile.', 'Image geometry, control sizes, button variants and destructive tone follow the native host theme.'] };
 export const mappedPromptOptions = {
   preamble: 'Generate a native HarmonyOS interface using the bounded official OpenUI component mapping profile. Use the user language.',
   toolCalls: false, bindings: true, builtinFunctions: false,
@@ -199,8 +247,13 @@ export const mappedPromptOptions = {
     'For reusable forms use Form(name, Buttons([Button("继续", @ToAssistant("提交资料", {intent:"supplied intent"}))], "column"), [FormControl(label, input), ...]). The host returns live formState; do not put guessed field values into action.context and do not use @Submit.',
     'Input(name, placeholder, "text", rules, value) and TextArea(name, placeholder, 3, rules, value) reuse native controls. Only type=text and three-row TextArea are supported. Use rules={required:true} only where necessary; no other rule keys are supported.',
     'CheckBoxGroup has the exact official spelling and signature CheckBoxGroup(name, [CheckBoxItem(label, description, name, defaultChecked), ...], rules, value). Its value is a record such as {quiet:false,accessible:false}, not an array or one boolean. Declare a record $preferences for reactive group state or omit value for local Form state. A required group needs any one item checked, not all items.',
+    'RadioGroup uses RadioGroup(name, [RadioItem(label, description, value), ...], defaultValue, rules, value). The optional defaultValue is a supplied option key; a current value wins over that default. Use a declared string $state for reactive value. Preserve each supplied option description; use an empty description only when no text was supplied.',
+    'SwitchGroup uses SwitchGroup(name, [SwitchItem(label, description, name, defaultChecked), ...], variant, value). It has NO rules argument. Bind a flat boolean record exactly like CheckBoxGroup. Prefer visible labels in the user language; omitted labels fall back to item names. Only clear and card variants are supported, never sunk.',
     'Give every Form and field a unique safe identifier; forms cannot nest. Primary ToAssistant buttons validate required fields before returning live formState. Secondary or tertiary actions are available for non-validating navigation or cancellation.',
-    'For local filtering, place conditional children directly in Stack: $kind == "all" || $kind == "park" ? namedCard : null. Keep fixed child slots and named reusable declarations. Do not use Each, Filter, Query or Mutation.',
+    'For short fixed lists, conditional children remain supported: $kind == "all" || $kind == "park" ? namedCard : null. For computed lists, only @Each(array, "item", inlineTemplate), @Filter(array, "field", operator, value), @Sort(array, "field", "asc" or "desc"), and @Count(array) are supported. Filter operators are ==, !=, >, <, >=, <=, contains. Do not use Query or Mutation, or other computation functions.',
+    'Store supplied result records in ordinary declarations such as data = [{id:"supplied-id",title:"supplied title"}]. Derive ordinary filtered/sorted declarations with @Filter and @Sort. Never put arrays or component templates in $state. Use @Each(filtered, "item", Card([TextContent(item.title), Button("选择", @ToAssistant("选择", {itemId:item.id}))])) with the component template inline; do not declare the template separately.',
+    'Every @Each template and nested computed child array is display/action-only. Never put Form, FormControl, Input, TextArea, Select, RadioGroup, CheckBoxGroup or SwitchGroup inside one. Editable repeated lists have no stable business-key field identity contract. Ordinary fixed Stack children may still contain forms.',
+    'Keep result data bounded to at most 200 records per literal array and the final native tree within 200 nodes. Use only one @Each expansion level: never nest @Each, including through referenced data or templates. UI arrays may nest at most 8 levels, with at most 200 entries per group and 1000 total flatten visits. Sort direction must be lowercase "asc" or "desc".',
     'Use only supplied result facts and exact supplied HTTPS image URLs. Never invent price, availability, bookings, URLs or business outcomes.',
     'Build results from ordinary Card, Image, CardHeader, TextContent and Button components, not business-specific components. Use only as many cards as supplied facts require.',
     'Use @Reset($kind) or @Set($kind, "value") for internal state changes. These execute locally without another model request. Use @ToAssistant("message", {itemId:"supplied id"}) to pass intent and business context to the host.',

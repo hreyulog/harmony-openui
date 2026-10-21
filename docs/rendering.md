@@ -23,7 +23,7 @@ Pass a stable controller for the view's lifetime. Replace the `theme` value to a
 
 ## Components and actions
 
-The capability set is deliberately bounded: basic `Column`, `Row`, `Card`, `Text`, `Button`, `Image`, native card composites, and the retained v0.2 form/media/confirmation kinds described below. The legacy language profile retains its 23 model-facing components and 21 IR kinds; v0.3 adds basic `Image` as the 22nd native kind. The separate mapped profile now has 15 upstream-style declarations and reuses this same renderer. This is not a claim of complete ArkUI, A2UI, or input-language conformance.
+The capability set is deliberately bounded: basic `Column`, `Row`, `Card`, `Text`, `Button`, `Image`, native card composites, and the retained v0.2 form/media/confirmation kinds described below. The legacy language profile retains its 23 model-facing components and 21 IR kinds; v0.3 adds basic `Image` as the 22nd native kind. The separate mapped profile now has 19 upstream-style declarations and reuses this same renderer. This is not a claim of complete ArkUI, A2UI, or input-language conformance.
 
 The four composite types are registered with AGenUI as real `A2UIComponent` factories, using precompiled ArkUI builders. Options make the complete row tappable. Facts align labels with values. Status has neutral, positive and caution colors. Details expands locally without sending a business action.
 

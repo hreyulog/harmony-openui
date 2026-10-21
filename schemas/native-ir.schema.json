@@ -889,6 +889,10 @@
                   "type": "string",
                   "maxLength": 500,
                   "minLength": 1
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 8192
                 }
               },
               "required": [
@@ -960,6 +964,10 @@
                   "type": "string",
                   "maxLength": 500,
                   "minLength": 1
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 8192
                 }
               },
               "required": [

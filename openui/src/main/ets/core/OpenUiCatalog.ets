@@ -135,9 +135,10 @@ export class OpenUiCatalog {
         if (!Array.isArray(component.options) || component.options.length < 1 || component.options.length > 100) { throw new Error('OPENUI_OPTIONS'); }
         const values: Set<string> = new Set<string>();
         for (const option of component.options) {
-          if (!option || Object.keys(option).some((key: string): boolean => !['label', 'value'].includes(key)) ||
+          if (!option || Object.keys(option).some((key: string): boolean => !['label', 'value', 'description'].includes(key)) ||
             typeof option.label !== 'string' || !option.label || option.label.length > 500 ||
-            typeof option.value !== 'string' || !option.value.trim() || option.value.length > 500 || values.has(option.value)) { throw new Error('OPENUI_OPTIONS'); }
+            typeof option.value !== 'string' || !option.value.trim() || option.value.length > 500 || values.has(option.value) ||
+            (option.description !== undefined && (typeof option.description !== 'string' || option.description.length > 8192))) { throw new Error('OPENUI_OPTIONS'); }
           values.add(option.value);
         }
         break;

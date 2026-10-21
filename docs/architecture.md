@@ -70,6 +70,12 @@ Controller observers and host callbacks can synchronously replace a program or c
 
 The independent Planner page receives a selected fictional activity, asks the model for an editor, and passes accepted live fields to another model request for a read-only result. It performs no booking or business side effect.
 
+The demo normalizes enum and boolean outcomes into explicit Chinese label/value facts before requesting result layout. The same fact builder supplies local preview and model-result validation. This keeps business-value interpretation in the host; the model arranges supplied facts rather than translating internal mode codes or guessing from an activity description.
+
+v0.5 maps RadioGroup to the existing string-valued native Radio group and SwitchGroup to the existing boolean-record bridge with native Toggle leaves. Radio descriptions remain visible and participate in basic accessibility labels. SwitchGroup follows upstream's independent-container contract; the demo includes its current record explicitly in the action context and checks it against the official store rather than inserting it into a FormControl.
+
+Display-only result arrays use upstream Each, Filter, Sort and Count. The adapter flattens bounded computed child arrays and validates capabilities and budgets; it does not interpret these functions itself. Each templates cannot contain editable fields or forms because loop identity remains positional. This is not keyed editable-list or virtual-list support.
+
 ## Multistep demo
 
 The standalone `Forms.ets` page demonstrates `trip → preferences → result` on one surface. “Model form” requests a real model-generated initial trip form. The host then supplies a fixed preferences form containing additional native controls and a confirmation sheet. The final model request receives the two accepted sets of user values and generates a read-only summary, bounded list, and host-supplied project image. “Reset example” exercises the same host flow using local declarations.

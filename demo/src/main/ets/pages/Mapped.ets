@@ -13,7 +13,8 @@ const FILTERS: string = 'kind = FormControl("去处类型", Select("kind", [Sele
   'SelectItem("park", "公园步道"), SelectItem("museum", "展馆"), SelectItem("bookstore", "书店")], "选择类型", null, $kind))\n' +
   'duration = FormControl("可用时间", Select("duration", [SelectItem("all", "不限时长"), ' +
   'SelectItem("short", "约 1 小时"), SelectItem("long", "约 2 小时")], "选择时长", null, $duration))\n' +
-  'reset = Button("重置筛选", @Reset($kind, $duration), "tertiary")\n';
+  'order = FormControl("排序", Select("sortOrder", [SelectItem("asc", "推荐顺序"), SelectItem("desc", "反向查看")], "选择顺序", null, $sortOrder))\n' +
+  'reset = Button("重置筛选", @Reset($kind, $duration, $sortOrder), "tertiary")\n';
 
 @Entry
 @Component
@@ -65,19 +66,18 @@ struct Mapped {
     } catch (_) {}
   }
   private preset(): string {
-    const declarations: string[] = [];
-    const slots: string[] = [];
-    for (let index = 0; index < PLACES.length; index++) {
-      const place = PLACES[index]; const id = 'place' + index;
-      slots.push('($kind == "all" || $kind == "' + place.kind + '") && ($duration == "all" || $duration == "' + place.duration + '") ? ' + id + ' : null');
-      declarations.push(id + ' = Card([Image(' + JSON.stringify(place.title + '活动类型配图') + ', ' + JSON.stringify(place.image) + '), ' +
-        'CardHeader(' + JSON.stringify(place.title) + ', ' + JSON.stringify(place.detail) + '), ' +
-        'Button(' + JSON.stringify('选择' + place.title) + ', @ToAssistant(' + JSON.stringify('选择' + place.title) +
-        ', {itemId:' + JSON.stringify(place.id) + '}))])');
-    }
-    return '$kind = "all"\n$duration = "all"\nroot = Stack([heading, note, kind, duration, reset, ' + slots.join(', ') + '])\n' +
+    return '$kind = "all"\n$duration = "all"\n$sortOrder = "asc"\n' +
+      'items = ' + JSON.stringify(PLACES) + '\n' +
+      'filtered = $kind == "all" ? items : @Filter(items, "kind", "==", $kind)\n' +
+      'timed = $duration == "all" ? filtered : @Filter(filtered, "duration", "==", $duration)\n' +
+      'ordered = @Sort(timed, "rank", $sortOrder)\n' +
+      'cards = @Each(ordered, "place", Card([Image(place.title, place.image), CardHeader(place.title, place.detail), ' +
+      'Button("选择" + place.title, @ToAssistant("选择" + place.title, {itemId:place.id}))]))\n' +
+      'root = Stack([heading, note, kind, duration, order, reset, count, cards, @Count(ordered) == 0 ? empty : null])\n' +
       'heading = CardHeader("周末去哪里", "按兴趣和可用时间挑选")\n' +
-      'note = TextContent("虚构演示资料 · 图片为活动类型配图，非场馆实景", "small")\n' + FILTERS + declarations.join('\n');
+      'note = TextContent("虚构演示资料 · 图片为活动类型配图，非场馆实景", "small")\n' +
+      'count = TextContent("找到 " + @Count(ordered) + " 个去处", "small")\n' +
+      'empty = TextContent("没有匹配结果，请调整筛选")\n' + FILTERS;
   }
   private preview(): void {
     if (this.busy) { return; }
@@ -90,7 +90,7 @@ struct Mapped {
     try {
       const parsed = candidate.replace(source);
       const nodes = candidate.controller.getSurface('check')!.components;
-      if (Object.keys(parsed.state).length !== 2 ||
+      if (![2, 3].includes(Object.keys(parsed.state).length) ||
         !['kind', 'duration'].every((name: string): boolean => parsed.bindings.some((binding: OpenUiMappedBinding): boolean =>
           binding.name === name && binding.target === '$' + name && binding.value === 'all')) ||
         nodes.filter((node: OpenUiComponent): boolean => node.component === 'Card').length < PLACES.length ||
@@ -103,27 +103,42 @@ struct Mapped {
       }
       // This finite fixture belongs to the demo host. Validate generated filter
       // behavior against supplied facts before presenting a model program.
-      for (const kind of ['all', 'park', 'museum', 'bookstore']) {
-        for (const duration of ['all', 'short', 'long']) {
-          for (const name of ['kind', 'duration']) {
-            const surface = candidate.controller.getSurface('check')!;
-            const field = surface.components.find((node: OpenUiComponent): boolean => node.component === 'OpenUiSelect' && node.field === name);
-            if (!field || !candidate.controller.setFieldValue('check', field.id, name === 'kind' ? kind : duration, surface.revision)) {
-              throw new Error('UI_FILTER_OPTIONS: 必须保留完整类型与时长筛选');
+      const hasOrder = parsed.bindings.some((binding: OpenUiMappedBinding): boolean => binding.name === 'sortOrder' && binding.target === '$sortOrder' && binding.value === 'asc');
+      if (Object.keys(parsed.state).length === 3 && !hasOrder) { throw new Error('UI_SORT_STATE: 排序状态须使用 sortOrder=asc'); }
+      for (const sortOrder of (hasOrder ? ['asc', 'desc'] : ['asc'])) {
+        for (const kind of ['all', 'park', 'museum', 'bookstore']) {
+          for (const duration of ['all', 'short', 'long']) {
+            const names = hasOrder ? ['kind', 'duration', 'sortOrder'] : ['kind', 'duration'];
+            for (const name of names) {
+              const surface = candidate.controller.getSurface('check')!;
+              const field = surface.components.find((node: OpenUiComponent): boolean => node.component === 'OpenUiSelect' && node.field === name);
+              const value = name === 'kind' ? kind : name === 'duration' ? duration : sortOrder;
+              if (!field || !candidate.controller.setFieldValue('check', field.id, value, surface.revision)) {
+                throw new Error('UI_FILTER_OPTIONS: 必须保留完整类型、时长与排序选项');
+              }
             }
-          }
-          const current = candidate.controller.getSurface('check')!.components;
-          const expected = PLACES.filter((place: Place): boolean => (kind === 'all' || place.kind === kind) &&
-            (duration === 'all' || place.duration === duration)).map((place: Place): string => place.image);
-          const visible = current.filter((node: OpenUiComponent): boolean => node.component === 'Image');
-          const emptyVisible = current.some((node: OpenUiComponent): boolean => node.component === 'Text' &&
-            typeof node.text === 'string' && node.text.includes('没有匹配结果'));
-          if (visible.length !== expected.length || new Set(visible.map((node: OpenUiComponent): string => node.source!)).size !== visible.length ||
-            visible.some((node: OpenUiComponent): boolean => !expected.includes(node.source!))) {
-            throw new Error('UI_FILTER_RESULTS: ' + kind + '/' + duration + ' 必须按宿主资料同时满足两项条件');
-          }
-          if (emptyVisible !== (expected.length === 0)) {
-            throw new Error('UI_EMPTY_STATE: ' + kind + '/' + duration + ' 的空结果文案只能在零匹配时显示');
+            const current = candidate.controller.getSurface('check')!.components;
+            const expected = PLACES.filter((place: Place): boolean => (kind === 'all' || place.kind === kind) &&
+              (duration === 'all' || place.duration === duration))
+              .sort((left: Place, right: Place): number => sortOrder === 'desc' ? right.rank - left.rank : left.rank - right.rank)
+              .map((place: Place): string => place.image);
+            const visible = current.filter((node: OpenUiComponent): boolean => node.component === 'Image');
+            const emptyVisible = current.some((node: OpenUiComponent): boolean => node.component === 'Text' &&
+              typeof node.text === 'string' && node.text.includes('没有匹配结果'));
+            if (visible.length !== expected.length || new Set(visible.map((node: OpenUiComponent): string => node.source!)).size !== visible.length ||
+              visible.some((node: OpenUiComponent): boolean => !expected.includes(node.source!))) {
+              throw new Error('UI_FILTER_RESULTS: ' + kind + '/' + duration + ' 必须同时满足两项筛选');
+            }
+            if (hasOrder && visible.some((node: OpenUiComponent, index: number): boolean => node.source !== expected[index])) {
+              throw new Error('UI_SORT_RESULTS: 必须按照提供的rank字段升序或降序');
+            }
+            if (emptyVisible !== (expected.length === 0)) {
+              throw new Error('UI_EMPTY_STATE: ' + kind + '/' + duration + ' 的空结果文案只能在零匹配时显示');
+            }
+            if (hasOrder && !current.some((node: OpenUiComponent): boolean => node.component === 'Text' &&
+              node.text === '找到 ' + expected.length.toString() + ' 个去处')) {
+              throw new Error('UI_RESULT_COUNT: 必须用Count显示“找到 N 个去处”并与筛选数量一致');
+            }
           }
         }
       }
@@ -136,18 +151,25 @@ struct Mapped {
     this.status = '模型正在生成原生图文列表和筛选逻辑…'; this.candidates = []; this.persist();
     try {
       const source = await DemoModel.generateValidated(this.config, OpenUiMappedRuntime.systemPrompt(),
-        '为手机生成中文“周末去哪里”图文结果列表。以下是宿主提供的全部虚构演示资料：' + JSON.stringify(PLACES) +
-        '。必须注明虚构演示、图片为活动类型配图非场馆实景。不得补充实时价格、地址或营业信息。' +
-        '只允许声明两个字符串状态 $kind="all" 和 $duration="all"，每个仅声明一次。禁止声明$show等派生状态变量，' +
-        '禁止用表达式初始化$变量；把完整筛选布尔表达式直接写在root的每个三元条件中。' +
-        '两个Select绑定状态并分别用name kind和duration；' +
-        'kind选项all全部类型、park公园步道、museum展馆、bookstore书店；duration选项all不限时长、short约1小时、long约2小时。' +
-        '两项筛选的条件要同时满足，all不限制该条件。初始展示全部四条，每条只用普通Card/Image/CardHeader/TextContent/Button组合，' +
-        '图片src必须逐字使用对应image字段；每条按钮使用@ToAssistant("选择对应标题", {itemId:"对应id"})。' +
-        '提供Button("重置筛选", @Reset($kind, $duration), "tertiary")，无需模型再次请求即可本地重置。' +
-        '所有卡片用命名声明，在root Stack中用保留固定槽位的三元条件隐藏或显示；没有匹配项时显示“没有匹配结果，请调整筛选”。' +
-        '使用列布局，简洁适合手机。说明只用一行中文；不要额外提示，禁止在可见文案显示all/kind/duration等内部代码。只输出OpenUI Lang。',
-        (candidate: string): void => { this.validate(candidate); }, {
+        '为手机生成中文“周末去哪里”图文结果列表。宿主全部虚构资料：' + JSON.stringify(PLACES) +
+        '。必须注明虚构演示、配图非场馆实景。不补充实时价格地址或营业信息。' +
+        '只声明三个字符串状态 $kind="all"、$duration="all"、$sortOrder="asc"。items普通声明为提供的资料数组，不要写$items。' +
+        '三个Select名字kind/duration/sortOrder并分别绑定对应状态。kind选项all全部类型、park公园步道、museum展馆、bookstore书店；' +
+        'duration选项all不限时长、short约1小时、long约2小时；sortOrder选项asc推荐顺序、desc反向查看。' +
+        '必须复用官方数据函数而不是手写四张卡：filtered = $kind=="all" ? items : @Filter(items,"kind","==",$kind)，' +
+        'timed = $duration=="all" ? filtered : @Filter(filtered,"duration","==",$duration)，ordered=@Sort(timed,"rank",$sortOrder)。' +
+        'cards=@Each(ordered,"place",Card([Image(place.title,place.image),CardHeader(place.title,place.detail),' +
+        'Button("选择"+place.title,@ToAssistant("选择"+place.title,{itemId:place.id}))]))。模板必须内联，不放任何表单字段。' +
+        'root=Stack([标题,简短说明,三个筛选,重置,计数,cards,@Count(ordered)==0 ? empty:null])。' +
+        '计数用TextContent("找到 "+@Count(ordered)+" 个去处")，empty用TextContent("没有匹配结果，请调整筛选")。' +
+        '提供Button("重置筛选",@Reset($kind,$duration,$sortOrder),"tertiary")，本地更新不再次请求模型。' +
+        '图片逐字使用image字段，按钮传真实id，列布局。可见文字不要显示内部变量名，只输出OpenUI Lang。',
+        (candidate: string): void => {
+          this.validate(candidate);
+          if (!['@Each(', '@Filter(', '@Sort(', '@Count('].every((name: string): boolean => candidate.replace(/\s/g, '').includes(name))) {
+            throw new Error('UI_DATA_FUNCTIONS: 列表须使用官方Each/Filter/Sort/Count');
+          }
+        }, {
           onAttempt: (): void => { this.requests++; this.persist(); },
           onCandidate: (candidate: string): void => { this.lastModelSource = candidate; this.candidates.push(candidate); this.persist(); },
           isCurrent: (): boolean => generation === this.epoch
@@ -173,7 +195,7 @@ struct Mapped {
   build() {
     Column({ space: 0 }) {
       Row({ space: 8 }) {
-        Text('图文筛选 · v0.4').fontSize(21).fontWeight(FontWeight.Medium).layoutWeight(1)
+        Text('图文筛选 · v0.5').fontSize(21).fontWeight(FontWeight.Medium).layoutWeight(1)
         Button('返回').id('mapped-back').onClick((): void => { router.back(); })
       }.width('100%').padding(20)
       Row({ space: 8 }) {

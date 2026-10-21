@@ -11,7 +11,8 @@ function fixture(){
  const intrinsicClass='class IntrinsicFixture {widthHint:number=0;revision:number=0;kind:string="";title:string="";onMeasured:(size:SizeResult)=>void=()=>{};'+intrinsicMethods+'}';
  const controls=read('render/OpenUiControlsLayout');
  const pickerMethods=controls.slice(controls.indexOf('  aboutToAppear():'),controls.indexOf('  onMeasureSize('));
- const controlsClass='class ControlsFixture {kind:string="";stringValue:string="";numberValue:number=0;boolValue:boolean=false;controlState:string="";nativeValue:OpenUiFieldValue="";liveStringValue:string="";liveNumberValue:number=0;liveBoolValue:boolean=false;selectedDate:Date=new Date();selectedTime:Date=new Date(2000,0,1);dialogVisible:boolean=false;onModalReady:(close:()=>void)=>void=()=>{};onString:(value:string)=>void=()=>{};onNumber:(value:number)=>void=()=>{};onBoolean:(value:boolean)=>void=()=>{};'+pickerMethods+'}';
+ const accessibilityMethods=controls.slice(controls.indexOf('  private radioAccessibilityText('),controls.indexOf('  @Builder',controls.indexOf('  private radioAccessibilityText(')));
+ const controlsClass='class ControlsFixture {kind:string="";label:string="";stringValue:string="";numberValue:number=0;boolValue:boolean=false;controlState:string="";nativeValue:OpenUiFieldValue="";liveStringValue:string="";liveNumberValue:number=0;liveBoolValue:boolean=false;selectedDate:Date=new Date();selectedTime:Date=new Date(2000,0,1);dialogVisible:boolean=false;onModalReady:(close:()=>void)=>void=()=>{};onString:(value:string)=>void=()=>{};onNumber:(value:number)=>void=()=>{};onBoolean:(value:boolean)=>void=()=>{};'+pickerMethods+accessibilityMethods+'}';
  const view=read('render/OpenUiView');
  const methods=view.slice(view.indexOf('  aboutToAppear():'),view.indexOf('  build() {'));
  const fakeView='class ViewFixture { controller: OpenUiController = new OpenUiController(); surfaceId:string="s"; theme:OpenUiTheme=OpenUiThemes.create(); nativeInstance:number=0;visibleEpoch:number=0;errorLabel:string="";observerId:number=-1;epoch:number=0;contentWidth:number=0;outerWidth:number=0;eventSerial:number=0;refreshTimer:number=-1;lifetime:string="fixture";fingerprint:string="";mountedSurface:string="";manager:SurfaceManager|undefined;nativeSession:OpenUiNativeSession|undefined;details:Map<string,boolean>=new Map();getUIContext():UIContext {return {window:this.lifetime} as UIContext;}'+methods+'}';
@@ -168,6 +169,27 @@ test('native controls hydrate edited values and errors without recreating the na
  assert.equal(native.stringValue,'not-an-email');assert.match(native.fieldError,/邮箱/);assert.equal(native.updates,1);assert.ok(native.renderRevision>initialRevision);
  native.edit('valid@example.com');assert.deepEqual(JSON.parse(JSON.stringify(edits)),[{id:'email',value:'valid@example.com'}]);assert.equal(s.managers.length,1);assert.equal(native.getInstanceId(),m.getInstanceId());
  owner.dispose();native.edit('stale@example.com');assert.equal(edits.length,1,'detached native keyboard callbacks are inert');
+});
+
+test('radio captions reach the native element unchanged and caption-only patches preserve business selection and identity',()=>{
+ const s=fixture(),c=new s.Controller();const nodes=description=>[
+  {id:'root',component:'Column',children:['radio']},
+  {id:'radio',component:'OpenUiRadioGroup',field:'mode',label:'游览方式',value:'walk',options:[
+   {label:'步行游览',value:'walk',description},{label:'公共交通',value:'transit'}
+  ]}
+ ];
+ c.apply({kind:'create',surfaceId:'s'});c.apply({kind:'patch',surfaceId:'s',components:nodes('沿着公园步道行走，适合慢慢欣赏风景。')});
+ const view=new s.View();view.controller=c;mount(view);const manager=s.managers[0],id=view.nativeSession.ids.nativeId('radio'),native=s.hybridViews.get(id);
+ assert.equal(native.options[0].description,'沿着公园步道行走，适合慢慢欣赏风景。');assert.equal(native.options[1].description,undefined);
+ native.edit('transit');assert.equal(JSON.parse(c.getSurface('s').fieldValuesJson).radio,'transit');
+ c.apply({kind:'patch',surfaceId:'s',components:nodes('更新后的较长说明需要自动换行，依然保持原来的业务标识。')});
+ assert.equal(s.managers.length,1);assert.equal(s.hybridViews.get(id),native);assert.equal(native.stringValue,'transit');
+ assert.equal(native.options[0].description,'更新后的较长说明需要自动换行，依然保持原来的业务标识。');
+ const labels=new s.Controls();labels.label=native.controlLabel;
+ assert.equal(labels.radioAccessibilityText(native.options[0]),'游览方式，步行游览，更新后的较长说明需要自动换行，依然保持原来的业务标识。');
+ assert.equal(labels.radioAccessibilityText(native.options[1]),'游览方式，公共交通');
+ labels.label='更新的可见标题';assert.equal(labels.radioAccessibilityText(native.options[1]),'更新的可见标题，公共交通','accessibility uses visible labels instead of namespaced node IDs');
+ view.aboutToDisappear();
 });
 
 test('all control factories keep real instance identity and disabled or read-only controls cannot write',()=>{

@@ -1,0 +1,104 @@
+{
+  "format": "harmony-openui/planner-model-replay@2",
+  "createdAt": "2026-10-21T07:14:29.427Z",
+  "scope": "Model-free replay of already generated Nova sources with the actual Controller, ETS wrapper and official generated runtime. Not extra device evidence.",
+  "editorSourceSha256": "421c90b66594724e78cfddab2932a2be0622d0fb8483dd1a03bc5ef6973f9df3",
+  "resultSourceSha256": "5bc500441dafbdcf0f5d7b9faad37c4c2e63ea21b00890af26a28e5e9bf2c51d",
+  "fixtureSourceSha256": "4310cd2c7c12a4d013b41c87ccf3c728bbb7b88c4761d688bc14dda7d2cc47f6",
+  "inputEditorActualModel": true,
+  "inputResultActualModel": true,
+  "inputEditorModelRequests": 1,
+  "inputResultModelRequests": 2,
+  "checks": [
+    {
+      "name": "actual editor and result retain the supplied selected place",
+      "pass": true,
+      "placeId": "forest-trail"
+    },
+    {
+      "name": "blank form exposes name and radio required errors without any host action",
+      "pass": true,
+      "errorCount": 2,
+      "externalActions": 0
+    },
+    {
+      "name": "editing only the name preserves the required radio error",
+      "pass": true,
+      "errorCount": 1
+    },
+    {
+      "name": "radio selection stores exactly one business value and retains native option descriptions",
+      "pass": true,
+      "mode": "transit",
+      "errorCount": 0
+    },
+    {
+      "name": "independent SwitchGroup edits merge the record without changing form values or invoking host actions",
+      "pass": true,
+      "preferences": {
+        "remind": false,
+        "accessible": true
+      },
+      "externalActions": 0
+    },
+    {
+      "name": "Reset restores all four defaults and clears errors without an external action",
+      "pass": true,
+      "state": {
+        "$planName": "",
+        "$notes": "",
+        "$mode": "",
+        "$preferences": {
+          "remind": false,
+          "accessible": false
+        }
+      },
+      "externalActions": 0,
+      "errorCount": 0
+    },
+    {
+      "name": "live outside-form preferences and normalized current formState remain separate",
+      "pass": true,
+      "formState": {
+        "plan": {
+          "planName": "Walk",
+          "mode": "transit",
+          "notes": "BringWater"
+        }
+      },
+      "preferences": {
+        "remind": true,
+        "accessible": false
+      },
+      "stalePreferencesPayloadRejected": true,
+      "externalActions": 1
+    },
+    {
+      "name": "actual result is read-only, action-free and accurately shows the selected item and submitted values",
+      "pass": true,
+      "readOnly": true,
+      "actions": 0,
+      "imageSource": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop",
+      "submittedValuesAccurate": true
+    },
+    {
+      "name": "replay reported no runtime errors",
+      "pass": true,
+      "runtimeErrors": 0
+    }
+  ],
+  "placeId": "forest-trail",
+  "submitted": {
+    "planName": "Walk",
+    "mode": "transit",
+    "notes": "BringWater",
+    "preferences": {
+      "remind": true,
+      "accessible": false
+    }
+  },
+  "total": 9,
+  "passed": 9,
+  "pass": true,
+  "externalActions": 1
+}

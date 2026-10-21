@@ -1,0 +1,45 @@
+{
+  "dependencies": [
+    {
+      "name": "@agenui/agenui",
+      "version": "1.6.0",
+      "sha256": "e2269e998a69871be5251a610d890aea141bb14c00f78a8649a3335c3943c75a",
+      "integrityVerified": true,
+      "source": "https://ohpm.openharmony.cn/ohpm/@agenui/agenui/-/agenui-1.6.0.har"
+    }
+  ],
+  "installedDependencies": [
+    {
+      "name": "@agenui/agenui",
+      "version": "1.6.0",
+      "filesVerified": 32
+    }
+  ],
+  "distributionNotices": [
+    {
+      "name": "LICENSE",
+      "present": true,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "name": "NOTICE",
+      "present": true,
+      "sha256": "2c25ef6319c03b16633af4cb1d34b265b30bb6cf15fe58b1a49889a7478c7a57"
+    },
+    {
+      "name": "THIRD_PARTY_NOTICES",
+      "present": true,
+      "sha256": "57af01931623e411b2b1bb5655b1ad13b73138c02e0e9b69657f05114dbaab23"
+    },
+    {
+      "name": "third_party/agenui/COPYING.LGPL-2.1",
+      "present": true,
+      "sha256": "5bbcbb737e60fe9deba08ecbd00920cfcc3403ba2e534c64fdeea49d6bb87509"
+    },
+    {
+      "name": "third_party/agenui/NOTICE",
+      "present": true,
+      "sha256": "134d0c82eea9361d2c292abcddadac1aebfd9b93c427a13fbf3636c4773bbf74"
+    }
+  ]
+}

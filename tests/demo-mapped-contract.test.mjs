@@ -14,9 +14,11 @@ function validator() {
   const start = page.indexOf('  private validate(source: string): void {');
   const end = page.indexOf('  private async generate()', start);
   assert.ok(start >= 0 && end > start, 'execute the actual demo validation method');
+  const presetStart = page.indexOf('  private preset(): string {'), presetEnd = page.indexOf('  private preview(): void {', presetStart);
   const sources = ['core/OpenUiTypes', 'core/OpenUiCatalog', 'core/OpenUiController', 'lang/OpenUiMappedRuntime']
     .map(name => read('../openui/src/main/ets/' + name + '.ets'));
-  sources.push(read('../demo/src/main/ets/model/DemoPlaces.ets'), 'class DemoMapped {\n' + page.slice(start, end) + '\n}');
+  sources.push(read('../demo/src/main/ets/model/DemoPlaces.ets'), page.slice(page.indexOf('const FILTERS:'), page.indexOf('\n@Entry')),
+    'class DemoMapped {\n' + page.slice(presetStart, presetEnd) + page.slice(start, end) + '\n}');
   const code = sources.map(source => stripTypeScriptTypes(source.replace(/^import[\s\S]*?;\r?\n/gm, ''), {mode:'transform'})
     .replace(/^export /gm, '')).join('\n');
   const Page = vm.runInNewContext(code + '\nDemoMapped', {JSON, Map, Set, Date, Math, Object, Array, Number,
@@ -41,4 +43,11 @@ test('actual demo validator rejects incorrect filtering in a variant of the reco
   assert.ok(validSource.includes(before), 'mutate the real first-card filter, keeping its supplied image and business identity');
   const wrongFilter = validSource.replace(before, after);
   assert.throws(() => validator().validate(wrongFilter), /UI_FILTER_RESULTS: all\/short/);
+});
+
+test('the actual data-driven demo preset passes all filter, count and sort combinations through the real runtime', () => {
+  const page = validator();
+  assert.doesNotThrow(() => page.validate(page.preset()));
+  assert.throws(() => page.validate(page.preset().replace('@Sort(timed, "rank", $sortOrder)', '@Sort(timed, "rank", "asc")')), /UI_SORT_RESULTS/);
+  assert.throws(() => page.validate(page.preset().replace('"找到 " + @Count(ordered)', '"找到 " + 4')), /UI_RESULT_COUNT/);
 });

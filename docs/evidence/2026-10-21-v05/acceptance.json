@@ -1,0 +1,221 @@
+{
+  "format": "harmony-openui/acceptance@4",
+  "status": "accepted",
+  "createdAt": "2026-10-21T07:22:12.626555+00:00",
+  "version": "0.5.0",
+  "build": "build-r3",
+  "sourceCommitBase": "609e8ef4af1cc770327961221e303a6dd6b3ce24",
+  "compiledSourcesUnchanged": true,
+  "compiledInputCount": 62,
+  "buildCompletedAt": "2026-10-21T07:07:28.781383+00:00",
+  "artifacts": [
+    {
+      "target": "har",
+      "sha256": "29086a0c2f5400151535fb978ec495c9d36d3274def77fae10cd908d844ba6fc",
+      "bytes": 1195749,
+      "distributionNoticesComplete": true,
+      "artifact": "harmony-openui-0.5.0.har"
+    },
+    {
+      "target": "demo",
+      "sha256": "baa40dfabc296795a6c01f0db435150ef5a5ce78945f94fc22cc7fa941fa4b8c",
+      "bytes": 8084214,
+      "signed": true,
+      "distributionNoticesComplete": true,
+      "publicNativeLibrariesVerified": 4,
+      "artifact": "harmony-openui-demo-0.5.0-signed.hap"
+    }
+  ],
+  "signature": {
+    "signatureVerifierExitCode": 0,
+    "embeddedProfileExactMatch": true,
+    "signerContainsExactAgcLeaf": true,
+    "verified": true,
+    "status": "verified"
+  },
+  "host": {
+    "nodeTestsPassed": 186,
+    "pythonTestsPassed": 2,
+    "source": "root-reported final host test run"
+  },
+  "native": {
+    "device": "HUAWEI nova 15 Pro",
+    "api": 26,
+    "bundle": "com.hreyulog.harmonyopenui.demo",
+    "actualModelGeneratedOnDevice": true,
+    "model": "MiniMax-M3",
+    "actualProviderRequests": 3,
+    "validationRepairRequests": 0,
+    "selectionCallbacks": 1,
+    "formCallbacks": 1,
+    "nativeCheckpoints": 20,
+    "selectedItemId": "forest-trail",
+    "submittedValues": {
+      "planName": "Walk",
+      "notes": "BringWater",
+      "mode": "transit",
+      "preferences": {
+        "remind": true,
+        "accessible": false
+      }
+    },
+    "continuousTypingRetainedFocusAndIdentity": true,
+    "resultReadOnly": true,
+    "selectedImagesReviewed": true,
+    "process": {
+      "sameProcessThroughout": true,
+      "startPid": "24458",
+      "endPid": "24458",
+      "checkedAt": "2026-10-21T07:14:51.496593+00:00",
+      "checkedCrashMarkers": [
+        "Signal:SIGSEGV",
+        "Signal:SIGABRT",
+        "Reason:Signal",
+        "appfreeze",
+        "FatalException"
+      ],
+      "markersFound": [],
+      "scope": "Own live process log available at the end of the accepted native flow"
+    },
+    "nativeBounds": {
+      "nativeLeaves": 5,
+      "allWithinHost": true,
+      "checks": [
+        {
+          "bounds": [
+            119,
+            1068,
+            1201,
+            1236
+          ],
+          "host": [
+            119,
+            816,
+            1201,
+            2758
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1404,
+            1201,
+            1572
+          ],
+          "host": [
+            119,
+            816,
+            1201,
+            2758
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            1740,
+            1201,
+            2002
+          ],
+          "host": [
+            119,
+            816,
+            1201,
+            2758
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            2044,
+            1201,
+            2474
+          ],
+          "host": [
+            119,
+            816,
+            1201,
+            2758
+          ],
+          "withinHost": true
+        },
+        {
+          "bounds": [
+            119,
+            2515,
+            1201,
+            2758
+          ],
+          "host": [
+            119,
+            816,
+            1201,
+            2758
+          ],
+          "withinHost": true
+        }
+      ]
+    }
+  },
+  "replay": {
+    "modelFree": true,
+    "filterSortCombinationsPassed": 24,
+    "emptyStatesCorrect": 24,
+    "countsCorrect": 24,
+    "visibleActionsChecked": 32,
+    "resetsPassed": 24,
+    "formAndResultCasesPassed": 9
+  },
+  "screenshots": [
+    {
+      "path": "docs/images/nova-v05-20261021/reverse-results.jpeg",
+      "sha256": "063df412ca3bc6c07401a4c2aefc4c115de6461ac339329ca87246d067656cab",
+      "bytes": 275007,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v05-20261021/empty-result.jpeg",
+      "sha256": "db8dfa2d29914255cf43e4b0f07428c33c4c98366ede3eb5570d2477d6485e43",
+      "bytes": 195549,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v05-20261021/choice-form.jpeg",
+      "sha256": "77a7dfe5aac092333b6e2e0839188b7702b7d372cd4b2ab7c8592c93e1202f8f",
+      "bytes": 181641,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v05-20261021/form-required.jpeg",
+      "sha256": "50a09d31be2489dfffd6ae8ac5aedbcfa547a19c15768175bd17f1271c7c9762",
+      "bytes": 174091,
+      "originalDeviceCapture": true
+    },
+    {
+      "path": "docs/images/nova-v05-20261021/model-result.jpeg",
+      "sha256": "d70c89f0f0931671cd3852ba4b43657ae3c82f2f92ba415f68a3ed9b16551889",
+      "bytes": 235443,
+      "originalDeviceCapture": true
+    }
+  ],
+  "boundaries": [
+    "Independent repository and demo; no Sofia integration.",
+    "Fictional host-supplied activities and illustrative images; no live search, booking or payment.",
+    "Native evidence covers the recorded subset on one Nova/API 26; the full 24-combination matrix is additional host replay.",
+    "An earlier r2 model result misstated transit as walking and was rejected; source candidates and a regression fixture are retained.",
+    "The mapped catalog has 19 declarations, not full OpenUI/ArkUI parity; editable repeated fields, Query/Mutation and provider SSE are unsupported.",
+    "Private state, signing credentials and binary packages remain outside the public checkout."
+  ],
+  "modelSourceHashes": {
+    "model-list.openui": "deb511af25c7f12ddc075e62c65ac0cd1cc45551fdd2c005fd7ca626352f7cec",
+    "model-form.openui": "421c90b66594724e78cfddab2932a2be0622d0fb8483dd1a03bc5ef6973f9df3",
+    "model-result.openui": "5bc500441dafbdcf0f5d7b9faad37c4c2e63ea21b00890af26a28e5e9bf2c51d"
+  },
+  "earlierRejectedRun": {
+    "providerRequests": 4,
+    "validationRepairs": 1,
+    "resultWasNotPresentedAsSuccess": true
+  }
+}

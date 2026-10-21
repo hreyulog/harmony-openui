@@ -1,0 +1,12 @@
+$planName = ""
+$notes = ""
+$mode = ""
+$preferences = {remind:false,accessible:false}
+root = Stack([header, switches, plan])
+header = CardHeader("林间步道", "户外 · 约 2 小时 · 适合步行探索")
+switches = SwitchGroup("preferences", [SwitchItem("出发提醒", "只记录偏好，不创建提醒", "remind"), SwitchItem("无障碍路线", "优先考虑通行便利", "accessible")], "clear", $preferences)
+nameField = FormControl("计划名称", Input("planName", "给计划起个名字", "text", {required:true}, $planName))
+modeField = FormControl("出行方式", RadioGroup("mode", [RadioItem("步行", "适合附近慢慢逛", "walk"), RadioItem("公共交通", "结合地铁或公交出行", "transit")], null, {required:true}, $mode))
+notesField = FormControl("备注", TextArea("notes", "可选备注", 3, null, $notes))
+buttons = Buttons([Button("保存计划", @ToAssistant("提交计划", {intent:"save-plan", itemId:"forest-trail", preferences:$preferences})), Button("重置资料", @Reset($planName, $notes, $mode, $preferences), "tertiary")], "column")
+plan = Form("plan", buttons, [nameField, modeField, notesField])

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 — 2026-10-21
+
+- Add upstream-signature RadioItem, RadioGroup, SwitchItem and SwitchGroup mappings: 19 model-facing declarations, reusing the same 22 native IR kinds.
+- Reuse the official Each, Filter, Sort and Count functions for bounded display/action lists. Support computed child arrays while rejecting editable loop subtrees and retaining source, depth and node budgets.
+- Retain radio option descriptions in IR, public schema, native layout and basic accessibility labels. Input, select, checkbox and toggle controls expose their visible labels to accessibility.
+- Reuse the existing activity demo for local filtering, counting and sorting, followed by radio and independent switch preferences and a model-generated read-only result.
+- Normalize submitted enum/boolean outcomes into host-owned display facts before asking the model for result layout; retain a real wrong-mode model output as a regression fixture.
+- Document the remaining gaps against the pinned/current upstream and ArkUI, including date/range and slider value contracts, Modal, virtual lists, system themes and mapped-session restoration. Sofia remains separate.
+
 ## 0.4.0 — 2026-10-20
 
 Extend the opt-in native mapping profile to reusable text input, checkbox groups and forms, while retaining the established language profile and native controls.

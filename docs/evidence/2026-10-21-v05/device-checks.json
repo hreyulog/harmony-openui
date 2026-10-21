@@ -1,0 +1,737 @@
+{
+  "format": "harmony-openui/native-mapped-choice-checks@1",
+  "device": "HUAWEI nova 15 Pro",
+  "api": 26,
+  "list": [
+    {
+      "tag": "mapped-r3-model",
+      "state": {
+        "$kind": "all",
+        "$duration": "all",
+        "$sortOrder": "asc"
+      },
+      "visibleItems": [
+        {
+          "itemId": "lake-walk",
+          "image": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "city-museum",
+          "image": "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "corner-books",
+          "image": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "forest-trail",
+          "image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"
+        }
+      ],
+      "emptyStateVisible": false,
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "861:437",
+          "text": "全部类型",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_7",
+          "hashcode": "861:463",
+          "text": "不限时长",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_9",
+          "hashcode": "861:486",
+          "text": "推荐顺序",
+          "focused": "false",
+          "checked": "false"
+        }
+      ],
+      "nativeSelectEvidence": "three-visible-native-identities-verified",
+      "logicalSelects": [
+        [
+          "duration",
+          "n_root_3_input"
+        ],
+        [
+          "kind",
+          "n_root_2_input"
+        ],
+        [
+          "sortOrder",
+          "n_root_4_input"
+        ]
+      ],
+      "revision": 5,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "mapped-r3-reverse",
+      "state": {
+        "$kind": "all",
+        "$duration": "all",
+        "$sortOrder": "desc"
+      },
+      "visibleItems": [
+        {
+          "itemId": "forest-trail",
+          "image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "corner-books",
+          "image": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "city-museum",
+          "image": "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "lake-walk",
+          "image": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop"
+        }
+      ],
+      "emptyStateVisible": false,
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "861:437",
+          "text": "全部类型",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_7",
+          "hashcode": "861:463",
+          "text": "不限时长",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_9",
+          "hashcode": "861:486",
+          "text": "反向查看",
+          "focused": "false",
+          "checked": "false"
+        }
+      ],
+      "nativeSelectEvidence": "three-visible-native-identities-verified",
+      "logicalSelects": [
+        [
+          "duration",
+          "n_root_3_input"
+        ],
+        [
+          "kind",
+          "n_root_2_input"
+        ],
+        [
+          "sortOrder",
+          "n_root_4_input"
+        ]
+      ],
+      "revision": 6,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "mapped-r3-reverse-image",
+      "state": {
+        "$kind": "all",
+        "$duration": "all",
+        "$sortOrder": "desc"
+      },
+      "visibleItems": [
+        {
+          "itemId": "forest-trail",
+          "image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "corner-books",
+          "image": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "city-museum",
+          "image": "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "lake-walk",
+          "image": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop"
+        }
+      ],
+      "emptyStateVisible": false,
+      "modelRequests": 1,
+      "nativeSelects": [],
+      "nativeSelectEvidence": "not-visible-in-capture",
+      "logicalSelects": [
+        [
+          "duration",
+          "n_root_3_input"
+        ],
+        [
+          "kind",
+          "n_root_2_input"
+        ],
+        [
+          "sortOrder",
+          "n_root_4_input"
+        ]
+      ],
+      "revision": 6,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "mapped-r3-reverse-selection",
+      "state": {
+        "$kind": "all",
+        "$duration": "all",
+        "$sortOrder": "desc"
+      },
+      "visibleItems": [
+        {
+          "itemId": "forest-trail",
+          "image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "corner-books",
+          "image": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "city-museum",
+          "image": "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "lake-walk",
+          "image": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop"
+        }
+      ],
+      "emptyStateVisible": false,
+      "modelRequests": 1,
+      "nativeSelects": [],
+      "nativeSelectEvidence": "not-visible-in-capture",
+      "logicalSelects": [
+        [
+          "duration",
+          "n_root_3_input"
+        ],
+        [
+          "kind",
+          "n_root_2_input"
+        ],
+        [
+          "sortOrder",
+          "n_root_4_input"
+        ]
+      ],
+      "revision": 7,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "mapped-r3-empty",
+      "state": {
+        "$kind": "museum",
+        "$duration": "short",
+        "$sortOrder": "desc"
+      },
+      "visibleItems": [],
+      "emptyStateVisible": true,
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "861:437",
+          "text": "展馆",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_7",
+          "hashcode": "861:463",
+          "text": "约 1 小时",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_9",
+          "hashcode": "861:486",
+          "text": "反向查看",
+          "focused": "false",
+          "checked": "false"
+        }
+      ],
+      "nativeSelectEvidence": "three-visible-native-identities-verified",
+      "logicalSelects": [
+        [
+          "duration",
+          "n_root_3_input"
+        ],
+        [
+          "kind",
+          "n_root_2_input"
+        ],
+        [
+          "sortOrder",
+          "n_root_4_input"
+        ]
+      ],
+      "revision": 9,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "mapped-r3-reset",
+      "state": {
+        "$kind": "all",
+        "$duration": "all",
+        "$sortOrder": "asc"
+      },
+      "visibleItems": [
+        {
+          "itemId": "lake-walk",
+          "image": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "city-museum",
+          "image": "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "corner-books",
+          "image": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75&fit=crop"
+        },
+        {
+          "itemId": "forest-trail",
+          "image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"
+        }
+      ],
+      "emptyStateVisible": false,
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "861:437",
+          "text": "全部类型",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_7",
+          "hashcode": "861:463",
+          "text": "不限时长",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_9",
+          "hashcode": "861:486",
+          "text": "推荐顺序",
+          "focused": "false",
+          "checked": "false"
+        }
+      ],
+      "nativeSelectEvidence": "three-visible-native-identities-verified",
+      "logicalSelects": [
+        [
+          "duration",
+          "n_root_3_input"
+        ],
+        [
+          "kind",
+          "n_root_2_input"
+        ],
+        [
+          "sortOrder",
+          "n_root_4_input"
+        ]
+      ],
+      "revision": 10,
+      "renderStatus": "rendered"
+    },
+    {
+      "tag": "mapped-r3-forest",
+      "state": {
+        "$kind": "park",
+        "$duration": "long",
+        "$sortOrder": "asc"
+      },
+      "visibleItems": [
+        {
+          "itemId": "forest-trail",
+          "image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=75&fit=crop"
+        }
+      ],
+      "emptyStateVisible": false,
+      "modelRequests": 1,
+      "nativeSelects": [
+        {
+          "id": "openui_m5_5",
+          "hashcode": "861:437",
+          "text": "公园步道",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_7",
+          "hashcode": "861:463",
+          "text": "约 2 小时",
+          "focused": "false",
+          "checked": "false"
+        },
+        {
+          "id": "openui_m5_9",
+          "hashcode": "861:486",
+          "text": "推荐顺序",
+          "focused": "false",
+          "checked": "false"
+        }
+      ],
+      "nativeSelectEvidence": "three-visible-native-identities-verified",
+      "logicalSelects": [
+        [
+          "duration",
+          "n_root_3_input"
+        ],
+        [
+          "kind",
+          "n_root_2_input"
+        ],
+        [
+          "sortOrder",
+          "n_root_4_input"
+        ]
+      ],
+      "revision": 12,
+      "renderStatus": "rendered"
+    }
+  ],
+  "listSelectIdentityEvidence": {
+    "visibleCheckpoints": 5,
+    "notVisibleCaptures": [
+      "mapped-r3-reverse-image",
+      "mapped-r3-reverse-selection"
+    ],
+    "verifiedWhereVisible": true,
+    "logicalComponentIdsRetainedThroughAllCaptures": true
+  },
+  "plan": [
+    {
+      "tag": "planner-r3-model",
+      "stage": 1,
+      "state": {
+        "$planName": "",
+        "$notes": "",
+        "$mode": "",
+        "$preferences": {
+          "remind": false,
+          "accessible": false
+        }
+      },
+      "fieldErrorCount": 0,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false
+    },
+    {
+      "tag": "planner-r3-required",
+      "stage": 1,
+      "state": {
+        "$planName": "",
+        "$notes": "",
+        "$mode": "",
+        "$preferences": {
+          "remind": false,
+          "accessible": false
+        }
+      },
+      "fieldErrorCount": 2,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false
+    },
+    {
+      "tag": "planner-r3-both",
+      "stage": 1,
+      "state": {
+        "$planName": "Walk",
+        "$notes": "",
+        "$mode": "",
+        "$preferences": {
+          "remind": true,
+          "accessible": true
+        }
+      },
+      "fieldErrorCount": 1,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false
+    },
+    {
+      "tag": "planner-r3-accessible-only",
+      "stage": 1,
+      "state": {
+        "$planName": "Walk",
+        "$notes": "",
+        "$mode": "",
+        "$preferences": {
+          "remind": false,
+          "accessible": true
+        }
+      },
+      "fieldErrorCount": 1,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false
+    },
+    {
+      "tag": "planner-r3-radio-walk",
+      "stage": 1,
+      "state": {
+        "$planName": "Walk",
+        "$notes": "",
+        "$mode": "walk",
+        "$preferences": {
+          "remind": false,
+          "accessible": true
+        }
+      },
+      "fieldErrorCount": 0,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false
+    },
+    {
+      "tag": "planner-r3-radio-transit",
+      "stage": 1,
+      "state": {
+        "$planName": "Walk",
+        "$notes": "BringWater",
+        "$mode": "transit",
+        "$preferences": {
+          "remind": false,
+          "accessible": true
+        }
+      },
+      "fieldErrorCount": 0,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false
+    },
+    {
+      "tag": "planner-r3-reset",
+      "stage": 1,
+      "state": {
+        "$planName": "",
+        "$notes": "",
+        "$mode": "",
+        "$preferences": {
+          "remind": false,
+          "accessible": false
+        }
+      },
+      "fieldErrorCount": 0,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false
+    },
+    {
+      "tag": "planner-r3-choices-filled",
+      "stage": 1,
+      "state": {
+        "$planName": "Walk",
+        "$notes": "",
+        "$mode": "transit",
+        "$preferences": {
+          "remind": true,
+          "accessible": false
+        }
+      },
+      "fieldErrorCount": 0,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false
+    },
+    {
+      "tag": "planner-r3-filled",
+      "stage": 1,
+      "state": {
+        "$planName": "Walk",
+        "$notes": "BringWater",
+        "$mode": "transit",
+        "$preferences": {
+          "remind": true,
+          "accessible": false
+        }
+      },
+      "fieldErrorCount": 0,
+      "externalActionCount": 0,
+      "modelRequests": 1,
+      "readOnly": false
+    },
+    {
+      "tag": "planner-r3-result",
+      "stage": 2,
+      "state": {},
+      "fieldErrorCount": 0,
+      "externalActionCount": 1,
+      "modelRequests": 2,
+      "readOnly": true
+    }
+  ],
+  "typing": [
+    {
+      "tag": "planner-r3-keyboard-w",
+      "planName": "W",
+      "nativeInput": {
+        "id": "openui_m9_9",
+        "hashcode": "861:821",
+        "text": "W",
+        "focused": "true",
+        "checked": "false"
+      },
+      "remainingErrors": 1
+    },
+    {
+      "tag": "planner-r3-keyboard-wa",
+      "planName": "Wa",
+      "nativeInput": {
+        "id": "openui_m9_9",
+        "hashcode": "861:821",
+        "text": "Wa",
+        "focused": "true",
+        "checked": "false"
+      },
+      "remainingErrors": 1
+    },
+    {
+      "tag": "planner-r3-keyboard-walk",
+      "planName": "Walk",
+      "nativeInput": {
+        "id": "openui_m9_9",
+        "hashcode": "861:821",
+        "text": "Walk",
+        "focused": "true",
+        "checked": "false"
+      },
+      "remainingErrors": 1
+    }
+  ],
+  "submittedContext": {
+    "message": "提交计划",
+    "context": {
+      "intent": "save-plan",
+      "itemId": "forest-trail",
+      "preferences": {
+        "remind": true,
+        "accessible": false
+      }
+    },
+    "formName": "plan",
+    "formState": {
+      "plan": {
+        "planName": "Walk",
+        "mode": "transit",
+        "notes": "BringWater"
+      }
+    }
+  },
+  "selectedItemId": "forest-trail",
+  "process": {
+    "sameProcessThroughout": true,
+    "startPid": "24458",
+    "endPid": "24458",
+    "checkedAt": "2026-10-21T07:14:51.496593+00:00",
+    "checkedCrashMarkers": [
+      "Signal:SIGSEGV",
+      "Signal:SIGABRT",
+      "Reason:Signal",
+      "appfreeze",
+      "FatalException"
+    ],
+    "markersFound": [],
+    "scope": "Own live process log available at the end of the accepted native flow"
+  },
+  "nativeBounds": {
+    "nativeLeaves": 5,
+    "allWithinHost": true,
+    "checks": [
+      {
+        "bounds": [
+          119,
+          1068,
+          1201,
+          1236
+        ],
+        "host": [
+          119,
+          816,
+          1201,
+          2758
+        ],
+        "withinHost": true
+      },
+      {
+        "bounds": [
+          119,
+          1404,
+          1201,
+          1572
+        ],
+        "host": [
+          119,
+          816,
+          1201,
+          2758
+        ],
+        "withinHost": true
+      },
+      {
+        "bounds": [
+          119,
+          1740,
+          1201,
+          2002
+        ],
+        "host": [
+          119,
+          816,
+          1201,
+          2758
+        ],
+        "withinHost": true
+      },
+      {
+        "bounds": [
+          119,
+          2044,
+          1201,
+          2474
+        ],
+        "host": [
+          119,
+          816,
+          1201,
+          2758
+        ],
+        "withinHost": true
+      },
+      {
+        "bounds": [
+          119,
+          2515,
+          1201,
+          2758
+        ],
+        "host": [
+          119,
+          816,
+          1201,
+          2758
+        ],
+        "withinHost": true
+      }
+    ]
+  }
+}

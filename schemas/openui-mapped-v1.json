@@ -46,6 +46,18 @@
     },
     "Form": {
       "$ref": "#/$defs/Form"
+    },
+    "RadioItem": {
+      "$ref": "#/$defs/RadioItem"
+    },
+    "RadioGroup": {
+      "$ref": "#/$defs/RadioGroup"
+    },
+    "SwitchItem": {
+      "$ref": "#/$defs/SwitchItem"
+    },
+    "SwitchGroup": {
+      "$ref": "#/$defs/SwitchGroup"
     }
   },
   "required": [
@@ -63,7 +75,11 @@
     "CheckBoxGroup",
     "CheckBoxItem",
     "Buttons",
-    "Form"
+    "Form",
+    "RadioItem",
+    "RadioGroup",
+    "SwitchItem",
+    "SwitchGroup"
   ],
   "additionalProperties": false,
   "$defs": {
@@ -415,6 +431,9 @@
             },
             {
               "$ref": "#/$defs/CheckBoxGroup"
+            },
+            {
+              "$ref": "#/$defs/RadioGroup"
             }
           ]
         },
@@ -555,6 +574,62 @@
       "additionalProperties": false,
       "description": "One named boolean choice. description is required by the upstream signature; use an empty string when unnecessary."
     },
+    "RadioGroup": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RadioItem"
+          }
+        },
+        "defaultValue": {
+          "type": "string"
+        },
+        "rules": {
+          "type": "object",
+          "properties": {
+            "required": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "items"
+      ],
+      "additionalProperties": false,
+      "description": "A native radio group with optional defaultValue and reactive value binding. A supplied current value wins over the default. Use FormControl for a visible group label."
+    },
+    "RadioItem": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "description",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "One radio choice. description is required by the upstream signature; use an empty string if unnecessary. value is the stable business key."
+    },
     "Buttons": {
       "type": "object",
       "properties": {
@@ -602,6 +677,65 @@
       ],
       "additionalProperties": false,
       "description": "A named form with explicit buttons and labelled fields. Form(name, Buttons([...]), fields). Do not nest forms or invent a Submit action; use @ToAssistant and the host receives the validated live formState."
+    },
+    "SwitchItem": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "defaultChecked": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "One named switch. Supply a human-readable label when possible; an omitted or empty label falls back to its stable name in this native profile."
+    },
+    "SwitchGroup": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SwitchItem"
+          }
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "clear",
+            "card",
+            "sunk"
+          ]
+        },
+        "value": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "items"
+      ],
+      "additionalProperties": false,
+      "description": "Independent switches stored as a boolean record, using the same aggregate semantics as CheckBoxGroup. There is no rules argument. Only clear and card variants are supported natively."
     }
   }
 }

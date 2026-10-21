@@ -106,6 +106,9 @@ export struct OpenUiControlsLayout {
   }
   private selectedIndex(): number { return this.options.findIndex((option: OpenUiSelectOption): boolean => option.value === this.liveStringValue); }
   private selectedLabel(): string { return this.options.find((option: OpenUiSelectOption): boolean => option.value === this.liveStringValue)?.label ?? this.placeholder; }
+  private radioAccessibilityText(option: OpenUiSelectOption): string {
+    return this.label + '，' + option.label + (option.description ? '，' + option.description : '');
+  }
   @Builder
   private heading() {
     if (this.label) {
@@ -132,23 +135,28 @@ export struct OpenUiControlsLayout {
         if (this.variant === 'textarea') {
           TextArea({ text: this.liveStringValue, placeholder: this.placeholder }).id(this.nodeId).width('100%').height(108)
             .fontSize(this.theme.dimensions.body).fontColor(this.theme.palette.text).backgroundColor(this.theme.palette.group)
+            .accessibilityText(this.label)
             .enabled(!this.disabled).onChange((value: string): void => { this.changedString(value); })
         } else if (this.variant === 'search') {
           Search({ value: this.liveStringValue, placeholder: this.placeholder }).id(this.nodeId).width('100%').height(48)
             .fontColor(this.theme.palette.text).backgroundColor(this.theme.palette.group).enabled(!this.disabled)
+            .accessibilityText(this.label)
             .onChange((value: string): void => { this.changedString(value); })
         } else {
           TextInput({ text: this.liveStringValue, placeholder: this.placeholder }).id(this.nodeId).width('100%').height(48)
             .type(this.inputType()).fontSize(this.theme.dimensions.body).fontColor(this.theme.palette.text)
+            .accessibilityText(this.label)
             .backgroundColor(this.theme.palette.group).enabled(!this.disabled).onChange((value: string): void => { this.changedString(value); })
         }
       } else if (this.kind === 'OpenUiCheckbox' || this.kind === 'OpenUiToggle') {
         Row({ space: 12 }) {
           if (this.kind === 'OpenUiCheckbox') {
             Checkbox({ name: this.nodeId }).id(this.nodeId).select(this.liveBoolValue).enabled(!this.disabled)
+              .accessibilityText(this.label)
               .selectedColor(this.theme.palette.accent).onChange((value: boolean): void => { this.changedBoolean(value); })
           } else {
             Toggle({ type: ToggleType.Switch, isOn: this.liveBoolValue }).id(this.nodeId).enabled(!this.disabled)
+              .accessibilityText(this.label)
               .selectedColor(this.theme.palette.accent).onChange((value: boolean): void => { this.changedBoolean(value); })
           }
           Text(this.label + (this.required ? ' *' : '')).layoutWeight(1).fontSize(this.theme.dimensions.body)
@@ -159,6 +167,7 @@ export struct OpenUiControlsLayout {
         Select(this.options.map((option: OpenUiSelectOption): SelectOption => ({ value: option.label })))
           .id(this.nodeId).width('100%').height(48).selected(this.selectedIndex()).value(this.selectedLabel())
           .fontColor(this.theme.palette.text).backgroundColor(this.theme.palette.group).enabled(!this.disabled)
+          .accessibilityText(this.label)
           .onSelect((index: number): void => { if (index >= 0 && index < this.options.length) { this.changedString(this.options[index].value); } })
       } else if (this.kind === 'OpenUiRadioGroup') {
         this.heading()
@@ -166,9 +175,18 @@ export struct OpenUiControlsLayout {
           Row({ space: 12 }) {
             Radio({ value: option.value, group: this.nodeId }).id(this.nodeId + '-' + option.value)
               .checked(this.liveStringValue === option.value).enabled(!this.disabled)
+              .accessibilityText(this.radioAccessibilityText(option))
               .onChange((checked: boolean): void => { if (checked) { this.changedString(option.value); } })
-            Text(option.label).layoutWeight(1).fontSize(this.theme.dimensions.body).fontColor(this.theme.palette.text)
-          }.width('100%').constraintSize({ minHeight: 44 })
+            Column({ space: 4 }) {
+              Text(option.label).width('100%').fontSize(this.theme.dimensions.body).fontColor(this.theme.palette.text)
+                .wordBreak(WordBreak.BREAK_WORD)
+              if (option.description) {
+                Text(option.description).width('100%').fontSize(this.theme.dimensions.supporting)
+                  .lineHeight(this.theme.dimensions.supportingLine).fontColor(this.theme.palette.secondary)
+                  .wordBreak(WordBreak.BREAK_WORD)
+              }
+            }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+          }.width('100%').alignItems(VerticalAlign.Top).constraintSize({ minHeight: 44 })
         }, (option: OpenUiSelectOption): string => option.value)
       } else if (this.kind === 'OpenUiSlider') {
         this.heading()

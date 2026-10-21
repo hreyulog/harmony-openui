@@ -5,7 +5,7 @@ export interface OpenUiFact { label: OpenUiText; value: OpenUiText; }
 export interface OpenUiActionDefinition { event: OpenUiNamedAction; }
 export interface OpenUiNamedAction { name: string; context: Record<string, Object>; }
 export type OpenUiFieldValue = string | number | boolean;
-export interface OpenUiSelectOption { label: string; value: string; }
+export interface OpenUiSelectOption { label: string; value: string; description?: string; }
 export interface OpenUiListItem { title: string; description?: string; meta?: string; }
 export interface OpenUiComponent {
   id: string;

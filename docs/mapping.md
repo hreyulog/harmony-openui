@@ -8,6 +8,10 @@ v0.4 在同一 profile 上增补文本输入、多选记录和具名表单。原
 
 v0.4 extends the same profile with text inputs, checkbox records and named forms. The original nine mappings and action payloads outside a Form remain compatible.
 
+v0.5 增加 RadioGroup、SwitchGroup 及其数据项，并正式开放四个有界的官方结果列表计算函数。现有签名和原生 IR 不变。
+
+v0.5 adds radio/switch mappings and bounded official result-list computation. Existing signatures and the native IR remain compatible.
+
 ## 数据如何到达界面 / Data flow
 
 ```text
@@ -31,7 +35,7 @@ The parser, state store, expression evaluation and field bindings above are upst
 
 The reference UI signatures are pinned to that commit. This profile does not claim complete upstream component support or pixel parity.
 
-## 当前十五类映射 / Fifteen supported mappings
+## 当前十九类映射 / Nineteen supported mappings
 
 | OpenUI 组件 / Component | 原生投影 / Native projection | 范围 / Scope |
 | --- | --- | --- |
@@ -50,14 +54,18 @@ The reference UI signatures are pinned to that commit. This profile does not cla
 | `CheckBoxGroup` | `Column` + 既有 `OpenUiCheckbox` + `Text` | 多选记录、组级 required / Boolean record and group-level required validation |
 | `Buttons` | AGenUI `Row` / `Column` | 显式动作按钮组合 / Explicit action-button composition |
 | `Form` | 既有 `OpenUiForm` | 具名字段范围、提交时实时取值 / Named field scope and live action-time values |
+| `RadioItem` | 选项数据 / Option data | 标签、说明、稳定 value / Label, description and stable value |
+| `RadioGroup` | 既有 `OpenUiRadioGroup` → ArkUI `Radio` | 字符串绑定、默认值、required；保留说明 / String binding, defaults, required and descriptions |
+| `SwitchItem` | 选项数据 / Option data | 具名开关及默认值 / Named toggle and boolean default |
+| `SwitchGroup` | `Column` / `Card` + 既有 `OpenUiToggle` | 独立布尔记录；`clear`、`card` / Independent boolean record; clear/card variants |
 
-这是模型组件目录的十五类映射，不是十五种全新控件。图片、文字、按钮组成的结果卡片不需要专门的业务卡组件。字体、颜色、尺寸、按钮视觉变体和破坏性操作色彩最终由原生主题决定。
+这是模型组件目录的十九类映射，不是十九种全新控件；仍复用 22 类原生 IR。图片、文字、按钮组成的结果卡片不需要专门的业务卡组件。字体、颜色、尺寸、按钮视觉变体和破坏性操作色彩最终由原生主题决定。
 
-These are fifteen model-facing mappings, not fifteen newly implemented native widgets. Result cards compose ordinary primitives. The native theme owns final typography, colors, geometry, button styling and destructive tones.
+These are nineteen model-facing mappings reusing the 22-kind native IR, not nineteen new widgets. Result cards compose ordinary primitives. The native theme owns final typography, colors, geometry, button styling and destructive tones.
 
 ## 两个 profile 的签名不同 / Separate language profiles
 
-| | v0.2 原目录 / Existing catalog | v0.3 映射目录 / Mapped profile |
+| | v0.2 原目录 / Existing catalog | 当前映射目录 / Mapped profile |
 | --- | --- | --- |
 | 入口 / API | `OpenUiLanguageStream` | `OpenUiMappedRuntime` |
 | 文本 / Text | `Text(content, variant?)` | `TextContent(text, size?)` |
@@ -88,7 +96,7 @@ FormControl(label, input, hint?)
 ```
 
 - `Input.type` 仅支持 `"text"`；不将密码输入退化为明文。`TextArea.rows` 可省略或为 `3`，对应已有原生布局，并不承诺 Web 文本框的像素行高。Only text input is supported; password is not silently rendered as plain text. TextArea accepts omitted rows or `3`, using the established native geometry.
-- `rules` 仅支持 `{required:true|false}`。`FormControl.input` 可为 `Input`、`TextArea`、`Select` 或 `CheckBoxGroup`。Only required validation is supported. The four listed field types compose inside FormControl.
+- `rules` 仅支持 `{required:true|false}`。`FormControl.input` 可为 `Input`、`TextArea`、`Select`、`CheckBoxGroup` 或 `RadioGroup`，不含 `SwitchGroup`。Only required validation is supported. SwitchGroup remains outside the upstream FormControl union.
 - `CheckBoxGroup` 的拼写包含大写 `B`。`CheckBoxItem` 的 `description` 是官方必填参数，不需要说明时传 `""`。`Buttons.direction` 默认 `"row"`，手机上的长标题可显式选 `"column"`。Use the exact component names and positional arguments; descriptions may be empty. Buttons default to a row.
 
 签名依据：[Input](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/Input/schema.ts)、[TextArea](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/TextArea/schema.ts)、[CheckBoxGroup](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/CheckBoxGroup/schema.ts)、[Form](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/Form/schema.ts)、[Buttons](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/Buttons/schema.ts)。
@@ -136,6 +144,64 @@ The adapter reads live values at action time. Model-supplied context is not a su
 这个一致格式是本原生适配器的公开契约。官方 React hook 的本地字段可能存为 `{value, componentType}`，具名 Form 存在时取其对象；直接绑定 `$state` 的字段走独立路径，也可能使返回值成为整个 store 的快照。本库不把这些 React 内部包装照搬给宿主，而是为同一 Form 的绑定及非绑定字段返回统一的原始值，并保持模型提供的第二 context 参数独立。表单外的 v0.3 动作格式不变。参考官方 [state-field](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/lang-core/src/runtime/state-field.ts)、[action/form payload hook](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-lang/src/hooks/useOpenUIState.ts)、[Button 校验](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/Button/index.tsx)。
 
 This normalized shape is the native adapter contract. Upstream React may wrap local fields as `{value, componentType}` and returns either named form data or a store snapshot; reactive bindings follow another storage path. The adapter presents consistent raw logical values for bound and unbound fields in the same Form, while preserving the model's optional second context argument separately. The v0.3 action shape outside a Form is unchanged. It does not claim byte-for-byte compatibility with React's internal event representation.
+
+## 单选与独立开关 / Radios and independent switches
+
+```text
+RadioItem(label, description, value)
+RadioGroup(name, items, defaultValue?, rules?, value?)
+SwitchItem(label?, description?, name, defaultChecked?)
+SwitchGroup(name, items, variant?, value?)
+```
+
+RadioGroup 复用原有原生单选控件。当前值优先于 defaultValue，当前空字符串也不会被默认值替换；required 时必须选择一个有效 option。description 可为空，非空说明保留到原生 options，显示在对应选项下，并与组标签、选项标签一起形成无障碍文本。
+
+A current radio value wins over defaultValue, including an explicitly empty string. Required radio input must select a valid option. Descriptions remain visible and participate in the native control's accessibility text.
+
+SwitchGroup 共用 CheckBoxGroup 的官方 record 绑定和现有开关叶子，不另造聚合状态引擎；修改一项不会清掉其它项。官方没有 rules 参数，FormControl 也不接收 SwitchGroup。省略或留空 item label 时，本原生 profile 回退到稳定 name；建议模型提供用户语言的标签。说明保留为邻接文字。variant 支持 clear、card；sunk 明确拒绝。
+
+SwitchGroup reuses the checkbox record bridge with native Toggle leaves. It has no rules argument and is not a FormControl input. Missing item labels fall back to names; descriptions remain adjacent text. Clear and card are supported; sunk is rejected.
+
+```openui
+$seat = "aisle"
+$extras = {camera:false,water:false}
+root = Stack([extras, plan])
+extras = SwitchGroup("extras", [SwitchItem("相机", "拍摄照片", "camera"), SwitchItem("饮水", "出行携带", "water")], "clear", $extras)
+plan = Form("plan", Buttons([Button("继续", @ToAssistant("提交计划", {preferences:$extras}))], "column"), [FormControl("座位", RadioGroup("seat", [RadioItem("靠窗", "便于看风景", "window"), RadioItem("过道", "便于出入", "aisle")], "window", {required:true}, $seat))])
+```
+
+这里 live `formState.plan.seat` 是当前单选值，`receipt.context.context.preferences` 是按钮显式携带的独立开关记录；宿主可与当前运行时状态核对。不会把 SwitchGroup 冒充成 Form 内字段。签名依据：[RadioGroup](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/RadioGroup/index.tsx)、[SwitchGroup](https://github.com/thesysdev/openui/blob/9823ec05d4b29bc78d101676dc16b44fe17f1830/packages/react-ui/src/genui-lib/SwitchGroup/schema.ts)。
+
+The radio is part of normalized formState. Independent switch preferences remain explicit business context; the host can compare them with current runtime state.
+
+## 有界结果计算 / Bounded result computation
+
+| 官方函数 / Official function | 语义 / Semantics |
+| --- | --- |
+| `@Each(array, "item", inlineTemplate)` | 逐项生成展示组件和业务按钮 / Render display components and intent buttons |
+| `@Filter(array, "field", operator, value)` | 按字段比较；operator 为 `==`、`!=`、`>`、`<`、`>=`、`<=`、`contains` / Named-field filtering, not a lambda |
+| `@Sort(array, "field", direction?)` | 小写 `asc` / `desc`，默认 asc / Lowercase direction, ascending by default |
+| `@Count(array)` | 数组长度 / Array length |
+
+这些计算复用官方 lang-core，仍不请求模型。数据数组使用普通声明，`$state` 继续只声明 scalar 或扁平 boolean record。Each 模板必须内联，不能把组件模板写进 `$state`。例如：
+
+These computations reuse upstream lang-core. Data arrays belong in ordinary declarations, while state defaults remain scalars or flat boolean records. Each templates are inline.
+
+```openui
+$kind = "park"
+root = Stack([TextContent("找到 " + @Count(filtered) + " 项"), @Count(filtered) == 0 ? TextContent("暂无匹配结果") : null, @Each(sorted, "item", Card([CardHeader(item.title), Button("选择", @ToAssistant("选择条目", {itemId:item.id}))]))])
+data = [{id:"a",title:"城市公园",kind:"park",rank:2},{id:"b",title:"展馆",kind:"museum",rank:1}]
+filtered = @Filter(data, "kind", "==", $kind)
+sorted = @Sort(filtered, "rank", "asc")
+```
+
+Each 及嵌套计算子数组内禁止 Form 和所有可编辑字段，因为尚无按业务 key 保留字段身份的重复表单契约。普通固定 Stack 子节点仍可包含表单。只支持单层 Each（包括引用展开）；literal array 和 UI array group 每组最多 200 项，UI array 深度最多 8、flatten 总访问最多 1,000，最终原生 IR 仍最多 200 节点。也受 source/AST/depth 等预算限制。这不是虚拟化、无限结果或分页 API。
+
+Each and nested computed child arrays are display/action-only. Editable repeated fields are rejected. One Each expansion level, bounded arrays and the existing IR budget prevent unbounded trees; this is not list virtualization or pagination. See [official functions](https://www.openui.com/docs/openui-lang/functions) and [remaining gaps](gaps-v05.md).
+
+过滤或排序后，同一位置可能代表另一条业务记录。因此原生按钮的 `mapped_action` 不仅带 slot 的 actionId，还关联当前完整动作定义的规范化 JSON（含表单范围和校验标记，上限 64 KiB）。控制器核对整份上下文，拒绝旧原生事件借用新条目的业务参数；宿主收到的外部意图格式不变。
+
+Positional slots can change business identity. Native actions therefore bind the complete canonical evaluated plan, form scope and validation flag, rather than trusting the slot ID alone. Old raw payloads fail the current-context check; public host intents keep their existing shape.
 
 ## 可运行示例 / Runnable example
 
@@ -201,9 +267,9 @@ This avoids unnecessary focus and scroll resets. It does not preserve focus on a
 ## 明确边界 / Explicit limitations
 
 - 状态初始值支持字符串、数字、布尔字面量，以及多选使用的扁平布尔记录，每个 `$name` 只能声明一次。派生条件直接写入组件表达式；不接受派生初始化、嵌套对象、数组或任意对象状态。Initial state accepts scalar literals and flat boolean records, declared once. Put derived conditions directly in component expressions; nested objects, arrays and derived initializers are unsupported.
-- 不支持 Query/Mutation、Each/Filter、任意远程请求、宿主代码执行；当前筛选通过条件子节点表达。No Query/Mutation, Each/Filter, remote execution or arbitrary code; use conditional children.
+- 支持有界 Each/Filter/Sort/Count 与条件子节点；不支持 Query/Mutation、其它计算函数、任意远程请求或宿主代码执行。Bounded result computations are available; remote execution and arbitrary code are not.
 - 不支持 HTML、Markdown、富文本、表格、图表、Tabs、导航或完整 ArkUI 控件目录。No HTML, Markdown, rich text, tables, charts, tabs, navigation or full ArkUI catalog.
-- 不支持自动换行布局、`Card` 的 `sunk` 变体、高级或异步表单规则、多选数组。No wrapping, sunk cards, advanced/async form rules or array-valued selections.
-- mapped profile 支持文本、多行文本、单选及多选记录；v0.2 的其他表单能力继续由旧 profile 提供，不会自动全部进入 mapped 目录。Mapped inputs are text, multiline text, single selection and checkbox records. Other established form controls remain in the existing profile.
+- 不支持自动换行布局、`Card` / `SwitchGroup` 的 `sunk` 变体、高级或异步表单规则、多选数组、Each 下的动态编辑字段。No wrapping, sunk variants, advanced/async form rules, array-valued selections or repeated editable fields.
+- mapped profile 支持文本、多行文本、单选、多选记录和独立开关记录；v0.2 的其他表单能力继续由旧 profile 提供，不会自动全部进入 mapped 目录。Other established controls remain in the existing profile unless explicitly mapped.
 - 新程序接收、状态更新和回调都有节点、深度、字符串及选项数量边界；具体能力以生成的支持清单和校验实现为准。Programs and updates have bounded nodes, depth, strings and options; consult the generated manifest and validation.
 - 本文说明代码契约，不作为真机通过证明；验收证据单独记录。This document describes the implementation contract, not physical-device acceptance; device evidence is recorded separately.

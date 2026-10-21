@@ -1,0 +1,72 @@
+{
+  "provider": "MiniMax",
+  "model": "MiniMax-M3",
+  "acceptedRunProviderRequests": 3,
+  "acceptedRunValidationRepairs": 0,
+  "earlierRejectedRunProviderRequests": 4,
+  "earlierRejectedRunValidationRepairs": 1,
+  "allRecordedProviderRequests": 7,
+  "attempts": [
+    {
+      "run": "accepted-r3",
+      "stage": "list",
+      "attempt": 1,
+      "decision": "accepted",
+      "path": "model-candidates/accepted-r3/list-1.openui",
+      "sha256": "deb511af25c7f12ddc075e62c65ac0cd1cc45551fdd2c005fd7ca626352f7cec"
+    },
+    {
+      "run": "accepted-r3",
+      "stage": "form",
+      "attempt": 1,
+      "decision": "accepted",
+      "path": "model-candidates/accepted-r3/form-1.openui",
+      "sha256": "421c90b66594724e78cfddab2932a2be0622d0fb8483dd1a03bc5ef6973f9df3"
+    },
+    {
+      "run": "accepted-r3",
+      "stage": "result",
+      "attempt": 1,
+      "decision": "accepted",
+      "path": "model-candidates/accepted-r3/result-1.openui",
+      "sha256": "5bc500441dafbdcf0f5d7b9faad37c4c2e63ea21b00890af26a28e5e9bf2c51d"
+    },
+    {
+      "run": "earlier-rejected-r2",
+      "stage": "list",
+      "attempt": 1,
+      "decision": "accepted",
+      "path": "model-candidates/earlier-rejected-r2/list-1.openui",
+      "sha256": "fabf9a960bbdb4faa47f5ced8cbaa6944cbb2c569be2567c6cb04b896d28da20"
+    },
+    {
+      "run": "earlier-rejected-r2",
+      "stage": "form",
+      "attempt": 1,
+      "decision": "accepted",
+      "path": "model-candidates/earlier-rejected-r2/form-1.openui",
+      "sha256": "5d893d1e56bc0bf64a8a042cb575024e3240cde12cd4d03f465dbe2045af4036"
+    },
+    {
+      "run": "earlier-rejected-r2",
+      "stage": "result",
+      "attempt": 1,
+      "decision": "rejected-host-validation",
+      "path": "model-candidates/earlier-rejected-r2/result-1.openui",
+      "sha256": "dd654bc00d0ea4849c2106f696fff9bf6fafb48479190c6710b67228d7b664c7"
+    },
+    {
+      "run": "earlier-rejected-r2",
+      "stage": "result",
+      "attempt": 2,
+      "decision": "rejected-host-validation",
+      "path": "model-candidates/earlier-rejected-r2/result-2.openui",
+      "sha256": "89a6ba46ddc174537a7a8b4cabd5b17406b957ceb130736af16a4e5d32b0694e"
+    }
+  ],
+  "sourceWasManuallyRewritten": false,
+  "wrongModeRegression": {
+    "path": "tests/fixtures/mapped-model-wrong-mode.openui",
+    "sha256": "89a6ba46ddc174537a7a8b4cabd5b17406b957ceb130736af16a4e5d32b0694e"
+  }
+}

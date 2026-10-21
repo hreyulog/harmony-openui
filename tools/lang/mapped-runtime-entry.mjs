@@ -5,6 +5,11 @@ import { mappedSystemPrompt } from './mapped-system-prompt.generated.mjs';
 
 const schema = mappedLibrary.toJSONSchema();
 const mappings = new Map(mappedRegistry.map(entry => [entry.name, entry]));
+const pureBuiltins = new Set(['Each', 'Filter', 'Sort', 'Count']);
+const actionCalls = new Set(['Action', 'Set', 'Reset', 'ToAssistant', 'OpenUrl']);
+const nativeFields = new Set(['OpenUiForm', 'OpenUiInput', 'OpenUiCheckbox', 'OpenUiToggle', 'OpenUiSelect',
+  'OpenUiRadioGroup', 'OpenUiSlider', 'OpenUiDatePicker', 'OpenUiTimePicker']);
+const stateful = name => mappings.get(name)?.native?.some(kind => nativeFields.has(kind));
 const identifier = value => typeof value === 'string' && /^[A-Za-z_][A-Za-z0-9_.-]{0,63}$/.test(value) &&
   !['__proto__', 'constructor', 'prototype'].includes(value);
 const booleanRecord = value => value && typeof value === 'object' && !Array.isArray(value) &&
@@ -13,6 +18,13 @@ function stableKey(value) {
   let hash = 2166136261;
   for (let index = 0; index < value.length; index++) { hash = Math.imul(hash ^ value.charCodeAt(index), 16777619); }
   return (hash >>> 0).toString(16).padStart(8, '0');
+}
+function canonicalAction(value, depth = 0) {
+  if (depth > 64) throw Error('OPENUI_MAPPED_ACTION_CONTEXT_DEPTH');
+  if (Array.isArray(value)) return '[' + value.map(item => canonicalAction(item, depth + 1)).join(',') + ']';
+  if (value && typeof value === 'object') return '{' + Object.keys(value).sort().filter(key => value[key] !== undefined)
+    .map(key => JSON.stringify(key) + ':' + canonicalAction(value[key], depth + 1)).join(',') + '}';
+  return JSON.stringify(value) ?? 'null';
 }
 function validateStateDeclarations(source, candidate) {
   const seen = new Set();
@@ -33,6 +45,55 @@ function validateStateDeclarations(source, candidate) {
     if (!scalar && !record) throw Error('OPENUI_MAPPED_STATE_INITIALIZER:' + statement.id);
   }
 }
+/** Inspect capabilities and budgets only. All expressions, collection operators
+ * and loop-variable substitution still execute in the official evaluator. */
+function validateProgramCapabilities(source) {
+  const statements = new Map(split(tokenize(source)).map(statement => [statement.id, parseExpression(statement.tokens)]));
+  let nodes = 0, repeatedNodes = 0;
+  function repeatedDisplay(node, loopName, seen = new Set(), depth = 0) {
+    if (!node || typeof node !== 'object') return;
+    if (++repeatedNodes > 10000 || depth > 64) throw Error('OPENUI_MAPPED_AST_BUDGET');
+    if (node.k === 'Comp') {
+      if (node.name === 'Each') throw Error('OPENUI_MAPPED_NESTED_EACH_UNSUPPORTED');
+      if (stateful(node.name)) throw Error('OPENUI_MAPPED_REPEATED_FIELD_UNSUPPORTED');
+    }
+    if (node.k === 'Ref' && node.n !== loopName && statements.has(node.n) && !seen.has(node.n)) {
+      const next = new Set(seen); next.add(node.n); repeatedDisplay(statements.get(node.n), loopName, next, depth + 1);
+    }
+    for (const value of Object.values(node)) {
+      if (Array.isArray(value)) for (const child of value) {
+        if (Array.isArray(child)) for (const entry of child) repeatedDisplay(entry, loopName, seen, depth + 1);
+        else repeatedDisplay(child, loopName, seen, depth + 1);
+      } else if (value && typeof value === 'object') repeatedDisplay(value, loopName, seen, depth + 1);
+    }
+  }
+  function inspect(node, depth = 0) {
+    if (!node || typeof node !== 'object') return;
+    if (++nodes > 10000 || depth > 64) throw Error('OPENUI_MAPPED_AST_BUDGET');
+    if (node.k === 'Arr' && node.els.length > 200) throw Error('OPENUI_MAPPED_ARRAY_LIMIT');
+    if (node.k === 'Comp') {
+      if (node.name === 'Query' || node.name === 'Mutation') throw Error('OPENUI_MAPPED_REMOTE_UNSUPPORTED');
+      if (!mappings.has(node.name) && !pureBuiltins.has(node.name) && !actionCalls.has(node.name)) throw Error('OPENUI_MAPPED_CALL_UNSUPPORTED:' + node.name);
+      const count = node.args.length;
+      if ((node.name === 'Each' && count !== 3) || (node.name === 'Filter' && count !== 4) ||
+        (node.name === 'Sort' && (count < 2 || count > 3)) || (node.name === 'Count' && count !== 1))
+        throw Error('OPENUI_MAPPED_BUILTIN_ARGUMENTS:' + node.name);
+      if (node.name === 'Each') {
+        const variable = node.args[1];
+        const name = variable?.k === 'Ref' ? variable.n : variable?.k === 'Str' ? variable.v : '';
+        if (!identifier(name)) throw Error('OPENUI_MAPPED_EACH_VARIABLE');
+        repeatedDisplay(node.args[0], name); repeatedDisplay(node.args[2], name);
+      }
+    }
+    for (const value of Object.values(node)) {
+      if (Array.isArray(value)) for (const child of value) {
+        if (Array.isArray(child)) for (const entry of child) inspect(entry, depth + 1);
+        else inspect(child, depth + 1);
+      } else if (value && typeof value === 'object') inspect(value, depth + 1);
+    }
+  }
+  for (const node of statements.values()) inspect(node);
+}
 export function getMappedSystemPrompt() { return mappedSystemPrompt; }
 export function getMappedLibrarySchema() { return JSON.stringify(schema); }
 export function getMappedSupportManifest() { return JSON.stringify(mappedSupport); }
@@ -50,10 +111,21 @@ export function createMappedSession() {
   const stateName = name => typeof name === 'string' && /^\$[A-Za-z_][A-Za-z0-9_]{0,63}$/.test(name) &&
     !['$__proto__', '$constructor', '$prototype'].includes(name) && Object.prototype.hasOwnProperty.call(parsed.stateDeclarations, name);
   const restore = snapshot => { store.dispose(); store = createStore(); store.initialize(parsed?.stateDeclarations || {}, snapshot); };
+  const validateStore = () => {
+    const snapshot = store.getSnapshot(), declared = {};
+    for (const name of Object.keys(parsed.stateDeclarations)) {
+      const value = snapshot[name];
+      if (!['string', 'boolean'].includes(typeof value) && !(typeof value === 'number' && Number.isFinite(value)) && !booleanRecord(value))
+        throw Error('OPENUI_MAPPED_STATE_VALUE:' + name);
+      declared[name] = value;
+    }
+    if (JSON.stringify(declared).length > 65536) throw Error('OPENUI_MAPPED_STATE_LIMIT');
+  };
 
   function project() {
     stats.evaluations++;
     const errors = [], bindings = [], components = [], ids = new Set(), actions = new Map(), fields = new Map(), logicalFields = new Map(), forms = new Set();
+    let arrayVisits = 0;
     const root = evaluateRoot(parsed, { ctx: context(), library: mappedLibrary, store, errors });
     if (errors.length || !root) throw Error('OPENUI_MAPPED_EVALUATION:' + errors.map(item => item.message).join(','));
     const add = node => {
@@ -73,6 +145,30 @@ export function createMappedSession() {
       if (field.isReactive && !stateName(bindingValue.target)) throw Error('OPENUI_MAPPED_UNDECLARED_BINDING');
       return field;
     }
+    function displayArray(value, depth = 0) {
+      if (depth > 32) throw Error('OPENUI_MAPPED_ARRAY_DEPTH');
+      if (Array.isArray(value)) { for (const child of value) displayArray(child, depth + 1); return; }
+      if (!value || value.type !== 'element') return;
+      if (stateful(value.typeName)) throw Error('OPENUI_MAPPED_REPEATED_FIELD_UNSUPPORTED');
+      for (const child of Object.values(value.props)) {
+        if (Array.isArray(child) || child?.type === 'element') displayArray(child, depth + 1);
+      }
+    }
+    function childrenAt(children, path, formName) {
+      if (!Array.isArray(children)) throw Error('OPENUI_MAPPED_CHILDREN');
+      const output = [];
+      function flatten(values, arrayPath, nesting) {
+        if (nesting > 8) throw Error('OPENUI_MAPPED_ARRAY_DEPTH');
+        if (values.length > 200) throw Error('OPENUI_MAPPED_ARRAY_LIMIT');
+        for (let index = 0; index < values.length; index++) {
+          if (++arrayVisits > 1000) throw Error('OPENUI_MAPPED_ARRAY_BUDGET');
+          const child = values[index], childPath = arrayPath + '_' + index;
+          if (Array.isArray(child)) { displayArray(child); flatten(child, childPath, nesting + 1); }
+          else { const id = visit(child, childPath, '', false, formName); if (id) output.push(id); }
+        }
+      }
+      flatten(children, path, 0); return output;
+    }
     function visit(element, path, label = '', isRoot = false, formName = '') {
       if (element == null) return undefined;
       if (element.type !== 'element' || path.split('_').length > 24) throw Error('OPENUI_MAPPED_TREE_VALUE');
@@ -83,10 +179,7 @@ export function createMappedSession() {
       const id = isRoot ? 'root' : 'n_' + (element.statementId || path).replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 68);
       const ctx = {
         label, add, formName,
-        children: children => {
-          if (!Array.isArray(children)) throw Error('OPENUI_MAPPED_CHILDREN');
-          return children.map((child, index) => visit(child, path + '_' + index, '', false, formName)).filter(Boolean);
-        },
+        children: children => childrenAt(children, path, formName),
         visit: (child, suffix, childLabel = '', childForm = formName) => visit(child, path + '_' + suffix, childLabel, false, childForm),
         registerForm: name => {
           if (!identifier(name) || formName || forms.has(name)) throw Error('OPENUI_MAPPED_FORM_NAME_OR_NESTING');
@@ -96,9 +189,15 @@ export function createMappedSession() {
           const plan = value || { steps: [{ type: 'continue_conversation', message: caption }] };
           if (!Array.isArray(plan.steps) || plan.steps.length < 1 || plan.steps.length > 16 ||
             plan.steps.some(step => !['set', 'reset', 'continue_conversation', 'open_url'].includes(step.type))) throw Error('OPENUI_MAPPED_ACTION_UNSUPPORTED');
-          actions.set(componentId, { plan, formName, validate: (options.variant ?? 'primary') === 'primary' &&
-            plan.steps.some(step => step.type === 'continue_conversation') });
-          return { event: { name: 'mapped_action', context: { actionId: componentId } } };
+          const definition = { plan, formName, validate: (options.variant ?? 'primary') === 'primary' &&
+            plan.steps.some(step => step.type === 'continue_conversation') };
+          // Positional list slots may now represent a different item. Bind a
+          // raw native event to the exact current evaluated plan, not only to
+          // that slot's reusable ID. The controller checks this whole context.
+          const association = canonicalAction(definition);
+          if (association.length > 65536) throw Error('OPENUI_MAPPED_ACTION_CONTEXT_LIMIT');
+          actions.set(componentId, definition);
+          return { event: { name: 'mapped_action', context: { actionId: componentId, plan: association } } };
         },
         field: (componentId, name, bindingValue, config) => {
           const opts = Array.isArray(config) ? { kind: 'select', options: config } : config;
@@ -106,9 +205,10 @@ export function createMappedSession() {
           const options = opts.options;
           if (opts.kind === 'select' && (!Array.isArray(options) || options.length < 1 || options.length > 100 || new Set(options.map(option => option.value)).size !== options.length ||
             options.some(option => typeof option.value !== 'string' || !option.value.trim() || option.value.length > 500 ||
-              typeof option.label !== 'string' || !option.label || option.label.length > 500))) throw Error('OPENUI_MAPPED_OPTIONS');
+              typeof option.label !== 'string' || !option.label || option.label.length > 500 ||
+              (option.description !== undefined && (typeof option.description !== 'string' || option.description.length > 8192))))) throw Error('OPENUI_MAPPED_OPTIONS');
           const field = stateField(name, bindingValue, formName);
-          const value = field.value ?? '';
+          const value = field.value ?? opts.defaultValue ?? '';
           if (typeof value !== 'string' || value.length > 8192 || (opts.kind === 'select' && value !== '' && !options.some(option => option.value === value))) throw Error('OPENUI_MAPPED_FIELD_VALUE');
           fields.set(componentId, { field, kind: opts.kind, options });
           logicalField(formName, name, { kind: opts.kind, value, required: opts.required === true, componentId });
@@ -176,6 +276,14 @@ export function createMappedSession() {
     replace(source) {
       ensure();
       if (typeof source !== 'string' || source.length > 262144) throw Error('OPENUI_MAPPED_SOURCE_LIMIT');
+      // Materializing referenced component declarations can amplify a small
+      // program. Check reference/array budgets before asking the streaming
+      // parser to materialize the completed document.
+      try { validateProgramCapabilities(source); }
+      catch (error) {
+        if (String(error.message).startsWith('OPENUI_MAPPED_')) throw error;
+        throw Error('OPENUI_MAPPED_PARSE:' + error.message);
+      }
       const candidate = createStreamingParser(schema, 'Stack').push(source, true);
       const errors = candidate.meta.errors.filter(error => error.severity !== 'warning');
       if (candidate.queryStatements.length || candidate.mutationStatements.length) throw Error('OPENUI_MAPPED_REMOTE_UNSUPPORTED');
@@ -218,11 +326,13 @@ export function createMappedSession() {
           if (step.type === 'set') {
             if (!stateName(step.target) || !step.valueAST) throw Error('OPENUI_MAPPED_SET_TARGET');
             store.set(step.target, evaluate(step.valueAST, context()));
+            validateStore();
           } else if (step.type === 'reset') {
             for (const target of step.targets) {
               if (!stateName(target)) throw Error('OPENUI_MAPPED_RESET_TARGET');
               store.set(target, parsed.stateDeclarations[target] ?? null, { pristine: true });
             }
+            validateStore();
             validatedForms.clear();
           } else if (step.type === 'continue_conversation') {
             if (typeof step.message !== 'string') throw Error('OPENUI_MAPPED_ACTION_MESSAGE');

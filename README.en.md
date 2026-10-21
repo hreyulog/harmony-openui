@@ -8,7 +8,18 @@
 
 An independent community adapter that reuses the official OpenUI parser, renders model-generated component declarations with precompiled ArkUI components, and returns user actions to the host application. Built for choices, data entry, multistep forms, and result panels in chat. No WebView or on-device compilation of generated ArkTS is required.
 
-This is not an official OpenUI or Huawei SDK. v0.4 extends the general mapping runtime with input, checkbox groups and live forms, reusing the official OpenUI state / expression engine and existing native controls. It remains a bounded adaptation, not a complete OpenUI or ArkUI implementation.
+This is not an official OpenUI or Huawei SDK. v0.5 extends the general mapping runtime with radio choices, independent switches and bounded data lists, reusing the official OpenUI state / expression engine and existing native controls. It remains a bounded adaptation, not a complete OpenUI or ArkUI implementation.
+
+**v0.5: data-driven image results, native radio choices and preference switches.** The mapped catalog contains **19 declarations**, reusing the same 22 native IR kinds. Official `Each / Filter / Sort / Count` handle result lists; the model need not handwrite a predicate for every card. [Mapping architecture](docs/mapping.md) · [OpenUI / ArkUI gap comparison](docs/gaps-v05.md)
+
+Nova completed **real model-generated results → local filtering, sorting and selection → native radio/switch preferences → model-generated read-only result**. The accepted candidate used three provider requests without repair requests; local interaction needed none. Its actual list passed all 24 filter/order combinations in host replay, and the final result preserved the submitted transit mode and mixed switch states. 186 Node and 2 Python checks passed. [v0.5 verification](docs/verification-v05.md) · [Actual programs and receipt](docs/evidence/2026-10-21-v05/acceptance.json)
+
+| Reordered image results | Native choices and descriptions | Required validation | Accurate model-generated result |
+| --- | --- | --- | --- |
+| <img src="docs/images/nova-v05-20261021/reverse-results.jpeg" width="210" alt="Forest and bookstore after reverse sorting"> | <img src="docs/images/nova-v05-20261021/choice-form.jpeg" width="210" alt="Independent switches and selected transit radio"> | <img src="docs/images/nova-v05-20261021/form-required.jpeg" width="210" alt="Localized required errors for name and radio choice"> | <img src="docs/images/nova-v05-20261021/model-result.jpeg" width="210" alt="Read-only result preserving all submitted values"> |
+
+<details>
+<summary>v0.4 historical device evidence: inputs, checkbox records and live forms</summary>
 
 **v0.4: model-generated image results → local filtering and selection → native form → model-generated result.** The generic mapped catalog now contains 15 components, adding text inputs, checkbox records and named forms while reusing existing native controls and the official state / expression engine. [Mapping architecture](docs/mapping.md)
 
@@ -17,6 +28,8 @@ The complete flow ran on Nova with real MiniMax requests, checking typing focus,
 | Filtered image result | Required validation | Native editing and multi-selection | Model-generated result |
 | --- | --- | --- | --- |
 | <img src="docs/images/nova-v04-20261020/filtered-forest.jpeg" width="210" alt="Locally filtered forest activity"> | <img src="docs/images/nova-v04-20261020/form-required.jpeg" width="210" alt="Localized required errors after blank submission"> | <img src="docs/images/nova-v04-20261020/form-filled.jpeg" width="210" alt="Live name, notes and both selected items"> | <img src="docs/images/nova-v04-20261020/model-result.jpeg" width="210" alt="Read-only model result retaining submitted values"> |
+
+</details>
 
 <details>
 <summary>v0.3 historical device evidence: image filtering, reset and selection</summary>
@@ -80,7 +93,14 @@ Harmony OpenUI adds a native adaptation layer around the official parser. It doe
 
 The model supplies declarations and content, rather than executable ArkTS. An action such as choosing an option returns data to the host; the host decides what happens next.
 
-## What v0.4 adds
+## What v0.5 adds
+
+- Four upstream-signature radio/switch mappings reuse existing controls and state adapters.
+- Four official data computations support bounded result lists; old button events remain associated with their original action plan after sorting.
+- Radio descriptions remain visible and contribute to basic accessibility labels. SwitchGroup remains independent of FormControl.
+- The host supplies normalized display facts for model result layout and retains a real wrong-mode response as a regression fixture.
+
+## Retained v0.4 form support
 
 - Six additional mappings: `Input`, `TextArea`, `CheckBoxItem`, `CheckBoxGroup`, `Buttons`, `Form`; 15 entries in total.
 - Existing native text editors and checkboxes, with boolean-record group state held by the official store.
@@ -203,7 +223,7 @@ To install the demo on a retail device, register its exact bundle, `com.hreyulog
 
 ## Demo and verification
 
-The v0.4 mapped demo connects image filtering to a plan editor. The model generates the list, editing card, and final result separately. Filters and inputs update locally; submission carries current raw values from the named form. Before displaying a generated list, the demo host checks all twelve filter combinations. An invalid program may receive one model repair request; the host never rewrites generated source. The SDK contains neither these fixture facts nor model transport.
+The v0.5 mapped demo connects image filtering and sorting to a plan editor. The model generates the list, editing card, and final result separately. Filters and inputs update locally; submission carries current named-form values and independent switch state in separate business context. Before displaying a generated list, the demo host checks all twenty-four filter/sort combinations. It converts submitted values into explicit display facts for the result model. An invalid program may receive one model repair request; the host never rewrites generated source. The SDK contains neither these fixture facts nor model transport.
 
 The demo uses explicitly fictional itinerary data to test interaction; it is not a live ticket search. It supports OpenAI-compatible and Anthropic-compatible HTTPS model requests. Keys entered through its configuration screen remain in memory. An optional developer configuration file must remain in the app-private directory, outside the package and repository.
 
@@ -223,7 +243,7 @@ See the [v0.2 verification record](docs/verification-v02.md) for exact scope, su
 - The A2UI adapter implements a limited subset, not full protocol conformance.
 - The SDK and demo are independent of Sofia; integration has not been implemented.
 
-Documentation: [v0.4 device verification](docs/verification-v04.md) · [Mapping layer](docs/mapping.md) · [Architecture](docs/architecture.md) · [Protocol and state](docs/protocol.md) · [Rendering and themes](docs/rendering.md) · [Build](docs/building.md) · [Verification](docs/verification.md)
+Documentation: [v0.5 device verification](docs/verification-v05.md) · [Gap comparison](docs/gaps-v05.md) · [Mapping layer](docs/mapping.md) · [Architecture](docs/architecture.md) · [Protocol and state](docs/protocol.md) · [Rendering and themes](docs/rendering.md) · [Build](docs/building.md) · [Verification](docs/verification.md)
 
 Upstream references: [OpenUI architecture](https://www.openui.com/docs/openui-lang/architecture) · [Defining components](https://www.openui.com/docs/openui-lang/defining-components) · [ArkUI](https://developer.huawei.com/consumer/cn/arkui/) · [AGenUI](https://github.com/AGenUI/AGenUI)
 

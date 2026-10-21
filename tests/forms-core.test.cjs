@@ -91,6 +91,33 @@ test('option membership, finite numbers, slider range/step and calendar bounds a
  assert.deepEqual(maps(c).errors,{});
 });
 
+test('choice descriptions retain native option metadata while invalid descriptions cannot replace a working form',()=>{
+ const {c,Catalog}=setup();
+ const controls=[{id:'choice',component:'OpenUiRadioGroup',field:'choice',label:'出行方式',options:[
+  {label:'安静步道',value:'quiet',description:'避开拥挤的道路，适合慢步行走。'},
+  {label:'城市展馆',value:'museum'}
+ ]}];
+ install(c,formNodes(controls));const before=c.exportSnapshot();
+ assert.equal(c.getSurface('s').components.find(n=>n.id==='choice').options[0].description,'避开拥挤的道路，适合慢步行走。');
+ assert.equal(c.setFieldValue('s','choice','quiet'),true);assert.equal(c.getFormValues('s','trip').choice,'quiet','description never replaces the stable business value');
+ for(const component of ['OpenUiRadioGroup','OpenUiSelect']){
+  const node={...controls[0],component};
+  for(const description of ['', '说'.repeat(8192)])assert.doesNotThrow(()=>Catalog.validate({...node,options:[{label:'Title',value:'key',description}]}));
+  for(const description of [true,27,{},[],null,'说'.repeat(8193)]){
+   const candidate=formNodes([{...node,options:[{label:'Title',value:'key',description}]}]);const saved=c.exportSnapshot();
+   assert.throws(()=>c.apply({kind:'components',surfaceId:'s',replace:true,components:candidate}),/OPTIONS/);
+   assert.equal(c.exportSnapshot(),saved,'rejected metadata is atomic');
+  }
+ }
+ const restored=JSON.parse(before).surfaces[0].components.find(n=>n.id==='choice');
+ assert.doesNotThrow(()=>Catalog.validate({...restored,options:[{label:'Legacy choice',value:'legacy'}]}));
+ const schema=JSON.parse(fs.readFileSync(path.join(__dirname,'../schemas/native-ir.schema.json'),'utf8'));
+ for(const component of ['OpenUiRadioGroup','OpenUiSelect']){
+  const item=schema.items.oneOf.find(branch=>branch.properties.component.const===component).properties.options.items;
+  assert.deepEqual(item.properties.description,{type:'string',maxLength:8192});assert.equal(item.required.includes('description'),false);assert.equal(item.additionalProperties,false);
+ }
+});
+
 test('optional structured fields accept canonical empty values but reject whitespace defaults and submissions',()=>{
  const {c,Catalog}=setup();install(c);c.setFieldValue('s','name','Ada');c.setFieldValue('s','terms',true);
  for(const id of ['seat','date','time']){

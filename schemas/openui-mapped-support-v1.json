@@ -58,6 +58,19 @@
       "source": "packages/react-ui/src/genui-lib/Select/schema.ts"
     },
     {
+      "name": "RadioItem",
+      "native": [],
+      "source": "packages/react-ui/src/genui-lib/RadioGroup/schema.ts",
+      "dataOnly": true
+    },
+    {
+      "name": "RadioGroup",
+      "native": [
+        "OpenUiRadioGroup"
+      ],
+      "source": "packages/react-ui/src/genui-lib/RadioGroup/index.tsx"
+    },
+    {
       "name": "Input",
       "native": [
         "OpenUiInput"
@@ -87,6 +100,22 @@
       "source": "packages/react-ui/src/genui-lib/CheckBoxGroup/schema.ts"
     },
     {
+      "name": "SwitchItem",
+      "native": [],
+      "source": "packages/react-ui/src/genui-lib/SwitchGroup/schema.ts",
+      "dataOnly": true
+    },
+    {
+      "name": "SwitchGroup",
+      "native": [
+        "Column",
+        "Text",
+        "Card",
+        "OpenUiToggle"
+      ],
+      "source": "packages/react-ui/src/genui-lib/SwitchGroup/schema.ts"
+    },
+    {
       "name": "Buttons",
       "native": [
         "Column",
@@ -114,7 +143,8 @@
         "Text",
         "OpenUiSelect",
         "OpenUiInput",
-        "OpenUiCheckbox"
+        "OpenUiCheckbox",
+        "OpenUiRadioGroup"
       ],
       "source": "packages/react-ui/src/genui-lib/FormControl/schema.ts"
     }
@@ -125,8 +155,14 @@
     "select-binding",
     "input-binding",
     "checkbox-record-binding",
+    "radio-binding",
+    "switch-record-binding",
     "form-live-state",
     "form-required-validation",
+    "@Each-display-only",
+    "@Filter",
+    "@Sort",
+    "@Count",
     "@Set",
     "@Reset",
     "@ToAssistant-context",
@@ -137,7 +173,10 @@
     "No Query/Mutation, HTML, Markdown, wrapping, custom code or network execution.",
     "State declarations are unique literal defaults. Checkbox groups bind a record of declared item names to boolean values. Derived state declarations are not supported; put expressions inline.",
     "Input supports type=text only. TextArea supports the native three-row geometry only. Form validation supports required only; no blur rules or advanced validation.",
-    "Card variant sunk and advanced form rules are not in this profile.",
+    "Each and nested computed child arrays are display/action-only: fields and forms are rejected because keyed editable lists are not implemented.",
+    "Only Each, Filter, Sort and Count computation functions are supported. Data arrays use ordinary declarations, not $state.",
+    "Computed-list bounds: 200 entries per literal array; one Each expansion level; nested UI arrays depth 8 and 1000 total flatten visits; 200 native IR nodes. Programs remain subject to AST/source/depth budgets.",
+    "Card and SwitchGroup variant sunk and advanced form rules are not in this profile.",
     "Image geometry, control sizes, button variants and destructive tone follow the native host theme."
   ]
 }
