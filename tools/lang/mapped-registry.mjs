@@ -20,8 +20,8 @@ const flex = {
 const binding = z.string().optional(); markReactive(binding);
 const rules = z.object({ required: z.boolean().optional() }).optional();
 const aggregateBinding = z.record(z.string(), z.boolean()).optional(); markReactive(aggregateBinding);
-const input = define('Input', 'A native single-line text field. This bounded profile accepts type=text only. Bind value to a declared $state or leave it local to its named Form.', {
-  name: z.string(), placeholder: z.string().optional(), type: z.literal('text').optional(), rules, value: binding
+const input = define('Input', 'A native field: text uses the keyboard; date and time use native pickers (YYYY-MM-DD and HH:MM). A chosen time is a preference, never proof of availability. Bind value to a declared $state or leave it local to its named Form.', {
+  name: z.string(), placeholder: z.string().optional(), type: z.enum(['text', 'date', 'time']).optional(), rules, value: binding
 });
 const textArea = define('TextArea', 'A native multiline text field. This bounded profile uses three native rows. Bind value to a declared $state or leave it local to its named Form.', {
   name: z.string(), placeholder: z.string().optional(), rows: z.literal(3).optional(), rules, value: binding
@@ -110,8 +110,14 @@ function fieldLabel(name, placeholder, context) {
 }
 function inputMap(id, p, c, multiline) {
   const name = fieldName(p.name), required = requiredRule(p.rules);
-  if (multiline ? p.rows != null && p.rows !== 3 : p.type != null && p.type !== 'text') throw Error('OPENUI_MAPPED_INPUT_VARIANT');
+  if (multiline ? p.rows != null && p.rows !== 3 : p.type != null && !['text', 'date', 'time'].includes(p.type)) throw Error('OPENUI_MAPPED_INPUT_VARIANT');
   if (p.placeholder != null && (typeof p.placeholder !== 'string' || p.placeholder.length > 500)) throw Error('OPENUI_MAPPED_INPUT_PLACEHOLDER');
+  if (!multiline && (p.type === 'date' || p.type === 'time')) {
+    return { id, component: p.type === 'date' ? 'OpenUiDatePicker' : 'OpenUiTimePicker',
+      field: name, label: fieldLabel(name, p.placeholder, c),
+      value: c.field(id, name, p.value, { kind: p.type, required }),
+      ...(required === undefined ? {} : { required }) };
+  }
   return { id, component: 'OpenUiInput', field: name, label: fieldLabel(name, p.placeholder, c),
     variant: multiline ? 'textarea' : 'text', inputType: 'text', value: c.field(id, name, p.value, { kind: 'text', required }),
     ...(p.placeholder == null ? {} : { placeholder: p.placeholder }), ...(required === undefined ? {} : { required }) };
@@ -180,7 +186,7 @@ export const mappedRegistry = [
     return { id, component: 'OpenUiRadioGroup', field: name, label: fieldLabel(name, '', c), value, options,
       ...(required === undefined ? {} : { required }) };
   } },
-  { name: 'Input', native: ['OpenUiInput'], source: 'Input/schema.ts', map(id, p, c) { return inputMap(id, p, c, false); } },
+  { name: 'Input', native: ['OpenUiInput', 'OpenUiDatePicker', 'OpenUiTimePicker'], source: 'Input/schema.ts', map(id, p, c) { return inputMap(id, p, c, false); } },
   { name: 'TextArea', native: ['OpenUiInput'], source: 'TextArea/schema.ts', map(id, p, c) { return inputMap(id, p, c, true); } },
   { name: 'CheckBoxItem', native: [], source: 'CheckBoxGroup/schema.ts', dataOnly: true },
   { name: 'CheckBoxGroup', native: ['Column', 'Text', 'OpenUiCheckbox'], source: 'CheckBoxGroup/schema.ts', map(id, p, c) {
@@ -217,7 +223,7 @@ export const mappedRegistry = [
     return { id, component: 'OpenUiForm', name, children };
   } },
   { name: 'SelectItem', native: [], source: 'Select/schema.ts', dataOnly: true },
-  { name: 'FormControl', native: ['Column', 'Text', 'OpenUiSelect', 'OpenUiInput', 'OpenUiCheckbox', 'OpenUiRadioGroup'], source: 'FormControl/schema.ts', map(id, p, c) {
+  { name: 'FormControl', native: ['Column', 'Text', 'OpenUiSelect', 'OpenUiInput', 'OpenUiDatePicker', 'OpenUiTimePicker', 'OpenUiCheckbox', 'OpenUiRadioGroup'], source: 'FormControl/schema.ts', map(id, p, c) {
     if (typeof p.label !== 'string' || !p.label || p.label.length > 500) throw Error('OPENUI_MAPPED_FIELD_LABEL');
     const child = c.visit(p.input, 'input', p.label); const children = child ? [child] : [];
     if (p.hint) { const key = 's_' + id + '_hint'; c.add(text(key, p.hint, 'caption')); children.push(key); }
@@ -230,7 +236,7 @@ export const mappedSupport = { ...mappedReference, components: mappedRegistry.ma
 })), capabilities: ['$state', 'conditional-expression', 'select-binding', 'input-binding', 'checkbox-record-binding', 'radio-binding', 'switch-record-binding', 'form-live-state', 'form-required-validation', '@Each-display-only', '@Filter', '@Sort', '@Count', '@Set', '@Reset', '@ToAssistant-context', '@OpenUrl'],
 limitations: ['Bounded official component signatures, not full react-ui or ArkUI parity.', 'No Query/Mutation, HTML, Markdown, wrapping, custom code or network execution.',
   'State declarations are unique literal defaults. Checkbox groups bind a record of declared item names to boolean values. Derived state declarations are not supported; put expressions inline.',
-  'Input supports type=text only. TextArea supports the native three-row geometry only. Form validation supports required only; no blur rules or advanced validation.',
+  'Input supports text, date and time; dates and times use native pickers and strictly formatted values. TextArea supports the native three-row geometry only. Form validation supports required only; no blur rules or advanced validation.',
   'Each and nested computed child arrays are display/action-only: fields and forms are rejected because keyed editable lists are not implemented.',
   'Only Each, Filter, Sort and Count computation functions are supported. Data arrays use ordinary declarations, not $state.',
   'Computed-list bounds: 200 entries per literal array; one Each expansion level; nested UI arrays depth 8 and 1000 total flatten visits; 200 native IR nodes. Programs remain subject to AST/source/depth budgets.',
@@ -249,7 +255,7 @@ export const mappedPromptOptions = {
     'Use one primary action for the main next step in a card or section, secondary for a quieter alternative, and tertiary for reset or other low-emphasis actions. Native themes retain these three priorities; do not imitate buttons with text decorations.',
     'Image is a normal full-width photograph with a native host aspect ratio. Supply the exact image URL and a useful description; do not invent image dimensions, inline styles, CSS, emoji badges or decorative placeholders. Use ordinary Card and Stack composition so the host can provide consistent spacing and typography.',
     'For reusable forms use Form(name, Buttons([Button("继续", @ToAssistant("提交资料", {intent:"supplied intent"}))], "column"), [FormControl(label, input), ...]). The host returns live formState; do not put guessed field values into action.context and do not use @Submit.',
-    'Input(name, placeholder, "text", rules, value) and TextArea(name, placeholder, 3, rules, value) reuse native controls. Only type=text and three-row TextArea are supported. Use rules={required:true} only where necessary; no other rule keys are supported.',
+    'Input(name, placeholder, type, rules, value) and TextArea(name, placeholder, 3, rules, value) reuse native controls. Input type is text, date or time. Use date/time pickers instead of keyboard entry for dates/times. For supplied available slots use Select with their exact values. Unknown dates/times stay empty until the owner chooses; never mistake a picker default for consent or availability. Only three-row TextArea is supported. Use rules={required:true} only where necessary; no other rule keys are supported.',
     'CheckBoxGroup has the exact official spelling and signature CheckBoxGroup(name, [CheckBoxItem(label, description, name, defaultChecked), ...], rules, value). Its value is a record such as {quiet:false,accessible:false}, not an array or one boolean. Declare a record $preferences for reactive group state or omit value for local Form state. A required group needs any one item checked, not all items.',
     'RadioGroup uses RadioGroup(name, [RadioItem(label, description, value), ...], defaultValue, rules, value). The optional defaultValue is a supplied option key; a current value wins over that default. Use a declared string $state for reactive value. Preserve each supplied option description; use an empty description only when no text was supplied.',
     'SwitchGroup uses SwitchGroup(name, [SwitchItem(label, description, name, defaultChecked), ...], variant, value). It has NO rules argument. Bind a flat boolean record exactly like CheckBoxGroup. Prefer visible labels in the user language; omitted labels fall back to item names. Only clear and card variants are supported, never sunk.',

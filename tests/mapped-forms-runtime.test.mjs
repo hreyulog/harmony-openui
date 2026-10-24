@@ -240,3 +240,23 @@ test('a field edit published before program replacement cannot mutate the newly 
   assert.equal(runtime.controller.getSurface('forms').components.find(node => node.component === 'OpenUiInput').value, 'fresh program');
   assert.deepEqual(changes, [], 'the retired program must not forward its old field event');
 });
+
+test('native date/time mapped fields keep unknowns empty, validate edits and submit exact live values', () => {
+  const receipts = [], runtime = setup({onAction: event => receipts.push(event)});
+  const source = '$day=""\n$slot=""\nroot=Stack([Form("visit",Buttons([Button("Query",@ToAssistant("Query"))]),[FormControl("Date",Input("day","Choose date","date",{required:true},$day)),FormControl("Time",Input("slot","Choose time","time",{required:true},$slot))])])';
+  const result = runtime.replace(source), surface = runtime.controller.getSurface('forms');
+  assert.equal(surface.components.find(n => n.field === 'day').component, 'OpenUiDatePicker');
+  assert.equal(surface.components.find(n => n.field === 'slot').component, 'OpenUiTimePicker');
+  assert.equal(surface.components.find(n => n.field === 'slot').value, '');
+  dispatch(runtime, 'Query'); assert.equal(receipts.length, 0);
+  const session = createMappedSession(); const parsed = unpack(session.replace(source));
+  for (const value of ['24:00','11:60','9:00']) assert.throws(() => session.setField(binding(parsed,'slot').componentId, JSON.stringify(value)), /FIELD_VALUE/);
+  assert.throws(() => session.setField(binding(parsed,'day').componentId, JSON.stringify('2026-02-30')), /FIELD_VALUE/);
+  assert.equal(edit(runtime,result,'day','2026-10-25'), true);
+  assert.equal(edit(runtime,result,'slot','11:30'), true);
+  dispatch(runtime, 'Query'); assert.equal(receipts.length, 1);
+  assert.deepEqual(receipts[0].context.formState.visit,{day:'2026-10-25',slot:'11:30'});
+  const id = binding(result, 'slot').componentId;
+  assert.equal(runtime.controller.getSurface('forms').components.find(n=>n.field==='slot').id, id);
+  runtime.dispose();
+});

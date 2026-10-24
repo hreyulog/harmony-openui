@@ -73,7 +73,9 @@
     {
       "name": "Input",
       "native": [
-        "OpenUiInput"
+        "OpenUiInput",
+        "OpenUiDatePicker",
+        "OpenUiTimePicker"
       ],
       "source": "packages/react-ui/src/genui-lib/Input/schema.ts"
     },
@@ -143,6 +145,8 @@
         "Text",
         "OpenUiSelect",
         "OpenUiInput",
+        "OpenUiDatePicker",
+        "OpenUiTimePicker",
         "OpenUiCheckbox",
         "OpenUiRadioGroup"
       ],
@@ -172,7 +176,7 @@
     "Bounded official component signatures, not full react-ui or ArkUI parity.",
     "No Query/Mutation, HTML, Markdown, wrapping, custom code or network execution.",
     "State declarations are unique literal defaults. Checkbox groups bind a record of declared item names to boolean values. Derived state declarations are not supported; put expressions inline.",
-    "Input supports type=text only. TextArea supports the native three-row geometry only. Form validation supports required only; no blur rules or advanced validation.",
+    "Input supports text, date and time; dates and times use native pickers and strictly formatted values. TextArea supports the native three-row geometry only. Form validation supports required only; no blur rules or advanced validation.",
     "Each and nested computed child arrays are display/action-only: fields and forms are rejected because keyed editable lists are not implemented.",
     "Only Each, Filter, Sort and Count computation functions are supported. Data arrays use ordinary declarations, not $state.",
     "Computed-list bounds: 200 entries per literal array; one Each expansion level; nested UI arrays depth 8 and 1000 total flatten visits; 200 native IR nodes. Programs remain subject to AST/source/depth budgets.",

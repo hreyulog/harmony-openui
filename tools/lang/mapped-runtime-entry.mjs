@@ -14,6 +14,14 @@ const identifier = value => typeof value === 'string' && /^[A-Za-z_][A-Za-z0-9_.
   !['__proto__', 'constructor', 'prototype'].includes(value);
 const booleanRecord = value => value && typeof value === 'object' && !Array.isArray(value) &&
   Object.keys(value).length <= 64 && Object.keys(value).every(key => identifier(key) && typeof value[key] === 'boolean');
+function temporalValue(kind, value) {
+  if (value === '') return true;
+  if (kind === 'time') return /^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/.test(value);
+  if (kind !== 'date') return true;
+  if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) return false;
+  const date = new Date(value + 'T00:00:00Z');
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value && value >= '0001-01-01';
+}
 function stableKey(value) {
   let hash = 2166136261;
   for (let index = 0; index < value.length; index++) { hash = Math.imul(hash ^ value.charCodeAt(index), 16777619); }
@@ -201,7 +209,7 @@ export function createMappedSession() {
         },
         field: (componentId, name, bindingValue, config) => {
           const opts = Array.isArray(config) ? { kind: 'select', options: config } : config;
-          if (!opts || !['text', 'select'].includes(opts.kind) || (opts.required !== undefined && typeof opts.required !== 'boolean')) throw Error('OPENUI_MAPPED_FIELD_CONFIG');
+          if (!opts || !['text', 'select', 'date', 'time'].includes(opts.kind) || (opts.required !== undefined && typeof opts.required !== 'boolean')) throw Error('OPENUI_MAPPED_FIELD_CONFIG');
           const options = opts.options;
           if (opts.kind === 'select' && (!Array.isArray(options) || options.length < 1 || options.length > 100 || new Set(options.map(option => option.value)).size !== options.length ||
             options.some(option => typeof option.value !== 'string' || !option.value.trim() || option.value.length > 500 ||
@@ -209,7 +217,7 @@ export function createMappedSession() {
               (option.description !== undefined && (typeof option.description !== 'string' || option.description.length > 8192))))) throw Error('OPENUI_MAPPED_OPTIONS');
           const field = stateField(name, bindingValue, formName);
           const value = field.value ?? opts.defaultValue ?? '';
-          if (typeof value !== 'string' || value.length > 8192 || (opts.kind === 'select' && value !== '' && !options.some(option => option.value === value))) throw Error('OPENUI_MAPPED_FIELD_VALUE');
+          if (typeof value !== 'string' || value.length > 8192 || !temporalValue(opts.kind, value) || (opts.kind === 'select' && value !== '' && !options.some(option => option.value === value))) throw Error('OPENUI_MAPPED_FIELD_VALUE');
           fields.set(componentId, { field, kind: opts.kind, options });
           logicalField(formName, name, { kind: opts.kind, value, required: opts.required === true, componentId });
           bindings.push({ componentId, name, target: field.isReactive ? bindingValue.target : '', value, ...(formName ? { formName } : {}) });
@@ -299,7 +307,7 @@ export function createMappedSession() {
     setField(componentId, valueJson) {
       ensure(); if (!parsed) throw Error('OPENUI_MAPPED_NO_PROGRAM');
       const binding = currentFields.get(componentId); const value = JSON.parse(valueJson);
-      if (!binding || (binding.kind === 'boolean' ? typeof value !== 'boolean' : typeof value !== 'string' || value.length > 8192 ||
+      if (!binding || (binding.kind === 'boolean' ? typeof value !== 'boolean' : typeof value !== 'string' || value.length > 8192 || !temporalValue(binding.kind, value) ||
         (binding.kind === 'select' && !binding.options.some(option => option.value === value)))) throw Error('OPENUI_MAPPED_FIELD_VALUE');
       const before = store.getSnapshot();
       try {

@@ -459,7 +459,11 @@
         },
         "type": {
           "type": "string",
-          "const": "text"
+          "enum": [
+            "text",
+            "date",
+            "time"
+          ]
         },
         "rules": {
           "type": "object",
@@ -478,7 +482,7 @@
         "name"
       ],
       "additionalProperties": false,
-      "description": "A native single-line text field. This bounded profile accepts type=text only. Bind value to a declared $state or leave it local to its named Form."
+      "description": "A native field: text uses the keyboard; date and time use native pickers (YYYY-MM-DD and HH:MM). A chosen time is a preference, never proof of availability. Bind value to a declared $state or leave it local to its named Form."
     },
     "TextArea": {
       "type": "object",
